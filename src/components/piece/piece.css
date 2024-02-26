@@ -1,0 +1,39 @@
+/* piece.css */
+
+.piece {
+  width: 35px; /* Size of the square piece */
+  height: 35px; /* Size of the square piece */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.2); /* Adds a rectangular border around the piece */
+  /* Removed border-radius to eliminate the rounded look */
+}
+
+.black-piece {
+  background-color: black;
+}
+
+.white-piece {
+  background-color: white;
+}
+
+.hole {
+  width: 10px; /* Size of the hole */
+  height: 10px; /* Size of the hole */
+  border-radius: 50%; /* Keeps the hole circular */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the hole within the piece */
+}
+
+.black-piece .hole {
+  background-color: white; /* Contrasting hole color */
+}
+
+.white-piece .hole {
+  background-color: black; /* Contrasting hole color */
+}
