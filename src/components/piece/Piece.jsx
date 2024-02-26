@@ -1,15 +1,12 @@
-
 import React from 'react';
-import './piece.css';
+import './piece.css'; // Ensure the CSS file is correctly imported
 
-const Piece = ({ color }) => {
-  const holeColor = color === 'black' ? 'white' : 'black';
-
+const Piece = ({ color, hasBall }) => {
+  console.log(`Has Ball: ${hasBall}`);
   return (
-    <div className="piece-border">
-      <div className={`piece ${color}-piece`}>
-        <div className={`hole ${holeColor}-hole`}></div>
-      </div>
+    <div className={`piece ${color}-piece`}>
+      <div className="hole"></div> {/* Always render the hole */}
+      {hasBall && <div className="ball"></div>} {/* Conditionally render the ball */}
     </div>
   );
 };

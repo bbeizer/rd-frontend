@@ -3,12 +3,12 @@ import './grid-cell.css';
 import Piece from '../../piece/Piece';
 
 
-const GridCell = ({ row, col, pieceColor }) => {
-  console.log(`GridCell [${row},${col}] pieceColor:`, pieceColor);
+const GridCell = ({ row, col, pieceColor, hasBall }) => {
+  console.log(`Row: ${row}, Col: ${col}, Has Ball: ${hasBall}`);
   const isLightCell = (row + col) % 2 === 0;
   return (
     <div className={`grid-cell ${isLightCell ? 'light-cell' : 'dark-cell'}`}>
-      {pieceColor && <Piece color={pieceColor} />}
+      {pieceColor && <Piece color={pieceColor} hasBall={hasBall}/>}
     </div>
   );
 };

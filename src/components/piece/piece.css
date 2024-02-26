@@ -1,15 +1,28 @@
-/* piece.css */
+
+.ball {
+  width: 14px; 
+  height: 14px;
+  border-radius: 50%;
+  background-color: #bbb; 
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background-image: radial-gradient(circle closest-side, #fff, #bbb, #999);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
 
 .piece {
-  width: 35px; /* Size of the square piece */
-  height: 35px; /* Size of the square piece */
+  width: 35px; 
+  height: 35px; 
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   margin: 5px;
-  border: 2px solid rgba(0, 0, 0, 0.2); /* Adds a rectangular border around the piece */
-  /* Removed border-radius to eliminate the rounded look */
+  border: 2px solid rgba(0, 0, 0, 0.2); 
 }
 
 .black-piece {
@@ -21,19 +34,19 @@
 }
 
 .hole {
-  width: 10px; /* Size of the hole */
-  height: 10px; /* Size of the hole */
-  border-radius: 50%; /* Keeps the hole circular */
+  width: 10px; 
+  height: 10px; 
+  border-radius: 50%; 
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Centers the hole within the piece */
+  transform: translate(-50%, -50%); 
 }
 
 .black-piece .hole {
-  background-color: white; /* Contrasting hole color */
+  background-color: white; 
 }
 
 .white-piece .hole {
-  background-color: black; /* Contrasting hole color */
+  background-color: black; 
 }
