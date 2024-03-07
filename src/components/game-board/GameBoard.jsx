@@ -35,10 +35,9 @@ const GameBoard = ({ gameModel, pendingMove }) => {
         3. read from possible moves state, if a grid cell is in there, style it differently
       */
 
+        // if in possible moves, set some CSS
       return (
-        <GridCell key={cellKey} row={row} col={col} pieceColor={''} classNames={
-          // if in possible moves, set some CSS
-        }>
+        <GridCell key={cellKey} row={row} col={col} >
           {piece}
         </GridCell>
       );
