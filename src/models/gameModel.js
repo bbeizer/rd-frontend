@@ -7,7 +7,7 @@ export const initializeGameModel = () => {
             const cellKey = `${String.fromCharCode(97 + colIndex)}${rowIndex + 1}`;
             const { pieceColor, hasBall } = initialSetup(rowIndex, colIndex);
             if (pieceColor) {
-                initialBoardStatus[cellKey] = { piece: pieceColor, hasBall };
+                initialBoardStatus[cellKey] = { color: pieceColor, hasBall };
             } else {
                 initialBoardStatus[cellKey] = null;
             }
