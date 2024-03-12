@@ -1,26 +1,38 @@
-import React from 'react';
-import { initializeGameModel } from './models/gameModel';
+import React, { useState } from 'react';
 import GameBoard from './components/game-board/GameBoard';
-
-const pendingMove = {
-  hasMovedAPiece: false,
-  move: {
-    startPosition: null,
-    endPosition: null
-  },
-  pass: {
-    startPosition: null,
-    endPosition: null
-  }
-};
-
-const activePiece = null;
+import { initializeGameModel } from './models/gameModel';
 
 function App() {
-  const gameModel = initializeGameModel();
+  const [gameModel, setGameModel] = useState(initializeGameModel());
+  const [pendingMove, setPendingMove] = useState({
+    hasMovedAPiece: false,
+    move: {
+      startPosition: null,
+      endPosition: null,
+    },
+    pass: {
+      startPosition: null,
+      endPosition: null,
+    },
+  });
+  const [activePiece, setActivePiece] = useState(null);
+
+  const updateGameModel = (newBoardStatus) => {
+    setGameModel(prevModel => ({
+      ...prevModel,
+      currentBoardStatus: newBoardStatus,
+    }));
+  };
+
+  // Similarly, you can create functions to update `pendingMove` and `activePiece` as needed
+
   return (
     <div className="App">
-      <GameBoard gameModel= {gameModel} pendingMove={pendingMove} activePiece={activePiece} /> 
+      <GameBoard
+        gameModel={gameModel}
+        updateGameModel={updateGameModel} // Pass this function to GameBoard for updates
+        pendingMove={pendingMove}
+      />
     </div>
   );
 }

@@ -2,26 +2,52 @@ import React, { useState, useEffect } from 'react';
 import GridCell from '../grid/grid-cell/GridCell';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
-import { getKeyCoordinates } from '../../utils/gameUtilities';
+import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 
-const GameBoard = ({ gameModel, pendingMove }) => {
+const GameBoard = ({ gameModel, pendingMove, updateGameModel}) => {
   const [activePiece, setActivePiece] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameBoard, setGameBoard] = useState(gameModel.currentBoardStatus);
 
-  // If gameModel changes outside of this component, sync it with local state
   useEffect(() => {
     setGameBoard(gameModel.currentBoardStatus);
   }, [gameModel.currentBoardStatus]);
 
-  const pieceClickHandler = (piece) => {
-    if (gameModel.turnPlayer === piece.color && !piece.hasBall) {
-      const moves = getPieceMoves(piece.position.row, piece.position.col, gameBoard);
-      console.log(moves);
+  const pieceClickHandler = (piece, cellKey) => {
+    console.log("Handler called", { activePiece, possibleMoves, cellKey });
+  
+    // Assuming getKeyCoordinates converts cellKey ('e8') back to { row, col }
+    const { row, col } = getKeyCoordinates(cellKey);
+  
+    if (gameModel.turnPlayer === piece.color && !activePiece && !piece.hasBall) {
+      const moves = getPieceMoves(row, col, gameBoard); // Use the row and col derived from cellKey
       setPossibleMoves(moves);
-      setActivePiece(piece);
+      setActivePiece({ ...piece, position: cellKey }); // Now position is correctly set as cellKey
     }
+  };
+  
+
+  const cellClickHandler = (cellKey) => {
+      console.log(activePiece)
+      if(gameBoard[cellKey]=== null && activePiece){
+        movePiece(activePiece.position, cellKey)
+      }
+
+  };
+
+  const movePiece = (sourceKey, targetKey) => {
+    //console.log(sourceKey)
+    //console.log(targetKey)
+    const newBoardStatus = { ...gameBoard };
+    
+    const pieceToMove = newBoardStatus[sourceKey];
+    newBoardStatus[targetKey] = pieceToMove;
+    newBoardStatus[sourceKey] = null;
+    updateGameModel(newBoardStatus); // Sync with the global game state
+    
+    setActivePiece(null);
+    setPossibleMoves([]);
   };
 
   const handlePassTurn = () => {
@@ -36,14 +62,14 @@ const GameBoard = ({ gameModel, pendingMove }) => {
           color={cellData.color}
           hasBall={cellData.hasBall}
           position={cellKey}
-          onClick={() => pieceClickHandler({ ...cellData, position: { row, col } })}
+          onClick={() => pieceClickHandler(cellData, cellKey)}
         />
       ) : null;
       const isPossibleMove = possibleMoves.some(move => {
-        const moveKey = `${String.fromCharCode(97 + move.col)}${move.row + 1}`;
+        const moveKey = toCellKey(move.row, move.col);
         return cellKey === moveKey;
       });
-      return <GridCell key={cellKey} row={row} col={col} highlight={isPossibleMove}>{piece}</GridCell>;
+      return <GridCell onClick={() => cellClickHandler(cellKey)} key={cellKey} row={row} col={col} highlight={isPossibleMove}>{piece}</GridCell>;
     });
   };
 

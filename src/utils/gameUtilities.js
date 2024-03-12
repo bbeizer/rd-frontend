@@ -19,3 +19,9 @@ export const getKeyCoordinates = (cellKey) => {
     const row = parseInt(cellKey.slice(1), 10) - 1;
     return { row, col };
 };
+
+export const toCellKey = (row, col) => {
+    const letter = String.fromCharCode(97 + col); // Convert column to a letter starting from 'a'
+    const number = row + 1; // Adjust row to 1-based index
+    return `${letter}${number}`;
+  };
