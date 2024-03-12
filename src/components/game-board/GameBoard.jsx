@@ -3,7 +3,7 @@ import GridCell from '../grid/grid-cell/GridCell';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
-import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
+import { getPieceMoves, legalMove } from '../../gameLogic/playerMovesRuleEngine';
 
 const GameBoard = ({ gameModel, pendingMove, updateGameModel}) => {
   const [activePiece, setActivePiece] = useState(null);
@@ -37,19 +37,23 @@ const GameBoard = ({ gameModel, pendingMove, updateGameModel}) => {
   };
 
   const movePiece = (sourceKey, targetKey) => {
-    //console.log(sourceKey)
-    //console.log(targetKey)
-    const newBoardStatus = { ...gameBoard };
-    
-    const pieceToMove = newBoardStatus[sourceKey];
-    newBoardStatus[targetKey] = pieceToMove;
-    newBoardStatus[sourceKey] = null;
-    updateGameModel(newBoardStatus); // Sync with the global game state
-    
-    setActivePiece(null);
-    setPossibleMoves([]);
+    console.log(sourceKey)
+    console.log(targetKey)
+    if (legalMove(gameBoard, targetKey, possibleMoves)) {
+      const newBoardStatus = { ...gameBoard };
+      const pieceToMove = newBoardStatus[sourceKey];
+      newBoardStatus[targetKey] = pieceToMove;
+      newBoardStatus[sourceKey] = null;
+      updateGameModel(newBoardStatus); // Sync with the global game state
+  
+      setActivePiece(null);
+      setPossibleMoves([]);
+    } else {
+      console.log("Move is not legal");
+      // Optionally, reset activePiece and possibleMoves here or handle as needed
+    }
   };
-
+  
   const handlePassTurn = () => {
     gameModel.turnPlayer = gameModel.turnPlayer === 'white' ? 'black' : 'white';
   };

@@ -27,6 +27,23 @@ export const getPieceMoves = (initialRow, initialCol, board) => {
     return legalMoves;
 };
 
+export const legalMove = (board, landing, moves) => {
+    // Convert each move from row-col to your cell key format
+    const moveKeys = moves.map(move => generateCellKey(move.row, move.col));
+
+    // Check if the landing spot is one of the moves
+    if (moveKeys.includes(landing)) {
+        // Optionally, also check if the landing spot is not occupied by a piece of the same color
+        // Assuming board[landing] contains a piece with a 'color' property
+        // and you have access to the current player's color (currentPlayerColor)
+        if (!board[landing] || board[landing].color !== currentPlayerColor) {
+            return true; // The move is legal
+        }
+    }
+
+    return false; // The move is not legal
+};
+
 
 export const generateCellKey = (row, col) => {
     return `${String.fromCharCode(97 + col)}${row + 1}`;
