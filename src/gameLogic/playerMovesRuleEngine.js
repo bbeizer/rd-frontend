@@ -1,30 +1,36 @@
 // Assuming the boardStatus is an object with keys like "a1", "b2", etc., and values are objects with piece details.
+import { getKeyCoordinates } from "../utils/gameUtilities";
 
-export const getPieceMoves = (initialRow, initialCol, board) => {
-    const legalMoves = [];
-    const moveOffsets = [
-        { row: -2, col: 1 }, { row: -1, col: 2 }, { row: 1, col: 2 }, { row: 2, col: 1 },
-        { row: 2, col: -1 }, { row: 1, col: -2 }, { row: -1, col: -2 }, { row: -2, col: -1 }
-    ];
+export const getPieceMoves = (initialRow, initialCol, board, hasMoved, originalSquare) => {
+    console.log("this is the og square:" + originalSquare)
+    if(!hasMoved){
+        const legalMoves = [];
+        const moveOffsets = [
+            { row: -2, col: 1 }, { row: -1, col: 2 }, { row: 1, col: 2 }, { row: 2, col: 1 },
+            { row: 2, col: -1 }, { row: 1, col: -2 }, { row: -1, col: -2 }, { row: -2, col: -1 }
+        ];
 
-    moveOffsets.forEach(offset => {
-        const newRow = initialRow + offset.row;
-        const newCol = initialCol + offset.col;
+        moveOffsets.forEach(offset => {
+            const newRow = initialRow + offset.row;
+            const newCol = initialCol + offset.col;
 
-        // Ensure the move is within the board limits
-        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-            const targetCellKey = generateCellKey(newRow, newCol);
-            const targetCellContent = board[targetCellKey];
+            // Ensure the move is within the board limits
+            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                const targetCellKey = generateCellKey(newRow, newCol);
+                const targetCellContent = board[targetCellKey];
 
-            // Check if the target cell is empty or contains an opponent's piece
-            // Assuming board.turnPlayer stores the color of the current player
-            if (!targetCellContent) {
-                legalMoves.push({ row: newRow, col: newCol });
+                // Check if the target cell is empty or contains an opponent's piece
+                // Assuming board.turnPlayer stores the color of the current player
+                if (!targetCellContent) {
+                    legalMoves.push({ row: newRow, col: newCol });
+                }
             }
-        }
-    });
+        });
 
-    return legalMoves;
+        return legalMoves;
+    } else {
+        return [getKeyCoordinates(originalSquare)]
+    }   
 };
 
 export const legalMove = (board, landing, moves) => {
