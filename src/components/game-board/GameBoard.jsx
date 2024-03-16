@@ -4,7 +4,7 @@ import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves, legalMove } from '../../gameLogic/playerMovesRuleEngine';
-import { handlePassTurn, canMovePiece, movePiece } from './helpers';
+import {canMovePiece, movePiece } from './helpers';
 
 const GameBoard = ({ gameModel, pendingTurn, updateGameModel}) => {
   const [activePiece, setActivePiece] = useState(null);
@@ -26,7 +26,6 @@ const GameBoard = ({ gameModel, pendingTurn, updateGameModel}) => {
   const handlePieceClick = (piece, cellKey) => {
     console.log("Piece Handler called", { activePiece, possibleMoves, cellKey });
     if (canMovePiece(gameModel, piece, activePiece)) {
-      // Assuming getKeyCoordinates converts cellKey ('e8') back to { row, col }
       const { row, col } = getKeyCoordinates(cellKey);
 
       const moves = getPieceMoves(row, col, gameBoard, hasMoved, originalSquare); // Use the row and col derived from cellKey
@@ -34,26 +33,60 @@ const GameBoard = ({ gameModel, pendingTurn, updateGameModel}) => {
     }
   }
 
-  const handleCellClick = (cellKey) => {
-    if (gameBoard[cellKey] === null && activePiece) {
-      const isLegalMove = hasMoved ? cellKey === originalSquare : legalMove(gameBoard, cellKey, possibleMoves);
-      if (isLegalMove) {
-        setOriginalSquare(activePiece.position)
-        const newBoardStatus = movePiece(activePiece.position, cellKey, gameBoard, activePiece.hasBall);
-        updateGameModel(newBoardStatus); // Assuming this also handles updating who has the ball
-        setHasMoved(true);
-        setBoardState();
-  
-        // If moving back to original, reset hasMoved
-        if (cellKey === originalSquare) {
-          setHasMoved(false);
-          setOriginalSquare(null)
-        }
-      } else {
-        console.log("Move is not legal");
-      }
-    }
+const handlePassTurn = () => {
+    // Create a new object for the updated game model
+    const updatedGameModel = {
+        ...gameModel,
+        turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',
+    };
+
+    // Assuming updateGameModel can handle updating the entire game model or adjust as needed
+    updateGameModel(updatedGameModel);
+    setActivePiece(null);
+    setHasMoved(false);
+    setPossibleMoves([]);
+    setOriginalSquare(null);
+}
+
+const handleCellClick = (cellKey) => {
+  // Check if there's an active piece and the target cell is either empty or the original square
+  if (!activePiece || (gameBoard[cellKey] && cellKey !== originalSquare)) {
+    console.log("No active piece selected, cell is not empty, or move is not back to original square.");
+    return;
+  }
+
+  const isReturningMove = cellKey === originalSquare;
+  const isLegalMove = isReturningMove || (!hasMoved && legalMove(gameBoard, cellKey, possibleMoves));
+
+  if (!isLegalMove) {
+    console.log("Move is not legal");
+    return;
+  }
+
+  // Proceed with the move
+  const newBoardStatus = movePiece(activePiece.position, cellKey, gameBoard, activePiece.hasBall);
+
+  // This assumes movePiece function correctly handles moving the piece and possibly transferring the ball.
+  // The game model should include all relevant updates, including the turn player if necessary.
+  const updatedGameModel = {
+    ...gameModel,
+    currentBoardStatus: newBoardStatus,
   };
+
+  updateGameModel(updatedGameModel); // Communicate the updated game model to the parent component
+
+  // Manage state based on the move
+  if (isReturningMove) {
+    // If the piece moved back to its original square, reset `hasMoved`
+    setHasMoved(false);
+  } else {
+    // This is a new move, so mark as moved and set the original square if it's the first move
+    setHasMoved(true);
+    if (!originalSquare) setOriginalSquare(activePiece.position); // Only update if it's the first move
+  }
+  setBoardState();
+};
+
 
   const renderBoard = () => {
     return Object.entries(gameBoard).map(([cellKey, cellData]) => {
@@ -78,7 +111,7 @@ const GameBoard = ({ gameModel, pendingTurn, updateGameModel}) => {
     <>
       <GridContainer>{renderBoard()}</GridContainer>
       <br/>
-      <button onClick={() => {handlePassTurn(gameModel)}}>Pass Turn</button>
+      <button onClick={handlePassTurn}>Pass Turn</button>
     </>
   );
 };

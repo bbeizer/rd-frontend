@@ -17,12 +17,12 @@ function App() {
   });
   const [activePiece, setActivePiece] = useState(null);
 
-  const updateGameModel = (newBoardStatus) => {
+  const updateGameModel = (updatedModel) => {
     setGameModel(prevModel => ({
-      ...prevModel,
-      currentBoardStatus: newBoardStatus,
+        ...prevModel,
+        ...updatedModel,
     }));
-  };
+};
 
   // Similarly, you can create functions to update `pendingMove` and `activePiece` as needed
 
