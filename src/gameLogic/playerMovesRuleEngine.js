@@ -2,7 +2,6 @@
 import { getKeyCoordinates } from "../utils/gameUtilities";
 
 export const getPieceMoves = (initialRow, initialCol, board, hasMoved, originalSquare) => {
-    console.log("this is the og square:" + originalSquare)
     if(!hasMoved){
         const legalMoves = [];
         const moveOffsets = [
