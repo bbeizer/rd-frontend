@@ -5,6 +5,7 @@ import GridContainer from '../grid/grid-container/GridContainer';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves, legalMove } from '../../gameLogic/playerMovesRuleEngine';
 import { canMovePiece, movePiece } from './helpers';
+import { getValidPasses } from './helpers/getValidPasses';
 
 const GameBoard = ({ gameModel, updateGameModel }) => {
   const [activePiece, setActivePiece] = useState(null);
@@ -12,6 +13,7 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameBoard, setGameBoard] = useState(gameModel.currentBoardStatus);
   const [hasMoved, setHasMoved] = useState(false);
+  const [possiblePasses, setPossiblePasses] = useState([]);
 
   useEffect(() => {
     setGameBoard(gameModel.currentBoardStatus);
@@ -20,12 +22,12 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   
   const handlePieceClick = (piece) => {
     // Block action if not the player's turn or if the piece has the ball
-    if (gameModel.turnPlayer !== piece.color || piece.hasBall) {
-      console.log("Either it's not your turn or the piece cannot be moved.");
+    if (gameModel.turnPlayer !== piece.color) {
+      console.log("Not you're turn!");
       return;
     }
-  
     const { row, col } = getKeyCoordinates(piece.position);
+    if(piece.hasBall === false) {
     const moves = getPieceMoves(row, col, gameBoard, hasMoved, originalSquare);
   
     // If clicking the same piece after it has moved, only show the original square as a possible move.
@@ -45,6 +47,12 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       setPossibleMoves(moves)
       setOriginalSquare(piece.position);
     }
+  } else {
+    const  pieceColor = gameModel.turnPlayer
+    const passes = getValidPasses(row, col, pieceColor, gameBoard)
+    console.log(passes)
+    setPossiblePasses(passes)
+  }
 
   };
   
@@ -89,12 +97,14 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
     return Object.entries(gameBoard).map(([cellKey, cellData]) => {
       const { row, col } = getKeyCoordinates(cellKey);
       const isPossibleMove = possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
+      const isPossiblePass = possiblePasses.some(pass => cellKey === pass);
       return (
         <GridCell
           key={cellKey}
           row={row}
           col={col}
-          highlight={isPossibleMove}
+          redHighlight={isPossibleMove}
+          yellowHighlight={isPossiblePass}
           onClick={() => handleCellClick(cellKey)}>
           {cellData && (
           <Piece
