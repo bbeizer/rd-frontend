@@ -48,10 +48,15 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       setOriginalSquare(piece.position);
     }
   } else {
-    const  pieceColor = gameModel.turnPlayer
-    const passes = getValidPasses(row, col, pieceColor, gameBoard)
-    console.log(passes)
-    setPossiblePasses(passes)
+    if (activePiece && activePiece.position === piece.position) {
+      setPossiblePasses([]);
+      setActivePiece(null);
+    } else {
+      const passes = getValidPasses(row, col, gameModel.turnPlayer, gameBoard);
+      console.log(passes);
+      setPossiblePasses(passes);
+      setActivePiece(piece);
+    }
   }
 
   };
@@ -59,25 +64,45 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
 
   const handleCellClick = (cellKey) => {
     const { row, col } = getKeyCoordinates(cellKey);
-    const isLegalMove = possibleMoves.some(move => move.row === row && move.col === col);
-    if(isLegalMove){
-      const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard)
-      setGameBoard(newGameBoard)
-      //havent Moved
-      if(hasMoved === false){
-        setHasMoved(true)
-        setOriginalSquare(activePiece.position)
-        activePiece.position = cellKey;
-        setPossibleMoves([originalSquare])
-        //has moved
-      } else {
-        setHasMoved(false)
-        setOriginalSquare(null)
-        setPossibleMoves([])
-        setActivePiece(null)
-      }
+  
+    if (!activePiece) {
+      console.log("Select a piece first.");
+      return;
+    }
+  
+    const isPassAction = activePiece.hasBall && possiblePasses.includes(cellKey);
+  
+    if (isPassAction) {
+      // Pass the ball logic
+      let newGameBoard = { ...gameBoard };
+      newGameBoard[activePiece.position].hasBall = false;
+      newGameBoard[cellKey].hasBall = true;
+      setGameBoard(newGameBoard);
+      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard });
+      setActivePiece(null);
+      setPossiblePasses([]);
     } else {
-      console.log("Illegal Move")
+      const isLegalMove = possibleMoves.some(move => move.row === row && move.col === col);
+      if (!isLegalMove) {
+        console.log("Illegal Move");
+        return;
+      }
+  
+      // Move the piece if it's a legal move
+      const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
+      setGameBoard(newGameBoard);
+      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard });
+  
+      if (hasMoved) {
+        setActivePiece(null); // Deselect the piece after moving
+        setPossibleMoves([]);
+        setHasMoved(false); // Reset move state for the next turn
+        setOriginalSquare(null); // Clear original square after completing the move
+      } else {
+        setHasMoved(true);
+        activePiece.position = cellKey; // Update the position of the active piece
+        setPossibleMoves([originalSquare]); // Allow moving back to the original square only
+      }
     }
   };
   
