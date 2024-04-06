@@ -6,6 +6,7 @@ import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves, legalMove } from '../../gameLogic/playerMovesRuleEngine';
 import { canMovePiece, movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
+import { didWin } from './helpers/didWin';
 
 const GameBoard = ({ gameModel, updateGameModel }) => {
   const [activePiece, setActivePiece] = useState(null);
@@ -144,8 +145,10 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
     });
   };
 
+
   return (
     <>
+      {didWin(gameBoard) && console.log("winner")} 
       <GridContainer>{renderBoard()}</GridContainer>
       <button onClick={handlePassTurn}>Pass Turn</button>
     </>
