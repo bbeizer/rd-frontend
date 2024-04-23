@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GameBoard from './components/game-board/GameBoard';
 import { initializeGameModel } from './models/gameModel';
+import Home from './components/home/home';
 
 function App() {
   const [gameModel, setGameModel] = useState(initializeGameModel());
@@ -18,22 +20,33 @@ function App() {
   const [activePiece, setActivePiece] = useState(null);
 
   const updateGameModel = (updatedModel) => {
-    setGameModel(prevModel => ({
-        ...prevModel,
-        ...updatedModel,
+    setGameModel((prevModel) => ({
+      ...prevModel,
+      ...updatedModel,
     }));
-};
-
-  // Similarly, you can create functions to update `pendingMove` and `activePiece` as needed
+  };
 
   return (
-    <div className="App">
-      <GameBoard
-        gameModel={gameModel}
-        updateGameModel={updateGameModel} // Pass this function to GameBoard for updates
-        pendingMove={pendingMove}
-      />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* Define a dynamic route for games, using the game ID */}
+          <Route
+            path="/game/:gameId"
+            element={
+              <GameBoard
+                gameModel={gameModel}
+                updateGameModel={updateGameModel}
+                pendingMove={pendingMove}
+                setActivePiece={setActivePiece} // Assuming you want to manage the active piece from App
+                activePiece={activePiece}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import GridCell from '../grid/grid-cell/GridCell';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
+import { createGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
-import { getPieceMoves, legalMove } from '../../gameLogic/playerMovesRuleEngine';
-import { canMovePiece, movePiece } from './helpers';
+import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
+import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { didWin } from './helpers/didWin';
 
@@ -17,9 +18,21 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [possiblePasses, setPossiblePasses] = useState([]);
 
   useEffect(() => {
-    setGameBoard(gameModel.currentBoardStatus);
-  }, [gameModel.currentBoardStatus]);
-
+    // This function initializes the game if the currentBoardStatus is empty or not set
+    const initializeGame = async () => {
+      try {
+        const newGame = await createGame();
+        updateGameModel(newGame); // This should update your gameModel state with the new game data
+      } catch (error) {
+        console.error('Failed to initialize new game:', error);
+      }
+    };
+      debugger
+      initializeGame();
+      setGameBoard(gameModel.currentBoardStatus);
+    
+  }, []); // The effect runs when currentBoardStatus changes
+  
   
   const handlePieceClick = (piece) => {
     // Block action if not the player's turn or if the piece has the ball
