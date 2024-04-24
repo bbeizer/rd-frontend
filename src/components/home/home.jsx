@@ -1,25 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createGame } from '../services/gameService';
 
 function Home() {
   const navigate = useNavigate();
 
-  const handleStartNewGame = () => {
-    // Here you would typically make an API call to your backend to create a new game
-    // and receive a gameId in response. For this example, let's use a placeholder.
-    const newGameId = '123';
-    
-    // After creating the game, navigate to the game board for the new game
-    navigate(`/game/${newGameId}`);
+  const handleCreateGame = async () => {
+    try {
+      const game = await createGame({}); // Assuming no gameData is required to create a game
+      navigate(`/game/${game._id}`); // Navigate to the game board with the new game ID
+    } catch (error) {
+      console.error('Failed to create game:', error);
+    }
   };
 
   return (
     <div className="home">
       <h1>Welcome to the Game Lobby</h1>
-      <button onClick={handleStartNewGame}>Start New Game</button>
-      {/* More functionality can be added here, like listing existing games */}
+      <button onClick={handleCreateGame}>Create New Game</button>
+      {/* You can also list existing games here and navigate to them similarly */}
     </div>
   );
 }
 
 export default Home;
+

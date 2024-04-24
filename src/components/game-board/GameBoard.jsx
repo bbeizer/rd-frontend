@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import GridCell from '../grid/grid-cell/GridCell';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
-import { createGame } from '../../services/gameService';
+import { createGame, getGameById, updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { didWin } from './helpers/didWin';
+import { useParams } from 'react-router-dom';
 
 const GameBoard = ({ gameModel, updateGameModel }) => {
+  const { gameId } = useParams();
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
@@ -18,21 +20,17 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [possiblePasses, setPossiblePasses] = useState([]);
 
   useEffect(() => {
-    // This function initializes the game if the currentBoardStatus is empty or not set
-    const initializeGame = async () => {
+    const fetchGame = async () => {
       try {
-        const newGame = await createGame();
-        updateGameModel(newGame); // This should update your gameModel state with the new game data
+        const fetchedGame = await getGameById(gameId);
+        setGame(fetchedGame);
       } catch (error) {
-        console.error('Failed to initialize new game:', error);
+        console.error('Error fetching game:', error);
       }
     };
-      debugger
-      initializeGame();
-      setGameBoard(gameModel.currentBoardStatus);
-    
-  }, []); // The effect runs when currentBoardStatus changes
-  
+
+    fetchGame();
+  }, [gameId]);
   
   const handlePieceClick = (piece) => {
     // Block action if not the player's turn or if the piece has the ball
@@ -106,6 +104,13 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
       setGameBoard(newGameBoard);
       updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard });
+
+      try {
+        const updatedGame = await updateGame(gameId, { currentBoardStatus: newGameBoard }); //backend call
+        updateGameModel(updatedGame); // frontend call
+      } catch (error) {
+        console.error('Failed to update game:', error);
+      }
   
       if (hasMoved) {
         setActivePiece(null); // Deselect the piece after moving
@@ -126,6 +131,14 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       ...gameModel,
       turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',
     });
+
+    try {
+      const updatedGame = await updateGame(gameId, updatedModel);
+      updateGameModel(updatedGame);  // Update local state with new game data from server
+    } catch (error) {
+      console.error('Failed to update game:', error);
+    }
+
     setActivePiece(null);
     setHasMoved(false);
     setPossibleMoves([]);

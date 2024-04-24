@@ -21,7 +21,7 @@ export const createGame = async (gameData) => {
   }
 };
 
-export const readGame = async (id) => {
+export const getGameById = async (id) => {
   try {
     const response = await fetch(`${baseUrl}/games/${id}`, {
       method: 'GET',
@@ -41,7 +41,7 @@ export const readGame = async (id) => {
   }
 }
 
-export const updateGameState = async (req, res) => {
+export const updateGame = async (req, res) => {
   const { id } = req.params; // Get game ID from URL
   const updates = req.body; // Get updates from request body
 
