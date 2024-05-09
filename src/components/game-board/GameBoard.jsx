@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GridCell from '../grid/grid-cell/GridCell';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
-import { createGame, getGameById, updateGame } from '../../services/gameService';
+import { getGameById, updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
@@ -74,7 +74,7 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   };
   
 
-  const handleCellClick = (cellKey) => {
+  const handleCellClick = async (cellKey) => {
     const { row, col } = getKeyCoordinates(cellKey);
   
     if (!activePiece) {
@@ -103,11 +103,10 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       // Move the piece if it's a legal move
       const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
       setGameBoard(newGameBoard);
-      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard });
+      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard }); //frontend
 
       try {
-        const updatedGame = await updateGame(gameId, { currentBoardStatus: newGameBoard }); //backend call
-        updateGameModel(updatedGame); // frontend call
+        const updatedGame = await updateGame(gameId, { ...gameModel, currentBoardStatus: newGameBoard }); //backend call
       } catch (error) {
         console.error('Failed to update game:', error);
       }
@@ -126,7 +125,7 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   };
   
 
-  const handlePassTurn = () => {
+  const handlePassTurn = async () => {
     updateGameModel({
       ...gameModel,
       turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',

@@ -1,26 +1,29 @@
-// src/services/gameService.js
+// Handle response in joinQueue
 const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
-console.log(`${baseUrl}/games`);
-export const createGame = async (gameData) => {
+
+export const joinQueue = async (playerId, name) => {
   try {
-    const response = await fetch(`${baseUrl}/games`, {
+    const response = await fetch(`${baseUrl}/games/joinGame`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // Include other headers as needed, e.g., authorization tokens
       },
-      body: JSON.stringify(gameData),
+      body: JSON.stringify({ playerId, name }), // Pass an object containing playerId and name
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to join game queue: ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data.game;
+
   } catch (error) {
-    console.error('Could not create a new game:', error);
+    console.error('Could not add player to the queue:', error);
     throw error; // Rethrowing the error is usually a good practice so that calling code can handle it
   }
 };
 
+// Use try-catch in getGameById
 export const getGameById = async (id) => {
   try {
     const response = await fetch(`${baseUrl}/games/${id}`, {
@@ -29,29 +32,34 @@ export const getGameById = async (id) => {
         'Content-Type': 'application/json',
         // Include other headers as needed, e.g., authorization tokens
       },
-      body: JSON.stringify(gameData),
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to fetch game: ${response.statusText}`);
     }
     return await response.json();
   } catch (error) {
-    console.error('Could not create a new game:', error);
+    console.error('Could not fetch the game:', error);
     throw error;
   }
-}
+};
 
-export const updateGame = async (req, res) => {
-  const { id } = req.params; // Get game ID from URL
-  const updates = req.body; // Get updates from request body
-
+// Use try-catch in updateGame
+export const updateGame = async (gameId, gameData) => {
   try {
-      const game = await Game.findByIdAndUpdate(id, updates, { new: true });
-      if (!game) {
-          return res.status(404).send({ message: 'Game not found' });
-      }
-      res.json(game);
+    const response = await fetch(`${baseUrl}/games/${gameId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        // Include other headers as needed, e.g., authorization tokens
+      },
+      body: JSON.stringify(gameData),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to update the game: ${response.statusText}`);
+    }
+    return await response.json();
   } catch (error) {
-      res.status(500).json({ message: 'Error updating game state', error: error.toString() });
+    console.error('Could not update the game:', error);
+    throw error;
   }
 };

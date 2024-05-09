@@ -1,4 +1,16 @@
 
+import { v4 as uuidv4 } from 'uuid';
+
+    export const generateUserID = () => {
+    let userID = localStorage.getItem('userID');
+    if (!userID) {
+        userID = uuidv4();
+        localStorage.setItem('userID', userID);
+    }
+    return userID;
+}
+
+
 export const initialSetup = (rowIndex, cellIndex) => {
     let pieceColor = null;
     let hasBall = false;
