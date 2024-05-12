@@ -18,18 +18,24 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [gameBoard, setGameBoard] = useState(gameModel.currentBoardStatus);
   const [hasMoved, setHasMoved] = useState(false);
   const [possiblePasses, setPossiblePasses] = useState([]);
+  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
     const fetchGame = async () => {
       try {
         const fetchedGame = await getGameById(gameId);
-        setGame(fetchedGame);
+        setGameBoard(fetchedGame.currentBoardStatus); // Update local game board
       } catch (error) {
         console.error('Error fetching game:', error);
       }
     };
 
-    fetchGame();
+    const id = setInterval(fetchGame, 3000); // Poll every 3 seconds
+    setIntervalId(id);
+
+    return () => {
+      clearInterval(intervalId); // Clean up the interval on component unmount
+    };
   }, [gameId]);
   
   const handlePieceClick = (piece) => {
@@ -124,12 +130,11 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
     }
   };
   
-
   const handlePassTurn = async () => {
-    updateGameModel({
+    const updatedModel = {
       ...gameModel,
       turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',
-    });
+    };
 
     try {
       const updatedGame = await updateGame(gameId, updatedModel);
