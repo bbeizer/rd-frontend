@@ -8,39 +8,31 @@ function Home() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
-  const [intervalId, setIntervalId] = useState(null);
-  const [gameId, setGameId] = useState(null);
-
-  useEffect(() => {
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [intervalId]);
 
   const handleJoinGame = async () => {
     try {
-      const userId = generateUserID();
+      const userId = generateUserID()
       const game = await joinQueue(userId, name);
-      setGameId(game._id);
       if (game.status === 'playing') {
         navigate(`/game/${game._id}`);
       } else {
         setWaitingForPlayer(true);
-        const id = setInterval(() => pollGameStatus(game._id), 3000); // Poll every 3 seconds
-        setIntervalId(id);
+        checkGameStatus(game._id);
       }
     } catch (error) {
       console.error('Failed to join game:', error);
     }
   };
 
-  const pollGameStatus = async (id) => {
+  const checkGameStatus = async (gameId) => {
     try {
-      const game = await getGameById(id);
-      if (game.status === 'playing') {
-        clearInterval(intervalId);
-        navigate(`/game/${game._id}`);
-      }
+      const intervalId = setInterval(async () => {
+        const game = await getGameById(gameId);
+        if (game.status === 'playing') {
+          clearInterval(intervalId);
+          navigate(`/game/${game._id}`);
+        }
+      }, 3000); // Poll every 3 seconds
     } catch (error) {
       console.error('Error polling game status:', error);
     }
@@ -53,17 +45,10 @@ function Home() {
       </div>
       <div className="input-container">
         <label htmlFor="name">Enter Your Name:</label>
-        <input
-          type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
       <button className="join-button" onClick={handleJoinGame}>Join Game</button>
-      {waitingForPlayer && (
-        <p className="waiting-text">Waiting for another player to join...</p>
-      )}
+      {waitingForPlayer && <p className="waiting-text">Waiting for another player to join...</p>}
     </div>
   );
 }

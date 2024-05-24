@@ -9,44 +9,39 @@ import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { didWin } from './helpers/didWin';
 import { useParams } from 'react-router-dom';
+import './GameBoard.css'
 
-const GameBoard = ({ gameModel, updateGameModel }) => {
+const GameBoard = () => {
   const { gameId } = useParams();
+  const [gameData, setGameData] = useState(null);
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
-  const [gameBoard, setGameBoard] = useState(gameModel.currentBoardStatus);
   const [hasMoved, setHasMoved] = useState(false);
   const [possiblePasses, setPossiblePasses] = useState([]);
-  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
-    const fetchGame = async () => {
+    const fetchGameData = async () => {
       try {
         const fetchedGame = await getGameById(gameId);
-        setGameBoard(fetchedGame.currentBoardStatus); // Update local game board
+        setGameData(fetchedGame);
       } catch (error) {
         console.error('Error fetching game:', error);
       }
     };
-
-    const id = setInterval(fetchGame, 3000); // Poll every 3 seconds
-    setIntervalId(id);
-
-    return () => {
-      clearInterval(intervalId); // Clean up the interval on component unmount
-    };
+    fetchGameData();
   }, [gameId]);
-  
+
   const handlePieceClick = (piece) => {
+    console.log(gameData);
     // Block action if not the player's turn or if the piece has the ball
-    if (gameModel.turnPlayer !== piece.color) {
+    if (gameData.turnPlayer !== piece.color) {
       console.log("Not you're turn!");
       return;
     }
     const { row, col } = getKeyCoordinates(piece.position);
     if(piece.hasBall === false) {
-    const moves = getPieceMoves(row, col, gameBoard, hasMoved, originalSquare);
+    const moves = getPieceMoves(row, col, gameData.currentBoardStatus, hasMoved, originalSquare);
   
     // If clicking the same piece after it has moved, only show the original square as a possible move.
     // Otherwise, calculate and show all possible moves for the piece.
@@ -70,7 +65,7 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       setPossiblePasses([]);
       setActivePiece(null);
     } else {
-      const passes = getValidPasses(row, col, gameModel.turnPlayer, gameBoard);
+      const passes = getValidPasses(row, col, gameData, gameData.currentBoardStatus);
       console.log(passes);
       setPossiblePasses(passes);
       setActivePiece(piece);
@@ -92,7 +87,7 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   
     if (isPassAction) {
       // Pass the ball logic
-      let newGameBoard = { ...gameBoard };
+      let newGameBoard = { ...gameData.currentBoardStatus };
       newGameBoard[activePiece.position].hasBall = false;
       newGameBoard[cellKey].hasBall = true;
       setGameBoard(newGameBoard);
@@ -107,9 +102,9 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       }
   
       // Move the piece if it's a legal move
-      const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
+      const newGameBoard = movePiece(activePiece.position, cellKey, gameData.currentBoardStatus);
       setGameBoard(newGameBoard);
-      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard }); //frontend
+      updateGameModel({ ...gameData, currentBoardStatus: newGameBoard }); //frontend
 
       try {
         const updatedGame = await updateGame(gameId, { ...gameModel, currentBoardStatus: newGameBoard }); //backend call
@@ -130,11 +125,12 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
     }
   };
   
+
   const handlePassTurn = async () => {
-    const updatedModel = {
+    updateGameModel({
       ...gameModel,
       turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',
-    };
+    });
 
     try {
       const updatedGame = await updateGame(gameId, updatedModel);
@@ -150,7 +146,8 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   };
 
   const renderBoard = () => {
-    return Object.entries(gameBoard).map(([cellKey, cellData]) => {
+    if (!gameData) return null;
+    return Object.entries(gameData.currentBoardStatus).map(([cellKey, cellData]) => {
       const { row, col } = getKeyCoordinates(cellKey);
       const isPossibleMove = possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
       const isPossiblePass = possiblePasses.some(pass => cellKey === pass);
@@ -161,27 +158,30 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
           col={col}
           redHighlight={isPossibleMove}
           yellowHighlight={isPossiblePass}
-          onClick={() => handleCellClick(cellKey)}>
+          onClick={() => handleCellClick(cellKey)}
+        >
           {cellData && (
-          <Piece
-            color={cellData.color}
-            hasBall={cellData.hasBall}
-            position={cellKey} // This is fine as it correctly sets the Piece's props.
-            onClick={() => handlePieceClick({ ...cellData, position: cellKey })} // Pass the complete piece data including position
-          />
+            <Piece
+              color={cellData.color}
+              hasBall={cellData.hasBall}
+              position={cellKey}
+              onClick={() => handlePieceClick({ ...cellData, position: cellKey })}
+            />
           )}
         </GridCell>
       );
     });
   };
 
-
   return (
-    <>
-      {didWin(gameBoard) && console.log("winner")} 
-      <GridContainer>{renderBoard()}</GridContainer>
-      <button onClick={handlePassTurn}>Pass Turn</button>
-    </>
+    <div className={`game-board ${gameData && gameData.blackPlayerId === gameData.userId ? 'rotate-180' : ''}`}>
+      <div className={`player-name ${gameData && gameData.whitePlayerId === gameData.userId ? 'top' : 'bottom'}`}>{gameData ? gameData.whitePlayerName : ''}</div>
+      <GridContainer>
+        {renderBoard()}
+      </GridContainer>
+      <div className={`player-name ${gameData && gameData.blackPlayerId === gameData.userId ? 'top' : 'bottom'}`}>{gameData ? gameData.blackPlayerName : 'Opponent'}</div>
+      {gameData && didWin(gameData.currentBoardStatus) && <div className="winner-banner">{`${gameData.whitePlayerName} wins!`}</div>}
+    </div>
   );
 };
 

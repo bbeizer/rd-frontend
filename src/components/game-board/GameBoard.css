@@ -1,0 +1,40 @@
+/* GameBoard.css adjustments for grid and game board layout */
+.game-board {
+  position: relative;
+  width: calc(100vw - 100px); /* Responsive width with some margin, adjust as needed */
+  max-width: 640px; /* Maximum size */
+  height: calc(100vw - 100px); /* Maintain aspect ratio */
+  max-height: 640px;
+  margin: 20px auto; /* Centering the game board horizontally, with margin */
+  padding-top: 50px;
+  padding-bottom: 50px;
+  box-sizing: border-box; /* Includes padding in height calculation */
+  background-color: #fdfdfd;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 1px; /* Small gap for visual separation */
+  width: 100%; /* Ensures container is fully filled */
+  height: 100%; /* Matching height */
+  box-sizing: border-box; /* Ensures padding or borders are included in the dimensions */
+}
+
+.grid-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1; /* Ensures square cells */
+  width: 100%; /* Ensures each cell fills its fraction of the grid properly */
+  height: 100%; /* Maintains aspect ratio */
+}
+
+.light-cell {
+  background-color: #f0e68c;
+}
+
+.dark-cell {
+  background-color: #8b4513;
+}
