@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import GridCell from '../grid/grid-cell/GridCell';
+import Modal from '../modal/modal'
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import { getGameById, updateGame } from '../../services/gameService';
@@ -8,10 +9,13 @@ import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { didWin } from './helpers/didWin';
+import { isCurrentUsersTurn } from './helpers/isCurrentUsersTurn';
 import { useParams } from 'react-router-dom';
 
 const GameBoard = ({ gameModel, updateGameModel }) => {
   const { gameId } = useParams();
+  const [isUserTurn, setIsUserTurn] = useState(true);
+  const [showNotYourTurnModal, setShowNotYourTurnModal] = useState(false);
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
@@ -25,23 +29,33 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       try {
         const fetchedGame = await getGameById(gameId);
         setGameBoard(fetchedGame.currentBoardStatus); // Update local game board
+        
+        // Retrieve current player's ID from localStorage
+        const currentPlayerId = localStorage.getItem('userId');
+        console.log(currentPlayerId)
+        
+        // Determine player color based on the player IDs stored in the game data
+        const playerColor = fetchedGame.whitePlayerId === currentPlayerId ? 'white' : 'black';
+        
+        // Check if it's current user's turn
+        const isTurn = fetchedGame.currentPlayerTurn === playerColor;
+        setIsUserTurn(isTurn);
+        setShowNotYourTurnModal(!isTurn); // Show or hide modal based on turn
       } catch (error) {
         console.error('Error fetching game:', error);
       }
     };
 
-    const id = setInterval(fetchGame, 3000); // Poll every 3 seconds
-    setIntervalId(id);
+    const intervalId = setInterval(fetchGame, 3000); // Poll every 3 seconds
 
-    return () => {
-      clearInterval(intervalId); // Clean up the interval on component unmount
-    };
-  }, [gameId]);
+    // Clean up the interval when the component unmounts or gameId changes
+    return () => clearInterval(intervalId);
+
+  }, [gameId]); // Only re-run the effect if gameId changes
   
   const handlePieceClick = (piece) => {
-    // Block action if not the player's turn or if the piece has the ball
-    if (gameModel.turnPlayer !== piece.color) {
-      console.log("Not you're turn!");
+    if (!isUserTurn) {
+      console.log("It's not your turn!"); // This can also trigger a modal or a toast message
       return;
     }
     const { row, col } = getKeyCoordinates(piece.position);
@@ -161,13 +175,13 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
           col={col}
           redHighlight={isPossibleMove}
           yellowHighlight={isPossiblePass}
-          onClick={() => handleCellClick(cellKey)}>
+          onClick={isUserTurn ? () => handleCellClick(cellKey) : () => {}}>
           {cellData && (
           <Piece
             color={cellData.color}
             hasBall={cellData.hasBall}
             position={cellKey} // This is fine as it correctly sets the Piece's props.
-            onClick={() => handlePieceClick({ ...cellData, position: cellKey })} // Pass the complete piece data including position
+            onClick={isUserTurn ? () => handlePieceClick({ ...cellData, position: cellKey }) : () => {}}// Pass the complete piece data including position
           />
           )}
         </GridCell>
@@ -178,9 +192,14 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
 
   return (
     <>
-      {didWin(gameBoard) && console.log("winner")} 
-      <GridContainer>{renderBoard()}</GridContainer>
-      <button onClick={handlePassTurn}>Pass Turn</button>
+    {didWin(gameBoard) && console.log("winner")} 
+    <GridContainer>{renderBoard()}</GridContainer>
+    {console.log(isUserTurn)}
+    <button onClick={handlePassTurn} disabled={!isUserTurn}>Pass Turn</button>
+    <Modal show={!isUserTurn} onClose={() => {}}>
+    <p>It's not your turn. Please wait for the other player.</p>
+    </Modal>
+      
     </>
   );
 };

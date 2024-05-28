@@ -20,8 +20,11 @@ function Home() {
   const handleJoinGame = async () => {
     try {
       const userId = generateUserID();
+      localStorage.setItem('userId', userId);
       const game = await joinQueue(userId, name);
       setGameId(game._id);
+      localStorage.setItem('userColor', game.userColor);  // store user's game color
+      
       if (game.status === 'playing') {
         navigate(`/game/${game._id}`);
       } else {
