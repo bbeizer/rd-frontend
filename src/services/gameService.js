@@ -7,19 +7,17 @@ export const joinQueue = async (playerId, name) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Include other headers as needed, e.g., authorization tokens
       },
-      body: JSON.stringify({ playerId, name }), // Pass an object containing playerId and name
+      body: JSON.stringify({ playerId, name }),
     });
     if (!response.ok) {
       throw new Error(`Failed to join game queue: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.game;
-
+    return data;  // Returning the whole response including game and playerColor
   } catch (error) {
     console.error('Could not add player to the queue:', error);
-    throw error; // Rethrowing the error is usually a good practice so that calling code can handle it
+    throw error;
   }
 };
 

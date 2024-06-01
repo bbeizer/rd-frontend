@@ -17,25 +17,31 @@ function Home() {
     };
   }, [intervalId]);
 
-  const handleJoinGame = async () => {
-    try {
-      const userId = generateUserID();
-      localStorage.setItem('userId', userId);
-      const game = await joinQueue(userId, name);
-      setGameId(game._id);
-      localStorage.setItem('userColor', game.userColor);  // store user's game color
-      
-      if (game.status === 'playing') {
-        navigate(`/game/${game._id}`);
-      } else {
-        setWaitingForPlayer(true);
-        const id = setInterval(() => pollGameStatus(game._id), 3000); // Poll every 3 seconds
-        setIntervalId(id);
-      }
-    } catch (error) {
-      console.error('Failed to join game:', error);
+  const clearGames = async()=> {
+    const response = await fetch(`http://localhost:3000/api/games`,  {
+      method: 'DELETE'
+  })
+}
+
+const handleJoinGame = async () => {
+  try {
+    const userId = generateUserID();
+    localStorage.setItem('userId', userId);
+    const data = await joinQueue(userId, name);  // Get the full response including game and playerColor
+    setGameId(data.game._id);
+    localStorage.setItem('userColor', data.playerColor);  // Correctly store the player color
+
+    if (data.game.status === 'playing') {
+      navigate(`/game/${data.game._id}`);
+    } else {
+      setWaitingForPlayer(true);
+      const id = setInterval(() => pollGameStatus(data.game._id), 3000);
+      setIntervalId(id);
     }
-  };
+  } catch (error) {
+    console.error('Failed to join game:', error);
+  }
+};
 
   const pollGameStatus = async (id) => {
     try {
@@ -63,6 +69,7 @@ function Home() {
           onChange={(e) => setName(e.target.value)}
         />
       </div>
+      <button onClick={clearGames}>DELETE</button>
       <button className="join-button" onClick={handleJoinGame}>Join Game</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>

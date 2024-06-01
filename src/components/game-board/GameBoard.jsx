@@ -23,39 +23,44 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [hasMoved, setHasMoved] = useState(false);
   const [possiblePasses, setPossiblePasses] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
+  const playerColor = localStorage.getItem('userColor');
 
   useEffect(() => {
     const fetchGame = async () => {
-      try {
-        const fetchedGame = await getGameById(gameId);
-        setGameBoard(fetchedGame.currentBoardStatus); // Update local game board
-        
-        // Retrieve current player's ID from localStorage
-        const currentPlayerId = localStorage.getItem('userId');
-        console.log(currentPlayerId)
-        
-        // Determine player color based on the player IDs stored in the game data
-        const playerColor = fetchedGame.whitePlayerId === currentPlayerId ? 'white' : 'black';
-        
-        // Check if it's current user's turn
-        const isTurn = fetchedGame.currentPlayerTurn === playerColor;
-        setIsUserTurn(isTurn);
-        setShowNotYourTurnModal(!isTurn); // Show or hide modal based on turn
-      } catch (error) {
-        console.error('Error fetching game:', error);
-      }
+        try {
+            const fetchedGame = await getGameById(gameId);
+            setGameBoard(fetchedGame.currentBoardStatus);
+            const playerColor = localStorage.getItem('userColor');
+            const isTurn = fetchedGame.currentPlayerTurn === playerColor;
+
+            setIsUserTurn(isTurn);
+            if (isTurn && intervalId) {
+                clearInterval(intervalId);
+                setIntervalId(null);
+            } else if (!isTurn && !intervalId) {
+                setIntervalId(setInterval(fetchGame, 3000));
+            }
+        } catch (error) {
+            console.error('Error fetching game:', error);
+        }
     };
 
-    const intervalId = setInterval(fetchGame, 3000); // Poll every 3 seconds
+    fetchGame(); // Initial fetch
 
-    // Clean up the interval when the component unmounts or gameId changes
-    return () => clearInterval(intervalId);
-
-  }, [gameId]); // Only re-run the effect if gameId changes
+    return () => {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+    };
+  }, [gameId, isUserTurn]);
   
   const handlePieceClick = (piece) => {
     if (!isUserTurn) {
       console.log("It's not your turn!"); // This can also trigger a modal or a toast message
+      return;
+    }
+    if (piece.color !== playerColor) {
+      console.log("You can only move your own pieces!");
       return;
     }
     const { row, col } = getKeyCoordinates(piece.position);
@@ -145,23 +150,34 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   };
   
   const handlePassTurn = async () => {
-    const updatedModel = {
-      ...gameModel,
-      turnPlayer: gameModel.turnPlayer === 'white' ? 'black' : 'white',
-    };
-
     try {
-      const updatedGame = await updateGame(gameId, updatedModel);
-      updateGameModel(updatedGame);  // Update local state with new game data from server
+      const currentPlayerColor = localStorage.getItem('userColor'); // Assuming color is stored
+      console.log("current player color " + currentPlayerColor );
+      const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
+      // will delete later temporary for UI purposes
+      const updatedModel = {
+        ...gameModel,
+        currentPlayerTurn: nextPlayerTurn,
+      };
+      updateGameModel(updatedModel); // Optimistically update UI
+      // will delete later temporary for UI purposes
+      const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
+      console.log("Updated game data:", updatedGame);
+      
+      // Check if the next turn is for this user
+      setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
+      setShowNotYourTurnModal(updatedGame.currentPlayerTurn !== currentPlayerColor);
     } catch (error) {
       console.error('Failed to update game:', error);
     }
-
+  
+    // Clear local game state settings
     setActivePiece(null);
     setHasMoved(false);
     setPossibleMoves([]);
     setOriginalSquare(null);
   };
+  
 
   const renderBoard = () => {
     return Object.entries(gameBoard).map(([cellKey, cellData]) => {
@@ -194,7 +210,6 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
     <>
     {didWin(gameBoard) && console.log("winner")} 
     <GridContainer>{renderBoard()}</GridContainer>
-    {console.log(isUserTurn)}
     <button onClick={handlePassTurn} disabled={!isUserTurn}>Pass Turn</button>
     <Modal show={!isUserTurn} onClose={() => {}}>
     <p>It's not your turn. Please wait for the other player.</p>
