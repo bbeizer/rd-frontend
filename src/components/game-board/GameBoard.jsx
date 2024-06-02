@@ -25,36 +25,36 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
 
-  useEffect(() => {
-    const fetchGame = async () => {
-        try {
-            const fetchedGame = await getGameById(gameId);
-            setGameBoard(fetchedGame.currentBoardStatus);
-            const playerColor = localStorage.getItem('userColor');
-            const isTurn = fetchedGame.currentPlayerTurn === playerColor;
+  const fetchGame = async () => {
+    try {
+        const fetchedGame = await getGameById(gameId);
+        setGameBoard(fetchedGame.currentBoardStatus);
+        const playerColor = localStorage.getItem('userColor');
+        const isTurn = fetchedGame.currentPlayerTurn === playerColor;
 
-            setIsUserTurn(isTurn);
-            if (isTurn && intervalId) {
-                clearInterval(intervalId);
-                setIntervalId(null);
-            } else if (!isTurn && !intervalId) {
-                setIntervalId(setInterval(fetchGame, 3000));
-            }
-        } catch (error) {
-            console.error('Error fetching game:', error);
+        setIsUserTurn(isTurn);
+        if (isTurn && intervalId) {
+            clearInterval(intervalId);
+            setIntervalId(null);
+        } else if (!isTurn && !intervalId) {
+            setIntervalId(setInterval(fetchGame, 3000));
         }
-    };
+    } catch (error) {
+        console.error('Error fetching game:', error);
+    }
+};
 
+  useEffect(() => {
     fetchGame(); // Initial fetch
-
     return () => {
         if (intervalId) {
             clearInterval(intervalId);
         }
     };
-  }, [gameId, isUserTurn]);
+  }, [gameId]);
   
   const handlePieceClick = (piece) => {
+    console.log("Piece Handler Hit")
     if (!isUserTurn) {
       console.log("It's not your turn!"); // This can also trigger a modal or a toast message
       return;
@@ -100,17 +100,27 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
   
 
   const handleCellClick = async (cellKey) => {
+    console.log("Cell Handler triggered");
+    console.log("Active Piece:", activePiece);
+    console.log("Possible Passes:", possiblePasses);
+    console.log("Possible Moves:", possibleMoves);
+
     const { row, col } = getKeyCoordinates(cellKey);
-  
+    console.log("Clicked Cell Coordinates:", { row, col });
+
     if (!activePiece) {
       console.log("Select a piece first.");
       return;
     }
-  
+
+    console.log("Active Piece Position:", activePiece.position);
+    console.log("Checking action type (Move or Pass)");
+
     const isPassAction = activePiece.hasBall && possiblePasses.includes(cellKey);
-  
+    console.log("Is Pass Action:", isPassAction);
+
     if (isPassAction) {
-      // Pass the ball logic
+      console.log("Executing Pass Action");
       let newGameBoard = { ...gameBoard };
       newGameBoard[activePiece.position].hasBall = false;
       newGameBoard[cellKey].hasBall = true;
@@ -118,65 +128,78 @@ const GameBoard = ({ gameModel, updateGameModel }) => {
       updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard });
       setActivePiece(null);
       setPossiblePasses([]);
+
+      console.log("New Game Board after pass:", newGameBoard);
     } else {
       const isLegalMove = possibleMoves.some(move => move.row === row && move.col === col);
+      console.log("Is Legal Move:", isLegalMove);
+
       if (!isLegalMove) {
-        console.log("Illegal Move");
+        console.log("Illegal Move Attempted");
         return;
       }
-  
-      // Move the piece if it's a legal move
+
+      console.log("Executing Legal Move");
       const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
+      console.log("New Game Board after move:", newGameBoard);
       setGameBoard(newGameBoard);
-      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard }); //frontend
+      updateGameModel({ ...gameModel, currentBoardStatus: newGameBoard }); // frontend update
 
       try {
-        const updatedGame = await updateGame(gameId, { ...gameModel, currentBoardStatus: newGameBoard }); //backend call
+        const updatedGame = await updateGame(gameId, { ...gameModel, currentBoardStatus: newGameBoard }); // backend call
+        console.log("Updated Game Data:", updatedGame);
       } catch (error) {
         console.error('Failed to update game:', error);
       }
-  
+
       if (hasMoved) {
+        console.log("Piece has moved, resetting state");
         setActivePiece(null); // Deselect the piece after moving
         setPossibleMoves([]);
         setHasMoved(false); // Reset move state for the next turn
         setOriginalSquare(null); // Clear original square after completing the move
       } else {
+        console.log("Piece selected, setting moved state");
         setHasMoved(true);
         activePiece.position = cellKey; // Update the position of the active piece
         setPossibleMoves([originalSquare]); // Allow moving back to the original square only
       }
     }
-  };
+};
+
   
-  const handlePassTurn = async () => {
-    try {
-      const currentPlayerColor = localStorage.getItem('userColor'); // Assuming color is stored
-      console.log("current player color " + currentPlayerColor );
-      const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
-      // will delete later temporary for UI purposes
-      const updatedModel = {
-        ...gameModel,
-        currentPlayerTurn: nextPlayerTurn,
-      };
-      updateGameModel(updatedModel); // Optimistically update UI
-      // will delete later temporary for UI purposes
-      const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
-      console.log("Updated game data:", updatedGame);
-      
-      // Check if the next turn is for this user
-      setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
-      setShowNotYourTurnModal(updatedGame.currentPlayerTurn !== currentPlayerColor);
-    } catch (error) {
-      console.error('Failed to update game:', error);
-    }
-  
-    // Clear local game state settings
+const handlePassTurn = async () => {
+  const currentPlayerColor = localStorage.getItem('userColor');
+  const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
+
+  try {
+    const updatedModel = { ...gameModel, currentPlayerTurn: nextPlayerTurn };
+    updateGameModel(updatedModel); // Optimistically update UI
+    const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
+
+    console.log("Updated game data:", updatedGame);
+    setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
+    setShowNotYourTurnModal(updatedGame.currentPlayerTurn !== currentPlayerColor);
+
+    // Reset game state
     setActivePiece(null);
     setHasMoved(false);
     setPossibleMoves([]);
     setOriginalSquare(null);
-  };
+
+    // Manage interval based on turn
+    if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    } else if (!intervalId) {
+      setIntervalId(setInterval(fetchGame, 3000));  // fetchGame needs to be available in this context
+    }
+  } catch (error) {
+    console.error('Failed to update game:', error);
+    // Optionally, notify the user about the error
+  }
+};
+
   
 
   const renderBoard = () => {
