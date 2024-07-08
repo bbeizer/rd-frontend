@@ -6,25 +6,15 @@ import Home from './components/home/home';
 
 function App() {
   const [gameModel, setGameModel] = useState(initializeGameModel());
-  const [pendingMove, setPendingMove] = useState({
-    hasMovedAPiece: false,
-    move: {
-      startPosition: null,
-      endPosition: null,
-    },
-    pass: {
-      startPosition: null,
-      endPosition: null,
-    },
-  });
-  const [activePiece, setActivePiece] = useState(null);
 
-  const updateGameModel = (updatedModel) => {
-    setGameModel((prevModel) => ({
-      ...prevModel,
-      ...updatedModel,
-    }));
-  };
+  const updateGameModel = async (gameId) => {
+    try {
+        const fetchedGame = await getGameById(gameId);
+        setGameModel(fetchedGame);
+    } catch (error) {
+        console.error("Failed to fetch game data:", error);
+    }
+};
 
   return (
     <Router>
@@ -38,9 +28,6 @@ function App() {
               <GameBoard
                 gameModel={gameModel}
                 updateGameModel={updateGameModel}
-                pendingMove={pendingMove}
-                setActivePiece={setActivePiece} // Assuming you want to manage the active piece from App
-                activePiece={activePiece}
               />
             }
           />

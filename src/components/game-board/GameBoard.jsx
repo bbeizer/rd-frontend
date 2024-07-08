@@ -9,7 +9,6 @@ import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { didWin } from './helpers/didWin';
-import { isCurrentUsersTurn } from './helpers/isCurrentUsersTurn';
 import { useParams } from 'react-router-dom';
 
 const GameBoard = ({ gameModel, updateGameModel }) => {
