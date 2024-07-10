@@ -5,17 +5,6 @@ import { initializeGameModel } from './models/gameModel';
 import Home from './components/home/home';
 
 function App() {
-  const [gameModel, setGameModel] = useState(initializeGameModel());
-
-  const updateGameModel = async (gameId) => {
-    try {
-        const fetchedGame = await getGameById(gameId);
-        setGameModel(fetchedGame);
-    } catch (error) {
-        console.error("Failed to fetch game data:", error);
-    }
-};
-
   return (
     <Router>
       <div className="App">
@@ -26,8 +15,6 @@ function App() {
             path="/game/:gameId"
             element={
               <GameBoard
-                gameModel={gameModel}
-                updateGameModel={updateGameModel}
               />
             }
           />
