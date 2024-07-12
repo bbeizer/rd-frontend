@@ -17,6 +17,12 @@ function Home() {
     };
   }, [intervalId]);
 
+  const clearGames = async()=> {
+    const response = await fetch(`http://localhost:3000/api/games`,  {
+      method: 'DELETE'
+  })
+}
+
 const handleJoinGame = async () => {
   try {
     const userId = generateUserID();
@@ -63,6 +69,7 @@ const handleJoinGame = async () => {
           onChange={(e) => setName(e.target.value)}
         />
       </div>
+      <button onClick={clearGames}>DELETE</button>
       <button className="join-button" onClick={handleJoinGame}>Join Game</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>
