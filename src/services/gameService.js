@@ -1,14 +1,14 @@
 // Handle response in joinQueue
 const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
-export const joinQueue = async (playerId, name) => {
+export const joinQueue = async (playerId, playerName) => {
   try {
     const response = await fetch(`${baseUrl}/games/joinGame`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ playerId, name }),
+      body: JSON.stringify({ playerId, playerName }),
     });
     if (!response.ok) {
       throw new Error(`Failed to join game queue: ${response.statusText}`);

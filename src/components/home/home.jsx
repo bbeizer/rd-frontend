@@ -22,11 +22,10 @@ function Home() {
       method: 'DELETE'
   })
 }
-
+console.log("Current name:", name); // Check the current state before the request
 const handleJoinGame = async () => {
   try {
     const userId = generateUserID();
-    localStorage.setItem('userId', userId);
     const data = await joinQueue(userId, name);  // Get the full response including game and playerColor
     setGameId(data.game._id);
     localStorage.setItem('userColor', data.playerColor);  // Correctly store the player color

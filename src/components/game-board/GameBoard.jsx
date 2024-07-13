@@ -3,6 +3,7 @@ import GridCell from '../grid/grid-cell/GridCell';
 import Modal from '../modal/modal'
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
+import PlayerInfo from '../playerInfo/playerInfo';
 import { getGameById, updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
@@ -16,7 +17,6 @@ const GameBoard = () => {
   const { gameId } = useParams();
   const [gameData, setGameData] = useState(null)
   const [isUserTurn, setIsUserTurn] = useState(true);
-  const [showNotYourTurnModal, setShowNotYourTurnModal] = useState(false);
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
@@ -25,6 +25,7 @@ const GameBoard = () => {
   const [possiblePasses, setPossiblePasses] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
+  const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
 
   const fetchGame = async () => {
     try {
@@ -88,7 +89,6 @@ const GameBoard = () => {
     // Attempting to pass the ball from the active piece to another piece
     if (activePiece.hasBall && !piece.hasBall) {
         if (possiblePasses.includes(piece.position)) {
-          debugger
             const updatedBoard = passBall(activePiece.position, piece.position, gameBoard);
             
             updateGameModel(updatedBoard);
@@ -200,8 +200,6 @@ const updateGameModel = async (updatedData) => {
   }
 };
 
-  
-
 const renderBoard = () => {
   if (!gameBoard) {
     // Optionally, display a loading indicator or a message
@@ -243,6 +241,7 @@ const renderBoard = () => {
     <>
     {didWin(gameBoard) && console.log("winner")} 
     <GridContainer>{renderBoard()}</GridContainer>
+    {console.log(gameData)}
     <button onClick={handlePassTurn} disabled={!isUserTurn}>Pass Turn</button>
     <Modal show={!isUserTurn} onClose={() => {}}>
     <p>It's not your turn. Please wait for the other player.</p>
