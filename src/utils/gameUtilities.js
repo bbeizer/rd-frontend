@@ -2,7 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
     export const generateUserID = () => {
-    let userID = localStorage.getItem('userID');
+    let userID = localStorage.getItem('userId');
     if (!userID) {
         userID = uuidv4();
         localStorage.setItem('userID', userID);

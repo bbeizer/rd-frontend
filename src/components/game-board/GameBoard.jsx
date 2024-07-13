@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import './GameBoard.css'
 import GridCell from '../grid/grid-cell/GridCell';
 import Modal from '../modal/modal'
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
+import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
 import { getGameById, updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
-import { didWin } from './helpers/didWin';
 import { passBall } from './helpers/passBall'
 import { useParams } from 'react-router-dom';
 
@@ -16,7 +17,6 @@ const GameBoard = () => {
   const { gameId } = useParams();
   const [gameData, setGameData] = useState(null)
   const [isUserTurn, setIsUserTurn] = useState(true);
-  const [showNotYourTurnModal, setShowNotYourTurnModal] = useState(false);
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
   const [possibleMoves, setPossibleMoves] = useState([]);
@@ -25,6 +25,7 @@ const GameBoard = () => {
   const [possiblePasses, setPossiblePasses] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
+  const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
 
   const fetchGame = async () => {
     try {
@@ -32,6 +33,10 @@ const GameBoard = () => {
       setGameData(fetchedGame);
       setGameBoard(fetchedGame.currentBoardStatus);
       setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
+      setPlayerDetails({
+        white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
+        black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
+      });
       if (fetchedGame.currentPlayerTurn !== playerColor && !intervalId) {
         setIntervalId(setInterval(fetchGame, 3000)); // Adjust the polling interval as needed
       } else if (fetchedGame.currentPlayerTurn === playerColor && intervalId) {
@@ -88,7 +93,6 @@ const GameBoard = () => {
     // Attempting to pass the ball from the active piece to another piece
     if (activePiece.hasBall && !piece.hasBall) {
         if (possiblePasses.includes(piece.position)) {
-          debugger
             const updatedBoard = passBall(activePiece.position, piece.position, gameBoard);
             
             updateGameModel(updatedBoard);
@@ -200,14 +204,11 @@ const updateGameModel = async (updatedData) => {
   }
 };
 
-  
-
 const renderBoard = () => {
   if (!gameBoard) {
     // Optionally, display a loading indicator or a message
     return <p>Loading game board...</p>;
   }
-
   return (
     <>
       {Object.entries(gameBoard).map(([cellKey, cellData]) => {
@@ -237,19 +238,38 @@ const renderBoard = () => {
   );
 };
 
-
-
-  return (
-    <>
-    {didWin(gameBoard) && console.log("winner")} 
-    <GridContainer>{renderBoard()}</GridContainer>
-    <button onClick={handlePassTurn} disabled={!isUserTurn}>Pass Turn</button>
-    <Modal show={!isUserTurn} onClose={() => {}}>
-    <p>It's not your turn. Please wait for the other player.</p>
-    </Modal>
-      
-    </>
-  );
-};
+const rotationStyle = playerColor === 'black' ? '180deg' : '0deg';
+const isWhite = playerColor === 'white';
+return (
+  <div className="game-container">
+      {/* Opponent's PlayerInfoBar at the top */}
+      <PlayerInfoBar
+        playerName={isWhite ? playerDetails.black.name : playerDetails.white.name}
+      />
+      <div className="board-and-info">
+        <div className="board-container" style={{ '--rotation': rotationStyle }}>
+          <GridContainer>{renderBoard()}</GridContainer>
+        </div>
+        <div className="modal-side">
+          <Modal show={!isUserTurn} onClose={() => {}}>
+            <p>It's not your turn. Please wait for the other player.</p>
+          </Modal>
+        </div>
+      </div>
+      {/* Current player's PlayerInfoBar at the bottom */}
+      <PlayerInfoBar
+        playerName={isWhite ? playerDetails.white.name : playerDetails.black.name}
+      />
+      {/* Pass Turn Button - Adjust alignment to the left */}
+      <button 
+        onClick={handlePassTurn} 
+        disabled={!isUserTurn} 
+        style={{ alignSelf: 'flex-start', margin: '10px' }}
+      >
+        Pass Turn
+      </button>
+    </div>
+);
+        }
 
 export default GameBoard;

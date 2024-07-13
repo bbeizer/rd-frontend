@@ -1,0 +1,24 @@
+/* gameboard.css */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns children to the start of the flex container, which is the left side */
+}
+  
+  .board-and-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Center align the game board and modal */
+  }
+  
+  .board-container {
+    transform: rotate(var(--rotation)); /* Use a CSS variable for dynamic rotation */
+    transition: transform 0.3s ease-in-out; /* Smooth rotation transition */
+  }
+  
+  .modal-side {
+    width: 200px; /* Fixed width for the modal */
+    height: auto; /* Auto height based on content */
+    margin-left: 20px; /* Spacing between board and modal */
+  }
+  
