@@ -22,7 +22,6 @@ function Home() {
       method: 'DELETE'
   })
 }
-console.log("Current name:", name); // Check the current state before the request
 const handleJoinGame = async () => {
   try {
     const userId = generateUserID();
