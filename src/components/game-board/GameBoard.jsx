@@ -171,7 +171,6 @@ const handlePassTurn = async () => {
 
     console.log("Updated game data:", updatedGame);
     setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
-    setShowNotYourTurnModal(updatedGame.currentPlayerTurn !== currentPlayerColor);
 
     // Reset game state
     setActivePiece(null);
