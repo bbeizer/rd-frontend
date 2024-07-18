@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import './GameBoard.css'
+import './GameBoard.css';
+import Confetti from 'react-confetti';
 import GridCell from '../grid/grid-cell/GridCell';
-import Modal from '../modal/modal'
+import Modal from '../modal/modal';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
+import { didWin } from './helpers/didWin';
 import { getGameById, updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
 import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
-import { passBall } from './helpers/passBall'
+import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 
 const GameBoard = () => {
   const { gameId } = useParams();
-  const [gameData, setGameData] = useState(null)
+  const [gameData, setGameData] = useState(null);
   const [isUserTurn, setIsUserTurn] = useState(true);
   const [activePiece, setActivePiece] = useState(null);
   const [originalSquare, setOriginalSquare] = useState(null);
@@ -26,38 +28,42 @@ const GameBoard = () => {
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
   const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState(null);
 
-  const fetchGame = async () => {
-    try {
-      const fetchedGame = await getGameById(gameId);
-      setGameData(fetchedGame);
-      setGameBoard(fetchedGame.currentBoardStatus);
-      setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
-      setPlayerDetails({
-        white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
-        black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
-      });
-      if (fetchedGame.currentPlayerTurn !== playerColor && !intervalId) {
-        setIntervalId(setInterval(fetchGame, 3000)); // Adjust the polling interval as needed
-      } else if (fetchedGame.currentPlayerTurn === playerColor && intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
-    } catch (error) {
-      console.error('Error fetching turn:', error);
-    }
-  };
-  
   useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        const fetchedGame = await getGameById(gameId);
+        setGameData(fetchedGame);
+        setGameBoard(fetchedGame.currentBoardStatus);
+        setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
+        setPlayerDetails({
+          white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
+          black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
+        });
+        if (fetchedGame.currentPlayerTurn !== playerColor && !intervalId) {
+          setIntervalId(setInterval(fetchGame, 3000));
+        } else if (fetchedGame.currentPlayerTurn === playerColor && intervalId) {
+          clearInterval(intervalId);
+          setIntervalId(null);
+        }
+      } catch (error) {
+        console.error('Error fetching turn:', error);
+      }
+    };
     fetchGame();
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [gameId, playerColor, intervalId]);
-  
+  }, [gameId, playerColor, intervalId, gameOver]);
+
+
   const handlePieceClick = (piece) => {
+    console.log(gameData.status)
     console.log("Piece Handler Hit");
 
     // Check if it's the player's turn and if the player is moving their own piece
@@ -98,6 +104,10 @@ const GameBoard = () => {
             updateGameModel(updatedBoard);
             setActivePiece(null);
             setPossiblePasses([]);
+            if (didWin(updatedBoard)) { 
+              handleGameEnd(playerColor); // Handle game end if the player won
+          }
+
         } else {
             console.log("Illegal pass");
         }
@@ -157,91 +167,120 @@ const handleCellClick = async (cellKey) => {
   }
 };
 
+  const handlePassTurn = async () => {
+    const currentPlayerColor = localStorage.getItem('userColor');
+    const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
 
+    try {
+      const updatedModel = { ...gameData, currentPlayerTurn: nextPlayerTurn };
+      updateGameModel(updatedModel);
+      const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
+      setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
+      setActivePiece(null);
+      setHasMoved(false);
+      setPossibleMoves([]);
+      setOriginalSquare(null);
+
+      if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      } else if (!intervalId) {
+        setIntervalId(setInterval(fetchGame, 3000));
+      }
+    } catch (error) {
+      console.error('Failed to update game:', error);
+    }
+  };
+
+  const handleGameEnd = async (winnerColor) => {
+    clearInterval(intervalId);  // Stop any active intervals
+    setShowConfetti(true);      // Show confetti animation
+    setTimeout(() => setShowConfetti(false), 5000);  // Hide confetti after 5 seconds
+    setGameOver(true)
+    const updatedGame = await updateGame(gameId, { status: 'completed'});
+    setWinner(winnerColor)
+};
 
   
-const handlePassTurn = async () => {
-  const currentPlayerColor = localStorage.getItem('userColor');
-  const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
 
-  try {
-    const updatedModel = { ...gameData, currentPlayerTurn: nextPlayerTurn };
-    updateGameModel(updatedModel); // Optimistically update UI
-    const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
-
-    console.log("Updated game data:", updatedGame);
-    setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
-
-    // Reset game state
-    setActivePiece(null);
-    setHasMoved(false);
-    setPossibleMoves([]);
-    setOriginalSquare(null);
-
-    // Manage interval based on turn
-    if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    } else if (!intervalId) {
-      setIntervalId(setInterval(fetchGame, 3000));  // fetchGame needs to be available in this context
+  const updateGameModel = async (updatedData) => {
+    try {
+      const updatedGame = await updateGame(gameId, { currentBoardStatus: updatedData });
+      setGameData(updatedGame);
+      setGameBoard(updatedGame.currentBoardStatus);
+      setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);
+    } catch (error) {
+      console.error('Failed to update game:', error);
     }
-  } catch (error) {
-    console.error('Failed to update game:', error);
-    // Optionally, notify the user about the error
-  }
-};
+  };
 
-/* may not need this... but its for the frontend */
-const updateGameModel = async (updatedData) => {
-  try {
-    const updatedGame = await updateGame(gameId, { currentBoardStatus: updatedData });
-    setGameData(updatedGame)
-    setGameBoard(updatedGame.currentBoardStatus);
-    setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);
-  } catch (error) {
-    console.error('Failed to update game:', error);
-  }
-};
+  const handleRematch = async () => {
+    // Define the initial state for a new game, keeping the same players.
+    const initialGameData = {
+      ...gameData, // Use existing game data to preserve player names, colors, etc.
+      currentBoardStatus: getInitialBoardStatus(), // Reset the board state
+      currentPlayerTurn: gameData.currentPlayerTurn === 'white' ? 'black' : 'white', // Alternate starting player
+      status: 'playing', // Ensure game status is reset to active
+      winner: undefined, // Reset the winner field
+    };
+  
+    try {
+      const updatedGame = await updateGame(gameId, initialGameData);
+      setGameData(updatedGame);
+      setGameBoard(updatedGame.currentBoardStatus);
+      setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);
+      setActivePiece(null);
+      setPossibleMoves([]);
+      setPossiblePasses([]);
+      setHasMoved(false);
+      setOriginalSquare(null);
+      setShowConfetti(false); // Ensure confetti is turned off if it was showing
+    } catch (error) {
+      console.error('Failed to start a new game:', error);
+    }
+  };
+  
 
-const renderBoard = () => {
-  if (!gameBoard) {
-    // Optionally, display a loading indicator or a message
-    return <p>Loading game board...</p>;
-  }
+  const renderBoard = () => {
+    if (!gameBoard) {
+      return <p>Loading game board...</p>;
+    }
+    return (
+      <>
+        {Object.entries(gameBoard).map(([cellKey, cellData]) => {
+          const { row, col } = getKeyCoordinates(cellKey);
+          const isPossibleMove = possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
+          const isPossiblePass = possiblePasses.some(pass => cellKey === pass);
+          return (
+            <GridCell
+              key={cellKey}
+              row={row}
+              col={col}
+              redHighlight={isPossibleMove}
+              yellowHighlight={isPossiblePass}
+              onClick={isUserTurn ? () => handleCellClick(cellKey) : () => {}}
+            >
+              {cellData && (
+                <Piece
+                  color={cellData.color}
+                  hasBall={cellData.hasBall}
+                  position={cellKey}
+                  onClick={isUserTurn ? () => handlePieceClick({ ...cellData, position: cellKey }) : () => {}}
+                />
+              )}
+            </GridCell>
+          );
+        })}
+      </>
+    );
+  };
+
+  const rotationStyle = playerColor === 'black' ? '180deg' : '0deg';
+  const isWhite = playerColor === 'white';
+
   return (
-    <>
-      {Object.entries(gameBoard).map(([cellKey, cellData]) => {
-        const { row, col } = getKeyCoordinates(cellKey);
-        const isPossibleMove = possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
-        const isPossiblePass = possiblePasses.some(pass => cellKey === pass);
-        return (
-          <GridCell
-            key={cellKey}
-            row={row}
-            col={col}
-            redHighlight={isPossibleMove}
-            yellowHighlight={isPossiblePass}
-            onClick={isUserTurn ? () => handleCellClick(cellKey) : () => {}}>
-            {cellData && (
-              <Piece
-                color={cellData.color}
-                hasBall={cellData.hasBall}
-                position={cellKey}
-                onClick={isUserTurn ? () => handlePieceClick({ ...cellData, position: cellKey }) : () => {}}
-              />
-            )}
-          </GridCell>
-        );
-      })}
-    </>
-  );
-};
-
-const rotationStyle = playerColor === 'black' ? '180deg' : '0deg';
-const isWhite = playerColor === 'white';
-return (
-  <div className="game-container">
-      {/* Opponent's PlayerInfoBar at the top */}
+    <div className="game-container">
+      {showConfetti && <Confetti />}
       <PlayerInfoBar
         playerName={isWhite ? playerDetails.black.name : playerDetails.white.name}
       />
@@ -249,17 +288,25 @@ return (
         <div className="board-container" style={{ '--rotation': rotationStyle }}>
           <GridContainer>{renderBoard()}</GridContainer>
         </div>
+
+        {!gameOver && !isUserTurn && (
         <div className="modal-side">
-          <Modal show={!isUserTurn} onClose={() => {}}>
+          <Modal>
             <p>It's not your turn. Please wait for the other player.</p>
           </Modal>
         </div>
+      )}
+        {gameData && gameData.status === 'completed' && (
+          <div className="game-over-controls">
+            <h2>{winner} wins!</h2>
+            <button onClick={handleRematch}>Rematch</button>
+            <button onClick={() => window.location.href = '/lobby'}>Return to Lobby</button>
+          </div>
+        )}
       </div>
-      {/* Current player's PlayerInfoBar at the bottom */}
       <PlayerInfoBar
         playerName={isWhite ? playerDetails.white.name : playerDetails.black.name}
       />
-      {/* Pass Turn Button - Adjust alignment to the left */}
       <button 
         onClick={handlePassTurn} 
         disabled={!isUserTurn} 
@@ -268,7 +315,7 @@ return (
         Pass Turn
       </button>
     </div>
-);
-        }
+  );
+};
 
 export default GameBoard;

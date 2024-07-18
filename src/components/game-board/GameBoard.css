@@ -1,24 +1,67 @@
 /* gameboard.css */
 .game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Aligns children to the start of the flex container, which is the left side */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Changed from flex-start to center to better center the overall game content */
+  width: 100%; /* Ensuring full width to provide enough space for child components */
+  max-width: 1200px; /* Optional: limits the max width of the container for better layout on larger screens */
+  margin: auto; /* Centers the game container in the middle of the page horizontally */
 }
-  
-  .board-and-info {
-    display: flex;
-    flex-direction: row;
-    align-items: center; /* Center align the game board and modal */
-  }
-  
-  .board-container {
-    transform: rotate(var(--rotation)); /* Use a CSS variable for dynamic rotation */
-    transition: transform 0.3s ease-in-out; /* Smooth rotation transition */
-  }
-  
+
+.board-and-info {
+position: relative; /* Needed for absolute positioning of children like game-over-controls */
+display: flex;
+flex-direction: row;
+align-items: center;
+width: 100%; /* Ensure it takes the full width of its parent for better layout control */
+justify-content: center; /* Centering children horizontally */
+}
+
+.board-container {
+flex: 1; /* Allows the game board to take up as much space as it can, useful if modal-side is not very wide */
+transform: rotate(var(--rotation)); /* Dynamic rotation based on a CSS variable */
+transition: transform 0.3s ease-in-out; /* Smooth transition for rotation */
+}
+
+.modal-side {
+  width: 250px; /* Define a moderate width */
+  margin-left: 20px; /* Space from the game board */
+  padding: 15px; /* Inner space for content */
+  background-color: white; /* White background for clarity */
+  border: 1px solid #cccccc; /* Subtle border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for 3D effect */
+  border-radius: 8px; /* Rounded corners */
+  overflow: hidden; /* Hides any overflowing content */
+  display: flex; /* Enables flexbox layout */
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center items horizontally */
+  justify-content: center; /* Center items vertically */
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Smooth transition for hover effects */
+}
+
+@media (max-width: 768px) {
   .modal-side {
-    width: 200px; /* Fixed width for the modal */
-    height: auto; /* Auto height based on content */
-    margin-left: 20px; /* Spacing between board and modal */
+      width: 100%; /* Full width on smaller screens */
+      margin-left: 0; /* Remove margin */
+      margin-top: 20px; /* Extra top margin for spacing */
+      border-top: 2px solid #007bff; /* Highlight at the top for visibility */
   }
-  
+}
+
+.game-over-controls {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%); /* Centers the controls over the board */
+z-index: 100; /* High z-index to ensure it's above all other elements */
+background-color: white; /* Ensure readability against potentially complex backgrounds */
+padding: 20px;
+border-radius: 8px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+width: 90%; /* Restricting width to avoid overly wide controls */
+max-width: 400px; /* Maximum width for better control */
+}
