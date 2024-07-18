@@ -14,6 +14,7 @@ import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -28,9 +29,8 @@ const GameBoard = () => {
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
   const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -59,11 +59,10 @@ const GameBoard = () => {
         clearInterval(intervalId);
       }
     };
-  }, [gameId, playerColor, intervalId, gameOver]);
+  }, [gameId, playerColor, intervalId]);
 
 
   const handlePieceClick = (piece) => {
-    console.log(gameData.status)
     console.log("Piece Handler Hit");
 
     // Check if it's the player's turn and if the player is moving their own piece
@@ -196,7 +195,6 @@ const handleCellClick = async (cellKey) => {
     clearInterval(intervalId);  // Stop any active intervals
     setShowConfetti(true);      // Show confetti animation
     setTimeout(() => setShowConfetti(false), 5000);  // Hide confetti after 5 seconds
-    setGameOver(true)
     const updatedGame = await updateGame(gameId, { status: 'completed'});
     setWinner(winnerColor)
 };
@@ -221,7 +219,6 @@ const handleCellClick = async (cellKey) => {
       currentBoardStatus: getInitialBoardStatus(), // Reset the board state
       currentPlayerTurn: gameData.currentPlayerTurn === 'white' ? 'black' : 'white', // Alternate starting player
       status: 'playing', // Ensure game status is reset to active
-      winner: undefined, // Reset the winner field
     };
   
     try {
@@ -280,7 +277,7 @@ const handleCellClick = async (cellKey) => {
 
   return (
     <div className="game-container">
-      {showConfetti && <Confetti />}
+      {gameData && gameData.status === 'completed' && <Confetti />}
       <PlayerInfoBar
         playerName={isWhite ? playerDetails.black.name : playerDetails.white.name}
       />
@@ -288,8 +285,8 @@ const handleCellClick = async (cellKey) => {
         <div className="board-container" style={{ '--rotation': rotationStyle }}>
           <GridContainer>{renderBoard()}</GridContainer>
         </div>
-
-        {!gameOver && !isUserTurn && (
+  
+        {gameData && gameData.status === 'playing' && !isUserTurn && (
         <div className="modal-side">
           <Modal>
             <p>It's not your turn. Please wait for the other player.</p>
@@ -300,7 +297,7 @@ const handleCellClick = async (cellKey) => {
           <div className="game-over-controls">
             <h2>{winner} wins!</h2>
             <button onClick={handleRematch}>Rematch</button>
-            <button onClick={() => window.location.href = '/lobby'}>Return to Lobby</button>
+            <button onClick={() => navigate('/')}>Return to Lobby</button>
           </div>
         )}
       </div>
@@ -316,6 +313,7 @@ const handleCellClick = async (cellKey) => {
       </button>
     </div>
   );
+  
 };
 
 export default GameBoard;
