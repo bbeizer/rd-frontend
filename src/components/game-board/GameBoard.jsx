@@ -29,30 +29,9 @@ const GameBoard = () => {
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
   const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
-  const [winner, setWinner] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGame = async () => {
-      try {
-        const fetchedGame = await getGameById(gameId);
-        setGameData(fetchedGame);
-        setGameBoard(fetchedGame.currentBoardStatus);
-        setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
-        setPlayerDetails({
-          white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
-          black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
-        });
-        if (fetchedGame.currentPlayerTurn !== playerColor && !intervalId) {
-          setIntervalId(setInterval(fetchGame, 3000));
-        } else if (fetchedGame.currentPlayerTurn === playerColor && intervalId) {
-          clearInterval(intervalId);
-          setIntervalId(null);
-        }
-      } catch (error) {
-        console.error('Error fetching turn:', error);
-      }
-    };
     fetchGame();
     return () => {
       if (intervalId) {
@@ -60,6 +39,27 @@ const GameBoard = () => {
       }
     };
   }, [gameId, playerColor, intervalId]);
+
+  const fetchGame = async () => {
+    try {
+      const fetchedGame = await getGameById(gameId);
+      setGameData(fetchedGame);
+      setGameBoard(fetchedGame.currentBoardStatus);
+      setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
+      setPlayerDetails({
+        white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
+        black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
+      });
+      if (fetchedGame.currentPlayerTurn !== playerColor && !intervalId) {
+        setIntervalId(setInterval(fetchGame, 3000));
+      } else if (fetchedGame.currentPlayerTurn === playerColor && intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
+    } catch (error) {
+      console.error('Error fetching turn:', error);
+    }
+  };
 
 
   const handlePieceClick = (piece) => {
@@ -173,7 +173,7 @@ const handleCellClick = async (cellKey) => {
     try {
       const updatedModel = { ...gameData, currentPlayerTurn: nextPlayerTurn };
       updateGameModel(updatedModel);
-      const updatedGame = await updateGame(gameId, { currentPlayerTurn: nextPlayerTurn });
+      const updatedGame = await updateGame(gameId, {currentPlayerTurn: nextPlayerTurn});
       setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
       setActivePiece(null);
       setHasMoved(false);
@@ -193,24 +193,26 @@ const handleCellClick = async (cellKey) => {
 
   const handleGameEnd = async (winnerColor) => {
     clearInterval(intervalId);  // Stop any active intervals
-    setShowConfetti(true);      // Show confetti animation
-    setTimeout(() => setShowConfetti(false), 5000);  // Hide confetti after 5 seconds
-    const updatedGame = await updateGame(gameId, { status: 'completed'});
-    setWinner(winnerColor)
+    const updatedGame = await updateGame(gameId, { status: 'completed', winner: winnerColor});
 };
 
   
 
-  const updateGameModel = async (updatedData) => {
-    try {
-      const updatedGame = await updateGame(gameId, { currentBoardStatus: updatedData });
-      setGameData(updatedGame);
-      setGameBoard(updatedGame.currentBoardStatus);
-      setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);
-    } catch (error) {
-      console.error('Failed to update game:', error);
+const updateGameModel = async (updates) => {
+  try {
+    const updatedGame = await updateGame(gameId, updates);
+    setGameData(updatedGame);  // Update the entire game data
+    setGameBoard(updatedGame.currentBoardStatus);  // Specifically update the board if present
+    setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);  // Update turn information
+
+    if (updatedGame.status === 'completed' && updatedGame.winner) {
+      setWinner(updatedGame.winner);
     }
-  };
+  } catch (error) {
+    console.error('Failed to update game:', error);
+  }
+};
+
 
   const handleRematch = async () => {
     // Define the initial state for a new game, keeping the same players.
@@ -231,7 +233,6 @@ const handleCellClick = async (cellKey) => {
       setPossiblePasses([]);
       setHasMoved(false);
       setOriginalSquare(null);
-      setShowConfetti(false); // Ensure confetti is turned off if it was showing
     } catch (error) {
       console.error('Failed to start a new game:', error);
     }
@@ -295,7 +296,7 @@ const handleCellClick = async (cellKey) => {
       )}
         {gameData && gameData.status === 'completed' && (
           <div className="game-over-controls">
-            <h2>{winner} wins!</h2>
+            <h2>{gameData.winner} wins!</h2>
             <button onClick={handleRematch}>Rematch</button>
             <button onClick={() => navigate('/')}>Return to Lobby</button>
           </div>
