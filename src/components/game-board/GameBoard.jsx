@@ -15,6 +15,7 @@ import { getValidPasses } from './helpers/getValidPasses';
 import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import isEqual from 'lodash/isEqual';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -38,7 +39,7 @@ const GameBoard = () => {
         clearInterval(intervalId);
       }
     };
-  }, [gameId, playerColor, intervalId]);
+  }, [gameId, playerColor, originalSquare, hasMoved, intervalId]);
 
   const fetchGame = async () => {
     try {
@@ -46,6 +47,8 @@ const GameBoard = () => {
       setGameData(fetchedGame);
       setGameBoard(fetchedGame.currentBoardStatus);
       setIsUserTurn(fetchedGame.currentPlayerTurn === playerColor);
+      setHasMoved(fetchedGame.hasMoved);
+      setOriginalSquare(fetchedGame.originalPosition);
       setPlayerDetails({
         white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
         black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
@@ -62,7 +65,7 @@ const GameBoard = () => {
   };
 
 
-  const handlePieceClick = (piece) => {
+  const handlePieceClick = async (piece) => {
     console.log("Piece Handler Hit");
 
     // Check if it's the player's turn and if the player is moving their own piece
@@ -76,18 +79,19 @@ const GameBoard = () => {
     }
 
     const { row, col } = getKeyCoordinates(piece.position);
-
     // Handling when there is no active piece selected
+    debugger
     if (!activePiece) {
-        setActivePiece(piece);
-        const movesOrPasses = piece.hasBall ? getValidPasses(row, col, gameData.currentPlayerTurn, gameBoard)
-                                            : getPieceMoves(row, col, gameBoard, hasMoved, originalSquare);
-        piece.hasBall ? setPossiblePasses(movesOrPasses) : setPossibleMoves(movesOrPasses);
-        return;
-    }
+      setActivePiece(piece);
+      const movesOrPasses = piece.hasBall ? 
+          getValidPasses(row, col, gameData.currentPlayerTurn, gameBoard) : 
+          getPieceMoves(row, col, gameBoard, hasMoved, gameData.originalSquare);
+      piece.hasBall ? setPossiblePasses(movesOrPasses) : setPossibleMoves(movesOrPasses);
+      return;
+  }
 
     // Handling when there is an active piece already selected
-    if (activePiece === piece) {
+    if (isEqual(activePiece, piece) && hasMoved === false) {
         // Clicking the same piece again should deselect it
         setActivePiece(null);
         setPossiblePasses([]);
@@ -99,10 +103,17 @@ const GameBoard = () => {
     if (activePiece.hasBall && !piece.hasBall) {
         if (possiblePasses.includes(piece.position)) {
             const updatedBoard = passBall(activePiece.position, piece.position, gameBoard);
-            
-            updateGameModel(updatedBoard);
+            setGameBoard(updatedBoard);
             setActivePiece(null);
             setPossiblePasses([]);
+            try {
+              const updatedGame = await updateGame(gameId, { currentBoardStatus: updatedBoard });
+              console.log("Updated Game Data:", updatedGame);
+              setGameData(updatedGame); // Update the full game data if necessary
+          } catch (error) {
+              console.error('Failed to update game:', error);
+              // Optionally, rollback to previous state if backend update fails
+          }
             if (didWin(updatedBoard)) { 
               handleGameEnd(playerColor); // Handle game end if the player won
           }
@@ -110,65 +121,72 @@ const GameBoard = () => {
         } else {
             console.log("Illegal pass");
         }
-    } else {
+    } else if (hasMoved === true) {
         // Setting new active piece and calculating moves or passes if not passing
-        setActivePiece(piece);
         const movesOrPasses = piece.hasBall ? getValidPasses(row, col, gameData.currentPlayerTurn, gameBoard)
-                                            : getPieceMoves(row, col, gameBoard, hasMoved, originalSquare);
+                                            : getPieceMoves(row, col, gameBoard, hasMoved, gameData.originalSquare);
         piece.hasBall ? setPossiblePasses(movesOrPasses) : setPossibleMoves(movesOrPasses);
     }
 };
 
-
 const handleCellClick = async (cellKey) => {
-  console.log("Cell Handler triggered");
-
-  if (!activePiece) {
-      console.log("Select a piece first.");
-      return;
-  }
-
   const { row, col } = getKeyCoordinates(cellKey);
-  console.log("Clicked Cell Coordinates:", { row, col });
-  console.log("Active Piece Position:", activePiece.position);
-
-  // Check if it's a legal move
   const isLegalMove = possibleMoves.some(move => move.row === row && move.col === col);
-  console.log("Is Legal Move:", isLegalMove);
-
-  if (!isLegalMove) {
-      console.log("Illegal Move Attempted");
-      return;
-  }
-
-  // Execute the move
-  console.log("Executing Legal Move");
-  if(!originalSquare){
-    setOriginalSquare(activePiece.position);
-    setHasMoved(true)
+  if (!activePiece || !isLegalMove) {
+    console.error("Illegal move or no piece selected.");
+    return;
   } else {
-    setOriginalSquare(null);
-    setHasMoved(false)
-  }
+  debugger
   const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
-  console.log("New Game Board after move:", newGameBoard);
-  setGameBoard(newGameBoard); // Optimistically update the game board
-  setActivePiece(null); // Deselect the piece after moving
-  setPossibleMoves([]); // Clear possible moves after action
+  let updates = {
+    currentBoardStatus: newGameBoard,
+    hasMoved: true,
+    originalSquare: activePiece.position
+  };
 
-  try {
-      const updatedGame = await updateGame(gameId, { currentBoardStatus: newGameBoard });
-      console.log("Updated Game Data:", updatedGame);
-      setGameData(updatedGame); // Update the full game data if necessary
-  } catch (error) {
-      console.error('Failed to update game:', error);
-      // Optionally, rollback to previous state if backend update fails
+  if (cellKey === gameData.originalSquare) {
+    updates.hasMoved = false;
+    setHasMoved(false);
+    setOriginalSquare(null)
+    setActivePiece(null);
+    updates.originalSquare = null;
+  } else {
+    updates.hasMoved = true;
+    setHasMoved(true);
+    setOriginalSquare(activePiece.position)
+    updates.originalSquare = activePiece.position
+    const newActivePiece = {
+      ...activePiece,
+      position: cellKey
+    }
+    setActivePiece(newActivePiece)
   }
+  // Optimistically update local state
+  const updatedGameData = {...gameData, currentBoardStatus: newGameBoard};
+  setGameData(updatedGameData);
+  setGameBoard(newGameBoard);
+  setPossibleMoves([]);
+
+  // Update backend
+  try {
+    const updatedGame = await updateGameModel(updates);
+    setGameData(updatedGame);
+  } catch (error) {
+    console.error('Failed to update game:', error);
+    // Optionally, rollback to previous state if backend update fails
+  }
+}
 };
 
   const handlePassTurn = async () => {
     const currentPlayerColor = localStorage.getItem('userColor');
     const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
+
+    const updates = {
+      currentPlayerTurn: nextPlayerTurn,
+      originalSquare: null,
+      hasMoved: false
+    };
 
     try {
       const updatedModel = { ...gameData, currentPlayerTurn: nextPlayerTurn };
@@ -179,6 +197,10 @@ const handleCellClick = async (cellKey) => {
       setHasMoved(false);
       setPossibleMoves([]);
       setOriginalSquare(null);
+
+      // Send updates to the server
+      const freshGame = await updateGame(gameId, updates);
+      setGameData(freshGame); // Update the complete game data from the response
 
       if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
         clearInterval(intervalId);
@@ -196,7 +218,6 @@ const handleCellClick = async (cellKey) => {
     const updatedGame = await updateGame(gameId, { status: 'completed', winner: winnerColor});
 };
 
-  
 
 const updateGameModel = async (updates) => {
   try {
@@ -204,10 +225,8 @@ const updateGameModel = async (updates) => {
     setGameData(updatedGame);  // Update the entire game data
     setGameBoard(updatedGame.currentBoardStatus);  // Specifically update the board if present
     setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);  // Update turn information
-
-    if (updatedGame.status === 'completed' && updatedGame.winner) {
-      setWinner(updatedGame.winner);
-    }
+    setHasMoved(updatedGame.hasMoved);
+    setOriginalSquare(updatedGame.originalPosition);
   } catch (error) {
     console.error('Failed to update game:', error);
   }
@@ -278,6 +297,7 @@ const updateGameModel = async (updates) => {
 
   return (
     <div className="game-container">
+      {console.log(gameData)}
       {gameData && gameData.status === 'completed' && <Confetti />}
       <PlayerInfoBar
         playerName={isWhite ? playerDetails.black.name : playerDetails.white.name}
@@ -286,7 +306,7 @@ const updateGameModel = async (updates) => {
         <div className="board-container" style={{ '--rotation': rotationStyle }}>
           <GridContainer>{renderBoard()}</GridContainer>
         </div>
-  
+        {console.log(gameData && gameData.hasMoved)}
         {gameData && gameData.status === 'playing' && !isUserTurn && (
         <div className="modal-side">
           <Modal>
