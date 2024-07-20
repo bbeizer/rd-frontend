@@ -16,10 +16,10 @@ import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
-import { canPassBall } from './helpers/canPassBall';
 import { canMovePiece } from './helpers';
 import { canTogglePiece } from './helpers/canTogglePiece';
 import { validMove } from './helpers/validMove';
+import {canReceiveBall} from './helpers/canReceiveBall'
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -69,7 +69,6 @@ const GameBoard = () => {
   }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
   
   const handlePieceClick = (piece) => {
-    console.log("Piece Handler Hit");
     debugger
     if (!canMovePiece(isUserTurn, playerColor, piece)) return;
     const { row, col } = getKeyCoordinates(piece.position);
@@ -78,7 +77,7 @@ const GameBoard = () => {
       return;
   }
 
-  if (canPassBall(piece)) {
+  if (canReceiveBall(piece, activePiece, gameData.currentBoardStatus)) {
       attemptPass(piece);
   } else {
       console.log("Illegal pass or move.");
@@ -88,6 +87,9 @@ const GameBoard = () => {
 const togglePieceSelection = (piece, hasMoved, row, col) => {
   let newActivePiece
   // If a move has been made, do not allow toggling to a different piece or deselecting
+  if(piece.hasBall){
+    newActivePiece = piece
+  } else {
   if (hasMoved) {
       // If the same piece is clicked again, it may toggle off, otherwise do nothing
       if (isEqual(activePiece, piece)) {
@@ -99,6 +101,7 @@ const togglePieceSelection = (piece, hasMoved, row, col) => {
   } else {
     newActivePiece = piece;
   }
+}
   setActivePiece(newActivePiece);
 
   // Prepare updates for state synchronization
