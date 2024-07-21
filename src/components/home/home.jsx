@@ -9,6 +9,7 @@ function Home() {
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
+  const [gameId, setGameId] = useState(null);
 
   useEffect(() => {
     return () => {
