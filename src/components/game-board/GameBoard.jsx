@@ -34,6 +34,7 @@ const GameBoard = () => {
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
   const [playerDetails, setPlayerDetails] = useState({ white: {}, black: {} });
+  const [winner, setWinner] = useState()
   const navigate = useNavigate();
 
   // Fetch game data initially and start/stop polling based on game state
@@ -66,7 +67,7 @@ const GameBoard = () => {
     }
   
     return () => clearInterval(interval); // Cleanup on unmount or dependency change
-  }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
+  }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved, winner]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
   
   const handlePieceClick = (piece) => {
     debugger
@@ -194,6 +195,7 @@ const updateLocalAndRemoteGameState = async (updates) => {
 
   const handleGameEnd = async (winnerColor) => {
     clearInterval(intervalId);  // Stop any active intervals
+    setWinner(true);
     const updatedGame = await updateGame(gameId, { status: 'completed', winner: winnerColor});
 };
 
