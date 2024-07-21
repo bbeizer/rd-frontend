@@ -1,73 +1,113 @@
-.home {
-  text-align: center;
+body {
   font-family: 'Arial', sans-serif;
-  background: url('https://example.com/wood-texture.jpg'); /* Replace with an actual path to a wood texture */
-  background-size: cover;
-  min-height: 100vh;
-  padding: 20px;
+  background-color: #f4f4f9;
   color: #333;
 }
 
-.header {
-  background-color: rgba(139, 69, 19, 0.8); /* Slightly transparent to allow wood texture to show through */
+.home {
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
-  color: #fff;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  color: white;
+  background-color: #b5633d;
+  padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .input-container {
-  margin: 20px auto 40px;
-  width: 50%;
-  background-color: rgba(245, 245, 245, 0.9); /* Light grey with transparency */
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin: 20px 0;
 }
 
-input {
+#name {
   padding: 10px;
+  font-size: 1.2em;
   width: 100%;
-  margin-top: 5px;
-  border: 2px solid #8b4513;
-  border-radius: 4px;
+  max-width: 400px;
+  margin: 10px auto;
+  display: block;
+  border: 2px solid #b5633d;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .join-button {
-  background-color: #a0522d;
+  padding: 15px 30px;
+  font-size: 1.2em;
+  background-color: #b5633d;
   color: white;
-  padding: 10px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  margin-bottom: 20px;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .join-button:hover {
-  background-color: #b87333;
+  background-color: #a55233;
+  transform: scale(1.05);
 }
 
 .waiting-text {
-  color: #2f4f4f;
-  margin-top: 10px;
+  margin-top: 20px;
+  font-size: 1.2em;
+  animation: fadeIn 2s;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .input-container {
-    width: 80%;
+.rules {
+  margin-top: 30px;
+  text-align: left;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rules h2 {
+  font-size: 2em;
+  margin-bottom: 15px;
+  color: #5a5a5a;
+}
+
+.rules p,
+.rules ul {
+  font-size: 1.2em;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
-@media (max-width: 480px) {
-  .input-container {
-    width: 90%;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
+}
 
-  input {
-    width: 100%;
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
