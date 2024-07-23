@@ -49,7 +49,6 @@ const GameBoard = () => {
         setOriginalSquare(fetchedGame.originalSquare);
         console.log("Original Square Set To:", fetchedGame.originalSquare
         );
-        setActivePiece(fetchedGame.activePiece)
         setPlayerDetails({
           white: { name: fetchedGame.whitePlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'white' },
           black: { name: fetchedGame.blackPlayerName, isUserTurn: fetchedGame.currentPlayerTurn === 'black' }
@@ -67,7 +66,7 @@ const GameBoard = () => {
     }
   
     return () => clearInterval(interval); // Cleanup on unmount or dependency change
-  }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved, winner]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
+  }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved, winner, possibleMoves]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
   
   const handlePieceClick = (piece) => {
     debugger
@@ -77,7 +76,6 @@ const GameBoard = () => {
       togglePieceSelection(piece, hasMoved, row, col);
       return;
   }
-
   if (canReceiveBall(piece, activePiece, gameData.currentBoardStatus)) {
       attemptPass(piece);
   } else {
@@ -152,6 +150,7 @@ const attemptPass = async (piece) => {
 };
   
   const handleCellClick = async (cellKey) => {
+    debugger
     if (!validMove(cellKey, possibleMoves, activePiece)) return;
     const newGameBoard = executeMove(cellKey);
     updateLocalAndRemoteGameState(newGameBoard);
