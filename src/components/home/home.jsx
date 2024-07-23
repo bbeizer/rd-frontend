@@ -73,6 +73,10 @@ function Home() {
         <ul>
           <li>Each player has 4 pieces.</li>
           <li>All pieces move like knights in chess (an L-shape).</li>
+            <div className="animation-container">
+              <img src="/images/attemptMove.png" alt="Attempt Move" className="move-animation" id="moveStep1"></img>
+              <img src="/images/makeMove.png" alt="Make Move" className="move-animation" id="moveStep2"></img>
+            </div>
         </ul>
         <p><strong>The Ball:</strong></p>
         <ul>
