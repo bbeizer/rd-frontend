@@ -95,18 +95,35 @@ body {
   width: 100%;
   height: 100%;
   opacity: 0;
-  animation: moveAnimation 5s infinite;
+  animation: moveAnimation 14s infinite; /* Adjust duration as needed */
 }
 
-#moveStep2 {
-  animation-delay: 1s; /* Delay to switch after the first image */
+/* Adjust delays for each image */
+#pass1 {
+  animation-delay: 0s;
+}
+#pass2 {
+  animation-delay: 2s;
+}
+#pass3 {
+  animation-delay: 4s;
+}
+
+#startPos{
+  width: 200px; /* Adjust width as needed */
+  height: 200px; /* Adjust height as needed */
+}
+
+#passTurn{
+  width: 200px; /* Adjust width as needed */
+  height: 200px; /* Adjust height as needed */
 }
 
 @keyframes moveAnimation {
-  0%, 50% {
+  0%, 14.28%, 100% {
     opacity: 0;
   }
-  25%, 75% {
+  7.14%, 21.42% {
     opacity: 1;
   }
 }

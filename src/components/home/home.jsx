@@ -82,17 +82,24 @@ function Home() {
         <ul>
           <li>One piece on each side starts with a metal ball.</li>
           <li>The piece holding the ball cannot move but can pass the ball to another piece.</li>
+          <img src ="/images/startPosition.png" id="startPos"></img>
         </ul>
         <p><strong>Passing the Ball:</strong></p>
         <ul>
           <li>The ball can be passed to any of the player's pieces that are laterally or diagonally adjacent.</li>
           <li>The path for passing the ball must be clear of opponent's pieces.</li>
+          <div className="animation-container">
+              <img src="/images/start.png" alt="start" className="move-animation" id="pass1"></img>
+              <img src="/images/passAttempt1.png" alt="pass attempt 1" className="move-animation" id="pass2"></img>
+              <img src="/images/2nd.png" alt="pass1" className="move-animation" id="pass3"></img>
+          </div>
         </ul>
         <p><strong>Gameplay:</strong></p>
         <ul>
           <li>On a turn, a player can either move one piece or pass the ball.</li>
-          <li>The turn ends when the player presses the "End Turn" button.</li>
+          <li>The turn ends when the player presses the "Pass Turn" button.</li>
           <li>Turns alternate between players.</li>
+          <img src ="/images/passTurn.png" id="passTurn"></img>
         </ul>
         <p><strong>Winning the Game:</strong> The first player to move a piece holding the ball to the opponent's back rank wins the game.</p>
       </div>
