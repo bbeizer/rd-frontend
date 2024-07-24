@@ -82,6 +82,13 @@ body {
   margin-bottom: 10px;
 }
 
+.static-image {
+  display: block;
+  margin-right: auto;
+  width: 200px; /* Adjust width as needed */
+  height: 200px; /* Maintain aspect ratio */
+}
+
 .animation-container {
   position: relative;
   width: 200px; /* Adjust width as needed */
@@ -107,16 +114,6 @@ body {
 }
 #pass3 {
   animation-delay: 4s;
-}
-
-#startPos{
-  width: 200px; /* Adjust width as needed */
-  height: 200px; /* Adjust height as needed */
-}
-
-#passTurn{
-  width: 200px; /* Adjust width as needed */
-  height: 200px; /* Adjust height as needed */
 }
 
 @keyframes moveAnimation {
