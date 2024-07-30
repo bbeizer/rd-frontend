@@ -30,6 +30,8 @@ const GameBoard = () => {
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameBoard, setGameBoard] = useState(null);
   const [hasMoved, setHasMoved] = useState(false);
+  const [movedPiece, setMovedPiece] = useState(null);
+  const [movedPieceOriginalPosition, setMovedPieceOriginalPosition] = useState(null);
   const [possiblePasses, setPossiblePasses] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const playerColor = localStorage.getItem('userColor');
@@ -69,50 +71,57 @@ const GameBoard = () => {
   }, [gameId, playerColor, isUserTurn, originalSquare, hasMoved, winner, possibleMoves]); // Ensure effect runs when it's the user's turn or the game ID/player changes  
   
   const handlePieceClick = (piece) => {
-    debugger
     if (!canMovePiece(isUserTurn, playerColor, piece)) return;
     const { row, col } = getKeyCoordinates(piece.position);
+    
     if (canTogglePiece(piece, hasMoved, activePiece)) {
       togglePieceSelection(piece, hasMoved, row, col);
       return;
-  }
-  if (canReceiveBall(piece, activePiece, gameData.currentBoardStatus)) {
+    }
+  
+    if (canReceiveBall(piece, activePiece, gameData.currentBoardStatus)) {
       attemptPass(piece);
-  } else {
+    } else {
       console.log("Illegal pass or move.");
-  }
-}
-
-const togglePieceSelection = (piece, hasMoved, row, col) => {
-  let newActivePiece
-  // If a move has been made, do not allow toggling to a different piece or deselecting
-  if(piece.hasBall){
-    newActivePiece = piece
-  } else {
-  if (hasMoved) {
-      // If the same piece is clicked again, it may toggle off, otherwise do nothing
-      if (isEqual(activePiece, piece)) {
-        newActivePiece = activePiece
-      } else {
-        console.log("you selected a piece that hasnt moved when you moved a piece")
-        return;
-      }
-  } else {
-    newActivePiece = piece;
-  }
-}
-  setActivePiece(newActivePiece);
-
-  // Prepare updates for state synchronization
-  const updates = {
-      activePiece: newActivePiece,
+    }
   };
+  
 
-  updatePossibleMovesOrPasses(newActivePiece, row, col);
-  updateLocalAndRemoteGameState(updates);
-};
-
-
+  const togglePieceSelection = (piece, hasMoved, row, col) => {
+    let newActivePiece;
+  
+    if (piece.hasBall) {
+      newActivePiece = piece;
+    } else {
+      if (hasMoved) {
+        if (isEqual(activePiece, piece)) {
+          newActivePiece = null;  // Deselect the piece
+        } else if (isEqual(piece.position, movedPieceOriginalPosition)) {
+          newActivePiece = piece;  // Allow moving back to the original square
+        } else {
+          console.log("You can only move the piece that has moved back to its original square or pass the ball");
+          return;
+        }
+      } else {
+        if (isEqual(activePiece, piece)) {
+          newActivePiece = null;  // Deselect the piece if it was already selected
+        } else {
+          newActivePiece = piece;
+        }
+      }
+    }
+  
+    setActivePiece(newActivePiece);
+  
+    // Prepare updates for state synchronization
+    const updates = {
+      activePiece: newActivePiece,
+    };
+  
+    updatePossibleMovesOrPasses(newActivePiece, row, col);
+    updateLocalAndRemoteGameState(updates);
+  };  
+  
 const updatePossibleMovesOrPasses = (piece, row, col) => {
   if (!piece) {
       // Clear moves and passes if no piece is active
@@ -149,33 +158,43 @@ const attemptPass = async (piece) => {
   }
 };
   
-  const handleCellClick = async (cellKey) => {
-    debugger
-    if (!validMove(cellKey, possibleMoves, activePiece)) return;
-    const newGameBoard = executeMove(cellKey);
-    updateLocalAndRemoteGameState(newGameBoard);
+const handleCellClick = async (cellKey) => {
+  // Restrict movement if a piece has already moved and it's not moving back to its original position
+  if (movedPiece && !isEqual(activePiece.position, movedPieceOriginalPosition) && cellKey !== movedPieceOriginalPosition) {
+    console.log("You can only move the piece that has moved back to its original square or pass the ball");
+    return;
+  }
+
+  if (!validMove(cellKey, possibleMoves, activePiece)) return;
+  const newGameBoard = executeMove(cellKey);
+  updateLocalAndRemoteGameState(newGameBoard);
+};
+
+const executeMove = (cellKey) => {
+  const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
+  // Determine if this move is a new move or a return to the original position
+  const isReturningToOriginal = cellKey === movedPieceOriginalPosition;
+  const newActivePiece = { ...activePiece, position: cellKey };
+  const updates = {
+    currentBoardStatus: newGameBoard,
+    hasMoved: !isReturningToOriginal,
+    originalSquare: isReturningToOriginal ? null : activePiece.position,
+    movedPiece: isReturningToOriginal ? null : activePiece,
+    // Maintain or clear the active piece based on the move type
+    activePiece: isReturningToOriginal ? null : newActivePiece
   };
 
-  const executeMove = (cellKey) => {
-    const newGameBoard = movePiece(activePiece.position, cellKey, gameBoard);
-    // Determine if this move is a new move or a return to the original position
-    const isReturningToOriginal = cellKey === originalSquare;
-    const newActivePiece = {...activePiece, position: cellKey}
-    const updates = {
-        currentBoardStatus: newGameBoard,
-        hasMoved: !isReturningToOriginal,
-        originalSquare: isReturningToOriginal ? null : activePiece.position,
-        // Maintain or clear the active piece based on the move type
-        activePiece: isReturningToOriginal ? null : newActivePiece
-    };
+  // Track the moved piece and its original position
+  setMovedPiece(isReturningToOriginal ? null : activePiece);
+  setMovedPieceOriginalPosition(isReturningToOriginal ? null : activePiece.position);
 
-    // Apply local state updates
-    setHasMoved(updates.hasMoved);
-    setOriginalSquare(updates.originalSquare);
-    setActivePiece(updates.activePiece);
-    setPossibleMoves([]);
-    updateLocalAndRemoteGameState(updates);
-    return newGameBoard;
+  // Apply local state updates
+  setHasMoved(updates.hasMoved);
+  setOriginalSquare(updates.originalSquare);
+  setActivePiece(updates.activePiece);
+  setPossibleMoves([]);
+  updateLocalAndRemoteGameState(updates);
+  return newGameBoard;
 };
 
 const updateLocalAndRemoteGameState = async (updates) => {
@@ -238,6 +257,7 @@ const updateGameModel = async (updates) => {
     setIsUserTurn(updatedGame.currentPlayerTurn === playerColor);  // Update turn information
     setHasMoved(updatedGame.hasMoved);
     setOriginalSquare(updatedGame.originalPosition);
+    setMovedPiece(updatedGame.movedPiece);
     setActivePiece(updatedGame.activePiece)
   } catch (error) {
     console.error('Failed to update game:', error);
