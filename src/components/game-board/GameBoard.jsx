@@ -280,6 +280,7 @@ const updateGameModel = async (updates) => {
           const { row, col } = getKeyCoordinates(cellKey);
           const isPossibleMove = possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
           const isPossiblePass = possiblePasses.some(pass => cellKey === pass);
+          const isActivePiece = activePiece && activePiece.position === cellKey;
           return (
             <GridCell
               key={cellKey}
@@ -287,6 +288,7 @@ const updateGameModel = async (updates) => {
               col={col}
               redHighlight={isPossibleMove}
               yellowHighlight={isPossiblePass}
+              blueHighlight={isActivePiece}
               onClick={isUserTurn ? () => handleCellClick(cellKey) : () => {}}
             >
               {cellData && (

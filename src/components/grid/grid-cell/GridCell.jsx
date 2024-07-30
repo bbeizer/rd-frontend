@@ -1,7 +1,7 @@
 import React from 'react';
 import './grid-cell.css';
 
-const GridCell = ({ style, children, row, col, redHighlight, yellowHighlight, onClick }) => {
+const GridCell = ({ style, children, row, col, redHighlight, yellowHighlight, blueHighlight, onClick }) => {
   const isLightCell = (row + col) % 2 === 0;
   const baseStyle = { ...style };
   if (redHighlight) {
@@ -9,6 +9,9 @@ const GridCell = ({ style, children, row, col, redHighlight, yellowHighlight, on
   }
   if (yellowHighlight) {
     baseStyle.backgroundColor = 'yellow';
+  }
+  if (blueHighlight){
+    baseStyle.backgroundColor = 'blue';
   }
   return (
     <div
