@@ -1,15 +1,10 @@
 import React from 'react';
 import './piece.css'
 
-const Piece = ({ color, hasBall, position, onClick, }) => {
-
-const handleClick = (event) => {
-  event.stopPropagation();
-  onClick({ color, hasBall, position });
-};
+const Piece = ({ color, hasBall, onClick, position}) => {
 
   return (
-    <div onClick={handleClick} className={`piece ${color}-piece`}>
+    <div onClick={onClick} className={`piece ${color}-piece`} data-position={position}>
       <div className="hole"></div>
       {hasBall && <div className="ball"></div>} 
     </div>
