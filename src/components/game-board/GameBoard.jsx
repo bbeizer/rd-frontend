@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './GameBoard.css';
 import Confetti from 'react-confetti';
 import GridCell from '../grid/grid-cell/GridCell';
@@ -15,11 +15,6 @@ import { getValidPasses } from './helpers/getValidPasses';
 import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import isEqual from 'lodash/isEqual';
-import { canMovePiece } from './helpers';
-import { canTogglePiece } from './helpers/canTogglePiece';
-import { validMove } from './helpers/validMove';
-import {canReceiveBall} from './helpers/canReceiveBall'
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -34,76 +29,101 @@ const GameBoard = () => {
     movedPiece: null,
     movedPieceOriginalPosition: null,
     possiblePasses: [],
+    playerColor: localStorage.getItem('userColor'),
     winner: null
   });
-  const playerColor = localStorage.getItem('userColor');
-
-
+  const [intervalId, setIntervalId] = useState(null);
+  const isUserWhite = gameState.playerColor === 'white';
+  const currentPlayerName = gameState.gameData ? (isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
+  const opponentPlayerName = gameState.gameData ? (!isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
   useEffect(() => {
+    let interval;
     const fetchGame = async () => {
       try {
         const fetchedGame = await getGameById(gameId);
-        if (fetchedGame) {
-          setGameState(prevState => ({
-            ...prevState,
-            gameData: fetchedGame,
-            isUserTurn: fetchedGame.currentPlayerTurn === localStorage.getItem('userColor'),
-            gameBoard: fetchedGame.currentBoardStatus
-          }));
+        setGameState(prevState => ({
+          ...prevState,
+          gameData: fetchedGame,
+          isUserTurn: fetchedGame.currentPlayerTurn === localStorage.getItem('userColor'),
+          gameBoard: fetchedGame.currentBoardStatus
+        }));
+  
+        // Update interval based on turn right after setting state
+        if (fetchedGame.currentPlayerTurn !== localStorage.getItem('userColor')) {
+          if (!intervalId) {
+            interval = setInterval(fetchGame, 3000);
+            setIntervalId(interval);
+          }
+        } else {
+          clearInterval(intervalId);
+          setIntervalId(null);
         }
       } catch (error) {
         console.error('Error fetching game data:', error);
       }
     };
-
-    const interval = setInterval(fetchGame, 3000);
-    fetchGame(); // Initial fetch
-
-    return () => clearInterval(interval);
-  }, [gameId]);
+  
+    fetchGame();
+  
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [gameId, gameState.playerColor, intervalId]);
+  
   
   function handleClick(event) {
-    const clickedElement = event.target;
-    const isPiece = clickedElement.dataset.isPiece === "true";  // Correct data attribute retrieval
-    const isCell = clickedElement.dataset.isCell === "true";
-    const hasBall = clickedElement.dataset.hasBall === "true";
+    debugger
+    event.stopPropagation();
+    const cellKey = event.currentTarget.id;
+    const element = gameState.gameBoard[cellKey]
+    const isPiece = element
+    const isCell = !isPiece
+    const hasBall = element.hasBall === "true";
     setGameState(prevState => {
-      let newState = { ...prevState };
+    const isFirstClickOnPiece = !prevState.movedPiece && !prevState.activePiece
+    const unselectingASelectedPiece = prevState.activePiece && element === prevState.activePiece
+    const selectingPieceThatIsNotActivePiece= prevState.activePiece && element !== prevState.activePiece
+    const activePieceHasBall = prevState.activePiece.hasBall
+    const activePiece = prevState.activePiece
+    const activePieceHasBallandSquareisAPossibleMove = !prevState.activePiece.hasBall && prevState.possibleMoves.includes(element)
+    const cellKey = element.dataset.position
+    const {row, col} = getKeyCoordinates(cellKey)
+    const pieceColor = element.color  
+    let newState = { ...prevState };
       if (isPiece) {
-        const cellKey = clickedElement.position
-        const {row, col} = getKeyCoordinates(cellKey)
-        const pieceColor = clickedElement.color
         if (hasBall) {
-          newState.activePiece = clickedElement;
+          newState.activePiece = element;
           newState.possiblePasses = getValidPasses(row,col,pieceColor, gameState.gameBoard);  // Assuming you have a function for this
-        //no moved piece and no active pieces
-        } else if (!prevState.movedPiece && !prevState.activePiece) {
-          newState.activePiece = clickedElement;
+        } else if (isFirstClickOnPiece) {
+          newState.activePiece = element;
           newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition);  // Assuming a function for this
         //unselecting a piece thats been clicked
-        } else if (prevState.activePiece && clickedElement === prevState.activePiece) {
+        } else if (unselectingASelectedPiece) {
           newState.activePiece = null;
           newState.possibleMoves = [];
         //if theres an active piece and the piece youve clicked isnt the active piece
-        } else if (prevState.activePiece && clickedElement !== prevState.activePiece) {
+        } else if (selectingPieceThatIsNotActivePiece) {
           //if the active piece has the ball try to pass
-          if (prevState.activePiece.hasBall) {
+          if (activePieceHasBall) {
             newState.gameBoard = passBall()
             didWin(gameState.gameBoard)
             getValidPasses(row,col,pieceColor, gameState.gameBoard);
-            newState.activePiece = clickedElement;
+            newState.activePiece = element;
           } else {
-            newState.activePiece = clickedElement;
+            newState.activePiece = element;
             newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition);
           }
         }
       } else if (isCell) {
-        if (prevState.activePiece) {
-          if (!prevState.activePiece.hasBall && prevState.possibleMoves.includes(clickedElement)) {
+        if (activePiece) {
+          if (activePieceHasBallandSquareisAPossibleMove) {
+            const originalSquare = prevState.activePiece.position
             newState.gameBoard = movePiece();
             newState.movedPiece = prevState.activePiece;  // Track the moved piece
-            newState.originalSquare = getOriginalSquare(prevState.activePiece);
-            newState.possibleMoves = calculatePossibleMoves(newState.originalSquare);  // Update moves
+            newState.originalSquare = originalSquare
+            newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition); // Update moves
           }
         } else {
           newState.activePiece = null;
@@ -112,7 +132,7 @@ const GameBoard = () => {
         }
       } else {
         // Display warning if neither piece nor square
-        newState = displayWarning(newState, "Invalid operation.");
+        //newState = displayWarning(newState, "Invalid operation.");
       }
   
       return newState;
@@ -123,23 +143,31 @@ const GameBoard = () => {
     const currentPlayerColor = localStorage.getItem('userColor');
     const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
   
-    const updates = {
-      currentPlayerTurn: nextPlayerTurn,
-      activePiece: null,  // Ensure the active piece is reset on the backend as well
-      hasMoved: false,    // Reset movement status
-      originalSquare: null // Clear the original square
-    };
-  
     try {
-      const updatedGame = await updateGame(gameId, updates);
-      setGameData(updatedGame);
-      setIsUserTurn(updatedGame.currentPlayerTurn === currentPlayerColor);
-      setActivePiece(null);
-      setHasMoved(false);
-      setPossibleMoves([]);
-      setOriginalSquare(null);
+      // Prepare updates for the backend
+      const updates = {
+        currentPlayerTurn: nextPlayerTurn,
+        activePiece: null,
+        hasMoved: false,
+        originalSquare: null,
+        possibleMoves: [],
+        possiblePasses: []
+      };
   
-      // Manage polling based on turn
+      // Call backend update
+      const updatedGame = await updateGame(gameId, updates);
+      setGameState(prevState => ({
+        ...prevState,
+        gameData: updatedGame,
+        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
+        activePiece: null,
+        hasMoved: false,
+        originalSquare: null,
+        possibleMoves: [],
+        possiblePasses: []
+      }));
+  
+      // Manage interval based on turn
       if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
@@ -149,11 +177,7 @@ const GameBoard = () => {
     } catch (error) {
       console.error('Failed to update game:', error);
     }
-  };
-  
-  // Helper functions need to be defined to handle the logic for moves, passes, etc.
-  
-  
+  };  
   const renderBoard = () => {
     if (!gameState.gameData) {
       return <p>Loading game board...</p>;
@@ -174,16 +198,15 @@ const GameBoard = () => {
             yellowHighlight={isPossiblePass}
             blueHighlight={isActivePiece}
             data-type="cell"
-            data-id={cellKey}
+            id={cellKey}
             onClick={handleClick}
         >
           {cellData && (
             <Piece
-             color={cellData.color}
+              color={cellData.color}
               hasBall={cellData.hasBall}
               position={cellKey}
-              data-type="piece"
-              data-id={cellData.id}
+              isPiece="true"
               onClick={(e) => { e.stopPropagation(); handleClick(e); }}
               />
             )}
@@ -193,21 +216,21 @@ const GameBoard = () => {
       </>
     );
   };
-  const rotationStyle = playerColor === 'black' ? '180deg' : '0deg';
-  const isWhite = playerColor === 'white';
 
   if (!gameState.gameData) {
     return <div>Loading game data...</div>;
   }
+  const rotationStyle = gameState.playerColor === 'black' ? '180deg' : '0deg';
   return (
     <div className="game-container">
       {console.log(gameState)}
       {gameState.gameData.status === 'completed' && <Confetti />}
       <PlayerInfoBar
-        playerName={gameState.isUserTurn ? gameState.gameData.blackPlayerName : gameState.gameData.whitePlayerName}
+        playerName={opponentPlayerName}
       />
       <div className="board-and-info">
-      <div className="board-container" style={{ '--rotation': rotationStyle }}>
+        {console.log(rotationStyle)}
+        <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
         <div className="board-container">
           <GridContainer>{renderBoard()}</GridContainer>
         </div>
@@ -220,15 +243,23 @@ const GameBoard = () => {
         )}
         {gameState.gameData.status === 'completed' && (
           <div className="game-over-controls">
-            <h2>{gameData.winner} wins!</h2>
+            <h2>{gameState.winner} wins!</h2>
             <button onClick={() => navigate('/')}>Return to Lobby</button>
           </div>
         )}
       </div>
       <PlayerInfoBar
-        playerName={isWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName}
+        playerName={currentPlayerName}
       />
+      <button 
+        onClick={handlePassTurn} 
+        disabled={!gameState.isUserTurn} 
+        style={{ alignSelf: 'flex-start', margin: '10px' }}
+      >
+        Pass Turn
+      </button>
     </div>
+    
   );
 };
 

@@ -1,10 +1,10 @@
 import React from 'react';
 import './piece.css'
 
-const Piece = ({ color, hasBall, onClick, position}) => {
+const Piece = ({ color, hasBall}) => {
 
   return (
-    <div onClick={onClick} className={`piece ${color}-piece`} data-position={position}>
+    <div className={`piece ${color}-piece`} >
       <div className="hole"></div>
       {hasBall && <div className="ball"></div>} 
     </div>

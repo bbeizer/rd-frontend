@@ -18,9 +18,11 @@ justify-content: center; /* Centering children horizontally */
 }
 
 .board-container {
-flex: 1; /* Allows the game board to take up as much space as it can, useful if modal-side is not very wide */
-transform: rotate(var(--rotation)); /* Dynamic rotation based on a CSS variable */
-transition: transform 0.3s ease-in-out; /* Smooth transition for rotation */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotate(var(--rotation)); /* Ensure rotation is applied correctly */
+  transition: transform 0.3s ease-in-out; /* Smooth transition for rotation */
 }
 
 .modal-side {
