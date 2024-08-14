@@ -7,14 +7,16 @@ import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
 import { didWin } from './helpers/didWin';
-import { getGameById, updateGame } from '../../services/gameService';
+import { updateGame } from '../../services/gameService';
 import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
-import { getPieceMoves } from '../../gameLogic/playerMovesRuleEngine';
+import { getPieceMoves } from './helpers/getPieceMoves';
 import { movePiece } from './helpers';
 import { getValidPasses } from './helpers/getValidPasses';
 import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { fetchGame } from './helpers/fetchGame';
+import { includesCoordinates } from './helpers/includesCoordinates';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -37,34 +39,7 @@ const GameBoard = () => {
   const currentPlayerName = gameState.gameData ? (isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
   const opponentPlayerName = gameState.gameData ? (!isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
   useEffect(() => {
-    let interval;
-    const fetchGame = async () => {
-      try {
-        const fetchedGame = await getGameById(gameId);
-        setGameState(prevState => ({
-          ...prevState,
-          gameData: fetchedGame,
-          isUserTurn: fetchedGame.currentPlayerTurn === localStorage.getItem('userColor'),
-          gameBoard: fetchedGame.currentBoardStatus
-        }));
-  
-        // Update interval based on turn right after setting state
-        if (fetchedGame.currentPlayerTurn !== localStorage.getItem('userColor')) {
-          if (!intervalId) {
-            interval = setInterval(fetchGame, 3000);
-            setIntervalId(interval);
-          }
-        } else {
-          clearInterval(intervalId);
-          setIntervalId(null);
-        }
-      } catch (error) {
-        console.error('Error fetching game data:', error);
-      }
-    };
-  
-    fetchGame();
-  
+    fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
@@ -72,72 +47,81 @@ const GameBoard = () => {
     };
   }, [gameId, gameState.playerColor, intervalId]);
   
-  
   function handleClick(event) {
-    debugger
+    debugger;
     event.stopPropagation();
     const cellKey = event.currentTarget.id;
-    const element = gameState.gameBoard[cellKey]
-    const isPiece = element
-    const isCell = !isPiece
-    const hasBall = element.hasBall === "true";
+    const element = gameState.gameBoard[cellKey];
+    const isPiece = !!element;  // Simplify the check to boolean
+    const hasBall = element?.hasBall === "true";
+    const { row, col } = getKeyCoordinates(cellKey);
+    const pieceColor = element?.color;
+
     setGameState(prevState => {
-    const isFirstClickOnPiece = !prevState.movedPiece && !prevState.activePiece
-    const unselectingASelectedPiece = prevState.activePiece && element === prevState.activePiece
-    const selectingPieceThatIsNotActivePiece= prevState.activePiece && element !== prevState.activePiece
-    const activePieceHasBall = prevState.activePiece.hasBall
-    const activePiece = prevState.activePiece
-    const activePieceHasBallandSquareisAPossibleMove = !prevState.activePiece.hasBall && prevState.possibleMoves.includes(element)
-    const cellKey = element.dataset.position
-    const {row, col} = getKeyCoordinates(cellKey)
-    const pieceColor = element.color  
-    let newState = { ...prevState };
-      if (isPiece) {
-        if (hasBall) {
-          newState.activePiece = element;
-          newState.possiblePasses = getValidPasses(row,col,pieceColor, gameState.gameBoard);  // Assuming you have a function for this
-        } else if (isFirstClickOnPiece) {
-          newState.activePiece = element;
-          newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition);  // Assuming a function for this
-        //unselecting a piece thats been clicked
-        } else if (unselectingASelectedPiece) {
-          newState.activePiece = null;
-          newState.possibleMoves = [];
-        //if theres an active piece and the piece youve clicked isnt the active piece
-        } else if (selectingPieceThatIsNotActivePiece) {
-          //if the active piece has the ball try to pass
-          if (activePieceHasBall) {
-            newState.gameBoard = passBall()
-            didWin(gameState.gameBoard)
-            getValidPasses(row,col,pieceColor, gameState.gameBoard);
-            newState.activePiece = element;
-          } else {
-            newState.activePiece = element;
-            newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition);
-          }
-        }
-      } else if (isCell) {
-        if (activePiece) {
-          if (activePieceHasBallandSquareisAPossibleMove) {
-            const originalSquare = prevState.activePiece.position
-            newState.gameBoard = movePiece();
-            newState.movedPiece = prevState.activePiece;  // Track the moved piece
-            newState.originalSquare = originalSquare
-            newState.possibleMoves = getPieceMoves(row, col, gameState.gameBoard, gameState.movePiece, gameState.movedPieceOriginalPosition); // Update moves
-          }
+        const isFirstClickOnPiece = !prevState.movedPiece && !prevState.activePiece;
+        const unselectingASelectedPiece = prevState.activePiece && element === prevState.activePiece;
+        const selectingPieceThatIsNotActivePiece = prevState.activePiece && element !== prevState.activePiece;
+        const activePieceHasBall = prevState.activePiece?.hasBall;
+        const noPieceHasMovedAndMoveIsValid = !prevState.movedPiece && includesCoordinates(prevState.possibleMoves, {row,col})
+        const aPieceHasMoved = !!prevState.movedPiece;
+        const isReturningToOriginalSquare = cellKey === prevState.originalSquare && includesCoordinates(prevState.possibleMoves, {row,col})
+        const noActivePiece = !prevState.activePiece
+
+        let newState = { ...prevState };
+
+        if (isPiece) {
+            if (hasBall) {
+                newState.activePiece = { ...element, position: cellKey };
+                newState.possiblePasses = getValidPasses(row, col, pieceColor, prevState.gameBoard);
+            } else if (isFirstClickOnPiece) {
+              newState.activePiece = { ...element, position: cellKey };
+                newState.possibleMoves = getPieceMoves(row, col, prevState.gameBoard);
+            } else if (unselectingASelectedPiece) {
+                newState.activePiece = null;
+                newState.possibleMoves = [];
+            } else if (selectingPieceThatIsNotActivePiece) {
+                if (activePieceHasBall) {
+                    newState.gameBoard = passBall();
+                    didWin(gameState.gameBoard);
+                    newState.possiblePasses = getValidPasses(row, col, pieceColor, prevState.gameBoard);
+                }
+                newState.activePiece = { ...element, position: cellKey };
+                newState.possibleMoves = getPieceMoves(row, col, prevState.gameBoard);
+            }
         } else {
-          newState.activePiece = null;
-          newState.possibleMoves = [];
-          newState.possiblePasses = [];
+            if (noActivePiece) {
+                console.log("No piece selected, please select a piece.");
+                newState.activePiece = null;
+                newState.possibleMoves = [];
+            } else if (prevState.activePiece) {
+                if (activePieceHasBall) {
+                    newState.activePiece = null;
+                    newState.possibleMoves = [];
+                } else if (noPieceHasMovedAndMoveIsValid) {
+                    newState.gameBoard = movePiece(prevState.activePiece.position, cellKey, prevState.gameBoard);
+                    newState.movedPiece = prevState.activePiece;
+                    newState.originalSquare = prevState.activePiece.position;
+                    newState.possibleMoves = [prevState.activePiece.position];
+                } else if (aPieceHasMoved) {
+                    if (isReturningToOriginalSquare) {
+                        newState.gameBoard = movePiece(prevState.movedPiece.position, cellKey, prevState.gameBoard);
+                        newState.movedPiece = null;
+                        newState.originalSquare = null;
+                        newState.possibleMoves = [];
+                    } else {
+                        console.log("Move not allowed, return piece to original position or pass the ball.");
+                    }
+                } else {
+                    console.log("Invalid operation.");
+                    newState.activePiece = null;
+                    newState.possibleMoves = [];
+                    newState.possiblePasses = [];
+                }
+            }
         }
-      } else {
-        // Display warning if neither piece nor square
-        //newState = displayWarning(newState, "Invalid operation.");
-      }
-  
-      return newState;
+        return newState;
     });
-  }
+}
 
   const handlePassTurn = async () => {
     const currentPlayerColor = localStorage.getItem('userColor');
@@ -178,6 +162,7 @@ const GameBoard = () => {
       console.error('Failed to update game:', error);
     }
   };  
+
   const renderBoard = () => {
     if (!gameState.gameData) {
       return <p>Loading game board...</p>;
@@ -238,7 +223,7 @@ const GameBoard = () => {
       
         {gameState.gameData.status === 'playing' && !gameState.isUserTurn && (
           <Modal>
-            <p>It's not your turn. Please wait for the other player.</p>
+            <p>It&apos;s not your turn. Please wait for the other player.</p>
           </Modal>
         )}
         {gameState.gameData.status === 'completed' && (

@@ -1,10 +1,9 @@
-import React from 'react';
 import './piece.css'
 
-const Piece = ({ color, hasBall}) => {
+const Piece = ({ color, hasBall, position}) => {
 
   return (
-    <div className={`piece ${color}-piece`} >
+    <div className={`piece ${color}-piece`} data-position={position} >
       <div className="hole"></div>
       {hasBall && <div className="ball"></div>} 
     </div>

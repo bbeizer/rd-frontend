@@ -2,7 +2,7 @@
     // extend out from piece in all directions using a a loop. 
     // if piece can pass the ball to another piece of the same color 
     // without an opposing piece blocking it, then it is a legal pass
-    import { getKeyCoordinates, toCellKey } from '../../../utils/gameUtilities'
+    import {toCellKey } from '../../../utils/gameUtilities'
 
     export const getValidPasses = (row, col, pieceColor, gameBoard) => {
         const directions = [
