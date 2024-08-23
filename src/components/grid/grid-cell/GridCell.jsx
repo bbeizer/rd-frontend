@@ -1,4 +1,3 @@
-import React from 'react';
 import './grid-cell.css';
 
 const GridCell = ({ style, children, row, col, id, redHighlight, yellowHighlight, blueHighlight, onClick }) => {

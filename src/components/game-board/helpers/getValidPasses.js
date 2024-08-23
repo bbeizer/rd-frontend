@@ -1,10 +1,6 @@
-    // keep track of piece color from the start of the function 
-    // extend out from piece in all directions using a a loop. 
-    // if piece can pass the ball to another piece of the same color 
-    // without an opposing piece blocking it, then it is a legal pass
-    import {toCellKey } from '../../../utils/gameUtilities'
-
-    export const getValidPasses = (row, col, pieceColor, gameBoard) => {
+import { getKeyCoordinates, toCellKey } from '../../../utils/gameUtilities';
+    export const getValidPasses = (cellKey, pieceColor, gameBoard) => {
+      const { row, col } = getKeyCoordinates(cellKey);
         const directions = [
           { dx: 1, dy: 0 }, { dx: -1, dy: 0 }, // Right, Left
           { dx: 0, dy: 1 }, { dx: 0, dy: -1 }, // Down, Up

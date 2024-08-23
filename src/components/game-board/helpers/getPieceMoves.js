@@ -1,6 +1,7 @@
-import { getKeyCoordinates } from '../../../utils/gameUtilities'
-export const getPieceMoves = (initialRow, initialCol, board, hasMoved, originalSquare) => {
-    if(!hasMoved){
+import { getKeyCoordinates } from "../../../utils/gameUtilities";
+export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
+    const { row: initialRow, col: initialCol } = getKeyCoordinates(cellKey);
+    if (!hasMoved) {
         const legalMoves = [];
         const moveOffsets = [
             { row: -2, col: 1 }, { row: -1, col: 2 }, { row: 1, col: 2 }, { row: 2, col: 1 },
@@ -17,20 +18,18 @@ export const getPieceMoves = (initialRow, initialCol, board, hasMoved, originalS
                 const targetCellContent = board[targetCellKey];
 
                 // Check if the target cell is empty or contains an opponent's piece
-                // Assuming board.turnPlayer stores the color of the current player
-                if (!targetCellContent) {
-                    legalMoves.push({ row: newRow, col: newCol });
+                if (!targetCellContent || targetCellContent.color !== board.turnPlayer) {
+                    legalMoves.push(targetCellKey);  // Push the cell key directly
                 }
             }
         });
 
         return legalMoves;
     } else {
-        return [getKeyCoordinates(originalSquare)]
-    }   
+        return [originalSquare];  // If the piece has moved, return to its original square using the cell key
+    }
 };
 
 export const generateCellKey = (row, col) => {
-    return `${String.fromCharCode(97 + col)}${row + 1}`;
+    return `${String.fromCharCode(97 + col)}${8 - row}`;
 };
-

@@ -1,2 +1,2 @@
-export const includesCoordinates = (movesArray, targetCoords) => 
-    movesArray.some(move => move.row === targetCoords.row && move.col === targetCoords.col);
+export const includesCoordinates = (movesArray, targetKey) => 
+    movesArray.includes(targetKey);

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import './piece.css'
 
 const Piece = ({ color, hasBall, position}) => {

@@ -6,17 +6,11 @@ import Modal from '../modal/modal';
 import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
 import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
-import { didWin } from './helpers/didWin';
 import { updateGame } from '../../services/gameService';
-import { getKeyCoordinates, toCellKey } from '../../utils/gameUtilities';
-import { getPieceMoves } from './helpers/getPieceMoves';
-import { movePiece } from './helpers';
-import { getValidPasses } from './helpers/getValidPasses';
-import { passBall } from './helpers/passBall';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { fetchGame } from './helpers/fetchGame';
-import { includesCoordinates } from './helpers/includesCoordinates';
+import { updateGameState } from './helpers/updateGameState';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -27,7 +21,6 @@ const GameBoard = () => {
     isUserTurn: true,
     activePiece: null,
     possibleMoves: [],
-    gameBoard: null,
     movedPiece: null,
     movedPieceOriginalPosition: null,
     possiblePasses: [],
@@ -38,147 +31,114 @@ const GameBoard = () => {
   const isUserWhite = gameState.playerColor === 'white';
   const currentPlayerName = gameState.gameData ? (isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
   const opponentPlayerName = gameState.gameData ? (!isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
+
   useEffect(() => {
-    fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
+    if (!gameId) return; // Exit if gameId is not defined
+    
+    const pollGameData = async () => {
+      await fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
+    };
+    
+    // Poll the game data once immediately
+    pollGameData();
+    
+    // Set up interval polling if it's not the user's turn
+    if (!gameState.isUserTurn && !intervalId) {
+      const newIntervalId = setInterval(pollGameData, 3000);
+      setIntervalId(newIntervalId);
+    }
+    
+    // Clear the interval when it becomes the user's turn
+    if (gameState.isUserTurn && intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+    
+    // Cleanup on component unmount
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
+        setIntervalId(null);
       }
     };
-  }, [gameId, gameState.playerColor, intervalId]);
+  }, [gameState.isUserTurn, gameId, intervalId]);
   
-  function handleClick(event) {
-    debugger;
+  
+  const handleClick = async (event) => {
     event.stopPropagation();
     const cellKey = event.currentTarget.id;
-    const element = gameState.gameBoard[cellKey];
-    const isPiece = !!element;  // Simplify the check to boolean
-    const hasBall = element?.hasBall === "true";
-    const { row, col } = getKeyCoordinates(cellKey);
-    const pieceColor = element?.color;
-
-    setGameState(prevState => {
-        const isFirstClickOnPiece = !prevState.movedPiece && !prevState.activePiece;
-        const unselectingASelectedPiece = prevState.activePiece && element === prevState.activePiece;
-        const selectingPieceThatIsNotActivePiece = prevState.activePiece && element !== prevState.activePiece;
-        const activePieceHasBall = prevState.activePiece?.hasBall;
-        const noPieceHasMovedAndMoveIsValid = !prevState.movedPiece && includesCoordinates(prevState.possibleMoves, {row,col})
-        const aPieceHasMoved = !!prevState.movedPiece;
-        const isReturningToOriginalSquare = cellKey === prevState.originalSquare && includesCoordinates(prevState.possibleMoves, {row,col})
-        const noActivePiece = !prevState.activePiece
-
-        let newState = { ...prevState };
-
-        if (isPiece) {
-            if (hasBall) {
-                newState.activePiece = { ...element, position: cellKey };
-                newState.possiblePasses = getValidPasses(row, col, pieceColor, prevState.gameBoard);
-            } else if (isFirstClickOnPiece) {
-              newState.activePiece = { ...element, position: cellKey };
-                newState.possibleMoves = getPieceMoves(row, col, prevState.gameBoard);
-            } else if (unselectingASelectedPiece) {
-                newState.activePiece = null;
-                newState.possibleMoves = [];
-            } else if (selectingPieceThatIsNotActivePiece) {
-                if (activePieceHasBall) {
-                    newState.gameBoard = passBall();
-                    didWin(gameState.gameBoard);
-                    newState.possiblePasses = getValidPasses(row, col, pieceColor, prevState.gameBoard);
-                }
-                newState.activePiece = { ...element, position: cellKey };
-                newState.possibleMoves = getPieceMoves(row, col, prevState.gameBoard);
-            }
-        } else {
-            if (noActivePiece) {
-                console.log("No piece selected, please select a piece.");
-                newState.activePiece = null;
-                newState.possibleMoves = [];
-            } else if (prevState.activePiece) {
-                if (activePieceHasBall) {
-                    newState.activePiece = null;
-                    newState.possibleMoves = [];
-                } else if (noPieceHasMovedAndMoveIsValid) {
-                    newState.gameBoard = movePiece(prevState.activePiece.position, cellKey, prevState.gameBoard);
-                    newState.movedPiece = prevState.activePiece;
-                    newState.originalSquare = prevState.activePiece.position;
-                    newState.possibleMoves = [prevState.activePiece.position];
-                } else if (aPieceHasMoved) {
-                    if (isReturningToOriginalSquare) {
-                        newState.gameBoard = movePiece(prevState.movedPiece.position, cellKey, prevState.gameBoard);
-                        newState.movedPiece = null;
-                        newState.originalSquare = null;
-                        newState.possibleMoves = [];
-                    } else {
-                        console.log("Move not allowed, return piece to original position or pass the ball.");
-                    }
-                } else {
-                    console.log("Invalid operation.");
-                    newState.activePiece = null;
-                    newState.possibleMoves = [];
-                    newState.possiblePasses = [];
-                }
-            }
-        }
-        return newState;
-    });
-}
+    const newState = updateGameState(cellKey, gameState);
+    setGameState(newState);
+    try {
+      await updateGame(gameId, newState);
+  } catch (error) {
+      console.error('Failed to update game on server:', error);
+  }
+  };
 
   const handlePassTurn = async () => {
     const currentPlayerColor = localStorage.getItem('userColor');
     const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
-  
+    
     try {
-      // Prepare updates for the backend
       const updates = {
+        currentBoardStatus: gameState.gameData.currentBoardStatus,
         currentPlayerTurn: nextPlayerTurn,
         activePiece: null,
-        hasMoved: false,
+        movedPiece: null,
         originalSquare: null,
         possibleMoves: [],
         possiblePasses: []
       };
-  
-      // Call backend update
+      
       const updatedGame = await updateGame(gameId, updates);
+      
       setGameState(prevState => ({
         ...prevState,
         gameData: updatedGame,
         isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
         activePiece: null,
-        hasMoved: false,
         originalSquare: null,
         possibleMoves: [],
         possiblePasses: []
       }));
-  
-      // Manage interval based on turn
-      if (updatedGame.currentPlayerTurn === currentPlayerColor && intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
+      
+      // Manage polling interval
+      if (updatedGame.currentPlayerTurn === currentPlayerColor) {
+        if (intervalId) {
+          clearInterval(intervalId);
+          setIntervalId(null);
+        }
       } else if (!intervalId) {
-        setIntervalId(setInterval(fetchGame, 3000));
+        const newIntervalId = setInterval(() => {
+          fetchGame(gameId, setGameState, currentPlayerColor);
+        }, 3000);
+        setIntervalId(newIntervalId);
       }
     } catch (error) {
       console.error('Failed to update game:', error);
     }
-  };  
+  };
+  
 
   const renderBoard = () => {
-    if (!gameState.gameData) {
+    if (!gameState.gameData.currentBoardStatus) {
       return <p>Loading game board...</p>;
     }
     return (
       <>
         {Object.entries(gameState.gameData.currentBoardStatus).map(([cellKey, cellData]) => {
-          const { row, col } = getKeyCoordinates(cellKey);
-          const isPossibleMove = gameState.possibleMoves.some(move => cellKey === toCellKey(move.row, move.col));
-          const isPossiblePass = gameState.possiblePasses.some(pass => cellKey === pass);
-          const isActivePiece = gameState.activePiece && gameState.activePiece.position === cellKey;
+          const isPossibleMove = gameState.possibleMoves.includes(cellKey);
+          const isPossiblePass = gameState.possiblePasses.includes(cellKey);
+          let isActivePiece = null;
+          if(gameState.activePiece){
+            isActivePiece = gameState.activePiece.position === cellKey;
+          }
           return (
             <GridCell
             key={cellKey}
-            row={row}
-            col={col}
+            row={parseInt(cellKey[1], 10) - 1}
+            col={cellKey.charCodeAt(0) - 'a'.charCodeAt(0)}
             redHighlight={isPossibleMove}
             yellowHighlight={isPossiblePass}
             blueHighlight={isActivePiece}
@@ -198,6 +158,7 @@ const GameBoard = () => {
             </GridCell>
           );
         })}
+        {console.log(gameState)}
       </>
     );
   };
@@ -208,13 +169,11 @@ const GameBoard = () => {
   const rotationStyle = gameState.playerColor === 'black' ? '180deg' : '0deg';
   return (
     <div className="game-container">
-      {console.log(gameState)}
       {gameState.gameData.status === 'completed' && <Confetti />}
       <PlayerInfoBar
         playerName={opponentPlayerName}
       />
       <div className="board-and-info">
-        {console.log(rotationStyle)}
         <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
         <div className="board-container">
           <GridContainer>{renderBoard()}</GridContainer>
