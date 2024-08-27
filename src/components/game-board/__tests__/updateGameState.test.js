@@ -18,7 +18,6 @@ describe('updateGameState', () => {
   it('should select a piece when clicked', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
-    console.log(newState.possibleMoves)
     expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
     
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
@@ -69,7 +68,6 @@ describe('updateGameState', () => {
   it('should update the possible moves when a piece is selected', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
-    console.log(newState.possibleMoves)
     expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
     expectedMoves.forEach(move => {

@@ -12,21 +12,19 @@ export const generateUserID = () => {
 const initialSetup = (rowIndex, colIndex) => {
   let pieceColor = null;
   let hasBall = false;
+  let id = null;
 
-  // Adjusting logic to place pieces correctly based on row and column indexes
-  if (rowIndex === 7 && [2, 3, 4, 5].includes(colIndex)) { // Rank 1, White pieces
-    pieceColor = 'white';
-    hasBall = colIndex === 3; // Has ball at d1 (colIndex 3)
-  } else if (rowIndex === 6 && [2, 3, 4, 5].includes(colIndex)) { // Rank 2, White pieces
-    pieceColor = 'white';
-  } else if (rowIndex === 1 && [2, 3, 4, 5].includes(colIndex)) { // Rank 7, Black pieces
-    pieceColor = 'black';
-    hasBall = colIndex === 4; // Has ball at e8 (colIndex 4)
-  } else if (rowIndex === 0 && [2, 3, 4, 5].includes(colIndex)) { // Rank 8, Black pieces
-    pieceColor = 'black';
+  if (rowIndex === 0 && [2, 3, 4, 5].includes(colIndex)) {
+      pieceColor = 'black';
+      hasBall = colIndex === 4;
+      id = uuidv4(); 
+  } else if (rowIndex === 7 && [2, 3, 4, 5].includes(colIndex)) {
+      pieceColor = 'white';
+      hasBall = colIndex === 3;
+      id = uuidv4();
   }
 
-  return { pieceColor, hasBall };
+  return { pieceColor, hasBall, id };
 };
 
 export const initializeGameBoard = () => {
