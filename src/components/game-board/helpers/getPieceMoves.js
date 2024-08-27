@@ -1,8 +1,10 @@
 import { getKeyCoordinates } from "../../../utils/gameUtilities";
+
 export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
     const { row: initialRow, col: initialCol } = getKeyCoordinates(cellKey);
+    const legalMoves = [];
+
     if (!hasMoved) {
-        const legalMoves = [];
         const moveOffsets = [
             { row: -2, col: 1 }, { row: -1, col: 2 }, { row: 1, col: 2 }, { row: 2, col: 1 },
             { row: 2, col: -1 }, { row: 1, col: -2 }, { row: -1, col: -2 }, { row: -2, col: -1 }
@@ -18,7 +20,7 @@ export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
                 const targetCellContent = board[targetCellKey];
 
                 // Check if the target cell is empty or contains an opponent's piece
-                if (!targetCellContent || targetCellContent.color !== board.turnPlayer) {
+                if (!targetCellContent || targetCellContent.color !== board[cellKey].color) {
                     legalMoves.push(targetCellKey);  // Push the cell key directly
                 }
             }

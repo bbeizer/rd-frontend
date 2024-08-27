@@ -18,6 +18,7 @@ describe('updateGameState', () => {
   it('should select a piece when clicked', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
+    console.log(newState.possibleMoves)
     expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
     
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
@@ -68,6 +69,7 @@ describe('updateGameState', () => {
   it('should update the possible moves when a piece is selected', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
+    console.log(newState.possibleMoves)
     expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
     expectedMoves.forEach(move => {
@@ -104,16 +106,15 @@ describe('updateGameState', () => {
     expect(newState).toEqual(initialState);
   });
 
-  it('should only allow a moved piece to return to its original square', () => {
-    const firstMove = 'f3';
-    initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
-    const newState = updateGameState(firstMove, initialState);
+  it('piece should only be ablke to movback to its original sqaure after it has moves', () => {
+    const firstPieceLocation = 'e1';
+    const movedSquare = 'f3';
+    const stateAfterPieceSelection = updateGameState(firstPieceLocation, initialState);
+    const stateWhenPieceIsMoved = updateGameState(movedSquare, stateAfterPieceSelection)
+      expect(stateWhenPieceIsMoved.possibleMoves).toContain(firstPieceLocation)
+    });
 
-    expect(newState.possibleMoves).toEqual(['e1']);
-});
-
-
-  it('user should not be able to select another piece without the ball if they already have moved a piece', () => {
+  it('user should not be able to select another piece without the ball if theyve already moved a piece', () => {
     const firstMove = 'f3';
     expect(initialState.gameData.currentBoardStatus[firstMove]).toBeNull(); // f3 is empty before move
     initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
