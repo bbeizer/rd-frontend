@@ -19,8 +19,8 @@ export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
                 const targetCellKey = generateCellKey(newRow, newCol);
                 const targetCellContent = board[targetCellKey];
 
-                // Check if the target cell is empty or contains an opponent's piece
-                if (!targetCellContent || targetCellContent.color !== board[cellKey].color) {
+                // Only allow moves to empty squares
+                if (!targetCellContent) {
                     legalMoves.push(targetCellKey);  // Push the cell key directly
                 }
             }
