@@ -96,6 +96,7 @@ const GameBoard = () => {
       setGameState(prevState => ({
         ...prevState,
         gameData: updatedGame,
+        movedPiece: null,
         isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
         activePiece: null,
         originalSquare: null,
