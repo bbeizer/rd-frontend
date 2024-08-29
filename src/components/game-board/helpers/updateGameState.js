@@ -49,7 +49,9 @@ export function updateGameState(cellKey, gameState) {
         if (canReceiveBall(element, gameState.possiblePasses)) {
           newState = passBallAndSetActivePiece(newState, element, cellKey);
           if (didWin(newState.gameData.currentBoardStatus)) {
-            newState.winner = true;
+            newState.winner = newState.gameData.currentPlayerTurn === 'white' 
+            ? newState.gameData.whitePlayerName 
+            : newState.gameData.blackPlayerName;
             return newState;
           }
         } else {

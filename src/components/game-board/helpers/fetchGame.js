@@ -6,7 +6,9 @@ export async function fetchGame(gameId, updateState, currentPlayerColor) {
     updateState(prevState => ({
       ...prevState,
       gameData: fetchedGame,
+      winner: fetchedGame.winner,
       isUserTurn: fetchedGame.currentPlayerTurn === currentPlayerColor,
+      currentBoardStatus: fetchedGame.currentBoardStatus
     }));
   } catch (error) {
     console.error('Error fetching game data:', error);

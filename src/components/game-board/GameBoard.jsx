@@ -69,11 +69,16 @@ const GameBoard = () => {
     const cellKey = event.currentTarget.id;
     const newState = updateGameState(cellKey, gameState);
     setGameState(newState);
+
+    if (newState.winner) {
+      handleGameEnd(newState.winner);
+    }
+
     try {
       await updateGame(gameId, newState);
-  } catch (error) {
+    } catch (error) {
       console.error('Failed to update game on server:', error);
-  }
+    }
   };
 
   const handlePassTurn = async () => {
@@ -116,6 +121,30 @@ const GameBoard = () => {
         }, 3000);
         setIntervalId(newIntervalId);
       }
+    } catch (error) {
+      console.error('Failed to update game:', error);
+    }
+  };
+  
+  const handleGameEnd = async (winnersName) => {
+    clearInterval(intervalId); // Stop polling
+    setGameState((prevState) => ({
+      ...prevState,
+      gameData: { 
+        ...prevState.gameData, 
+        status: 'completed', 
+        winner: winnersName 
+      },
+      winner: winnersName, // Set the winner in the local state
+    }));
+  
+    try {
+      // Update backend to persist game completion, winner's name, and final board state
+      await updateGame(gameId, { 
+        status: 'completed', 
+        winner: winnersName, 
+        currentBoardStatus: gameState.gameData.currentBoardStatus // Include the final board state
+      });
     } catch (error) {
       console.error('Failed to update game:', error);
     }

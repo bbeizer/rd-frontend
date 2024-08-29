@@ -10,12 +10,12 @@ export const didWin = (gameBoard) => {
     const eightArray = ["a8","b8","c8","d8","e8","f8","g8","h8"]
     for(var i = 0; i<8;i++){
         if(gameBoard[oneArray[i]]){
-            if(gameBoard[oneArray[i]].hasBall && gameBoard[oneArray[i]].color === "white"){
+            if(gameBoard[oneArray[i]].hasBall && gameBoard[oneArray[i]].color === "black"){
                 return true;
             }
         } 
         if(gameBoard[eightArray[i]]){
-            if(gameBoard[eightArray[i]].hasBall && gameBoard[eightArray[i]].color === "black"){
+            if(gameBoard[eightArray[i]].hasBall && gameBoard[eightArray[i]].color === "white"){
                 return true
             }
         }
