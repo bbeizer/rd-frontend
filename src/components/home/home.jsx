@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // Removed unused React import
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById } from '../../services/gameService';
 import { generateUserID } from '../../utils/gameUtilities';
@@ -9,7 +9,7 @@ function Home() {
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-  const [gameId, setGameId] = useState(null);
+
 
   useEffect(() => {
     return () => {
@@ -20,9 +20,8 @@ function Home() {
   const handleJoinGame = async () => {
     try {
       const userId = generateUserID();
-      const data = await joinQueue(userId, name);  // Get the full response including game and playerColor
-      setGameId(data.game._id);
-      localStorage.setItem('userColor', data.playerColor);  // Correctly store the player color
+      const data = await joinQueue(userId, name);
+      localStorage.setItem('userColor', data.playerColor);
 
       if (data.game.status === 'playing') {
         navigate(`/game/${data.game._id}`);
@@ -68,7 +67,7 @@ function Home() {
       )}
       <div className="rules">
         <h2>Game Rules</h2>
-        <p><strong>Game Objective:</strong> The goal is to move one of your pieces holding the ball to the opponent's back rank.</p>
+        <p><strong>Game Objective:</strong> The goal is to move one of your pieces holding the ball to the opponent&apos;s back rank.</p>
         <p><strong>Pieces and Movement:</strong></p>
         <ul>
           <li>Each player has 4 pieces.</li>
@@ -86,8 +85,8 @@ function Home() {
         </ul>
         <p><strong>Passing the Ball:</strong></p>
         <ul>
-          <li>The ball can be passed to any of the player's pieces that are laterally or diagonally adjacent.</li>
-          <li>The path for passing the ball must be clear of opponent's pieces.</li>
+          <li>The ball can be passed to any of the player&apos;s pieces that are laterally or diagonally adjacent.</li>
+          <li>The path for passing the ball must be clear of opponent&apos;s pieces.</li>
           <div className="animation-container">
             <img src="/images/start.png" alt="start" className="move-animation" id="pass1" />
             <img src="/images/passAttempt1.png" alt="pass attempt 1" className="move-animation" id="pass2" />
@@ -97,11 +96,11 @@ function Home() {
         <p><strong>Gameplay:</strong></p>
         <ul>
           <li>On a turn, a player can either move one piece or pass the ball.</li>
-          <li>The turn ends when the player presses the "Pass Turn" button.</li>
+          <li>The turn ends when the player presses the &quot;Pass Turn&quot; button.</li>
           <li>Turns alternate between players.</li>
           <img src="/images/passTurn.png" alt="Pass Turn" className="static-image" id="passTurn" />
         </ul>
-        <p><strong>Winning the Game:</strong> The first player to move a piece holding the ball to the opponent's back rank wins the game.</p>
+        <p><strong>Winning the Game:</strong> The first player to move a piece holding the ball to the opponent&apos;s back rank wins the game.</p>
         <ul>
           <img src="/images/win.png" alt="win" className="static-image" id="win" />
         </ul>
