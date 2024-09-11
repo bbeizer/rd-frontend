@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // Removed unused React import
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById } from '../../services/gameService';
 import { generateUserID } from '../../utils/gameUtilities';
@@ -9,7 +9,6 @@ function Home() {
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-
 
   useEffect(() => {
     return () => {
@@ -67,43 +66,70 @@ function Home() {
       )}
       <div className="rules">
         <h2>Game Rules</h2>
-        <p><strong>Game Objective:</strong> The goal is to move one of your pieces holding the ball to the opponent&apos;s back rank.</p>
-        <p><strong>Pieces and Movement:</strong></p>
-        <ul>
-          <li>Each player has 4 pieces.</li>
-          <li>All pieces move like knights in chess (an L-shape).</li>
-          <div className="animation-container">
-            <img src="/images/attemptMove.png" alt="Attempt Move" className="move-animation" id="moveStep1" />
-            <img src="/images/makeMove.png" alt="Make Move" className="move-animation" id="moveStep2" />
+        
+        <div className="section">
+          <p><strong>Game Objective:</strong> The goal is to move one of your pieces holding the ball to the opponent&apos;s back rank.</p>
+        </div>
+
+        <div className="section">
+          <p><strong>Pieces and Movement:</strong></p>
+          <ul>
+            <li>Each player has 4 pieces.</li>
+            <li>All pieces move like knights in chess (an L-shape).</li>
+            <li>The active piece (the piece you select) will be highlighted in blue.</li>
+          </ul>
+          <div className="image-container">
+            <img src="/images/activePieceHighlighted.png" alt="Highlighted Active Piece" className="static-image" />
           </div>
-        </ul>
-        <p><strong>The Ball:</strong></p>
-        <ul>
-          <li>One piece on each side starts with a metal ball.</li>
-          <li>The piece holding the ball cannot move but can pass the ball to another piece.</li>
-          <img src="/images/startPosition.png" alt="Start Position" className="static-image" id="startPos" />
-        </ul>
-        <p><strong>Passing the Ball:</strong></p>
-        <ul>
-          <li>The ball can be passed to any of the player&apos;s pieces that are laterally or diagonally adjacent.</li>
-          <li>The path for passing the ball must be clear of opponent&apos;s pieces.</li>
+        </div>
+
+        <div className="section">
+          <p><strong>Piece Movement:</strong></p>
+          <p>The piece you select will be highlighted in blue. Click on a piece to select it, then click on a valid destination square to move it. The valid destination squares will be highlighted in red.</p>
           <div className="animation-container">
-            <img src="/images/start.png" alt="start" className="move-animation" id="pass1" />
-            <img src="/images/passAttempt1.png" alt="pass attempt 1" className="move-animation" id="pass2" />
-            <img src="/images/2nd.png" alt="pass1" className="move-animation" id="pass3" />
+            <img src="/images/startingPiece.png" alt="Starting Piece" className="move-animation" />
           </div>
-        </ul>
-        <p><strong>Gameplay:</strong></p>
-        <ul>
-          <li>On a turn, a player can either move one piece or pass the ball.</li>
-          <li>The turn ends when the player presses the &quot;Pass Turn&quot; button.</li>
-          <li>Turns alternate between players.</li>
-          <img src="/images/passTurn.png" alt="Pass Turn" className="static-image" id="passTurn" />
-        </ul>
-        <p><strong>Winning the Game:</strong> The first player to move a piece holding the ball to the opponent&apos;s back rank wins the game.</p>
-        <ul>
-          <img src="/images/win.png" alt="win" className="static-image" id="win" />
-        </ul>
+        </div>
+
+        <div className="section">
+          <p><strong>The Ball:</strong></p>
+          <ul>
+            <li>One piece on each side starts with a metal ball.</li>
+            <li>The piece holding the ball cannot move but can pass the ball to another piece.</li>
+          </ul>
+          <div className="image-container">
+            <img src="/images/startPosition.png" alt="Start Position" className="static-image" id="startPos" />
+          </div>
+        </div>
+
+        <div className="section">
+          <p><strong>Passing the Ball:</strong></p>
+          <ul>
+            <li>The ball can be passed to any of the player&apos;s pieces that are laterally or diagonally adjacent.</li>
+            <li>The path for passing the ball must be clear of opponent&apos;s pieces.</li>
+          </ul>
+            <div className="animation-container">
+              <img src="/images/pass1.png" alt="Passing Ball" className="pass-animation" />
+            </div>
+        </div>
+        <div className="section">
+          <p><strong>Gameplay:</strong></p>
+          <ul>
+            <li>On a turn, a player can either move one piece or pass the ball.</li>
+            <li>The turn ends when the player presses the &quot;Pass Turn&quot; button.</li>
+            <li>Turns alternate between players.</li>
+          </ul>
+          <div className="image-container">
+            <img src="/images/passTurn.png" alt="Pass Turn" className="static-image" id="passTurn" />
+          </div>
+        </div>
+
+        <div className="section">
+          <p><strong>Winning the Game:</strong> The first player to move a piece holding the ball to the opponent&apos;s back rank wins the game.</p>
+          <div className="image-container">
+            <img src="/images/win.png" alt="Winning Move" className="static-image" id="win" />
+          </div>
+        </div>
       </div>
     </div>
   );
