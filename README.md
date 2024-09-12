@@ -1,8 +1,20 @@
-# React + Vite
+# RazzInDazzle - A Dynamic Chess Variant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://adaptable.io/)
 
-Currently, two official plugins are available:
+## Description
+RazzlnDazzle is an innovative chess variant where players race to move one of their pieces to their opponents backrank with a ball combining elements of chess and american football. The game introduces unique mechanics that provide a fresh and exciting twist on traditional chess gameplay.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Accessing the App
+You can access the live version of the app [here](https://www.razzlndazzle.com/).
+
+## Installation Instructions
+
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/razzindazzle.git
