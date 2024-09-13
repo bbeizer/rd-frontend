@@ -56,9 +56,10 @@ As RazzInDazzle continues to evolve, here are the key features and improvements 
 - **User Interface**: Design a user-friendly interface for selecting AI difficulty and game settings.
 - **Gameplay Testing**: Thoroughly test the AI to ensure challenging and engaging gameplay.
 
-### 3. Overall UI
+### 3. Overall UI/Bug Fixes
 - **Better Design**: improve the overall look and feel of the app
 - **Feedback Form**: adding a feedback form
 - **In game Chat**: implementing and in game chat
+- **Bug Fixes**: fix any known bugs
 
    
