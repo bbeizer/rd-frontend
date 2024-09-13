@@ -56,34 +56,9 @@ As RazzInDazzle continues to evolve, here are the key features and improvements 
 - **User Interface**: Design a user-friendly interface for selecting AI difficulty and game settings.
 - **Gameplay Testing**: Thoroughly test the AI to ensure challenging and engaging gameplay.
 
-### 3. Responsive Design
-- **Cross-Device Compatibility**: Optimize the app for different screen sizes, ensuring a smooth experience on mobile, tablet, and desktop devices.
-- **Testing Across Browsers**: Conduct extensive testing across multiple browsers to guarantee a consistent user experience.
-
-### 4. Performance Optimization
-- **Image Compression**: Compress images to reduce load times while maintaining visual quality.
-- **Code Minification**: Minify CSS and JavaScript files to improve overall performance.
-- **Lazy Loading**: Implement lazy loading for images and resources to enhance page load speeds.
-
-### 5. Enhanced User Interface (UI)
-- **Visual Refinements**: Continue to refine the game's UI based on user feedback, making the interface more intuitive and visually appealing.
-- **Animations & Effects**: Add subtle animations and visual effects to enhance the gameplay experience without affecting performance.
-
-### 6. Documentation and README
-- **Comprehensive Documentation**: Update and expand the project documentation to cover all features, including new user and guest functionalities.
-- **Detailed README**: Ensure the README is up-to-date with installation instructions, usage guides, and contribution guidelines.
-- **API Documentation**: Document any APIs used within the app to aid developers looking to contribute or integrate with the project.
-
-### 7. Game History & Statistics
-- **Track Game History**: Implement functionality to track and display a user’s game history, including wins, losses, and overall statistics.
-- **Leaderboard Integration**: Consider adding a leaderboard feature to showcase top players and encourage competition.
-
-### 8. Social Features
-- **Friend Lists**: Allow users to add friends and invite them to games.
-- **In-Game Messaging**: Implement a basic messaging system for users to communicate during gameplay.
-
-### 9. Continuous Feedback & Improvement
-- **Feedback Mechanism**: Add a feedback form within the app to gather user input on new features and improvements.
-- **Iterative Development**: Regularly review feedback and prioritize updates based on user needs and suggestions.
+### 3. Overall UI
+- **Better Design**: improve the overall look and feel of the app
+- **Feedback Form**: adding a feedback form
+- **In game Chat**: implementing and in game chat
 
    
