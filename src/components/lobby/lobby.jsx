@@ -47,7 +47,7 @@ function Lobby() {
   };
 
   return (
-    <div className="home">
+    <div className="lobby">
       <div className="header">
         <h1>Welcome to the Game Lobby</h1>
       </div>
