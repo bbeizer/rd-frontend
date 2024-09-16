@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GameBoard from './components/game-board/GameBoard';
-import Home from './components/home/home';
+import Lobby from './components/lobby/lobby';
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Lobby />} />
           {/* Define a dynamic route for games, using the game ID */}
           <Route
             path="/game/:gameId"

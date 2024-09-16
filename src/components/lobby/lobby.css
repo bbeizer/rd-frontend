@@ -96,32 +96,31 @@ body {
 }
 
 img {
-  max-width: 60%;  /* Limit the width to 60% of the container */
-  max-height: 300px;  /* Limit the height to 300px to prevent large images */
-  height: auto;   /* Maintain aspect ratio */
-  margin: 10px auto; /* Add some margin to space out images from text */
-  display: block; /* Center images by making them block elements */
+  max-width: 60%;
+  max-height: 300px;
+  height: auto;
+  margin: 10px auto;
+  display: block;
 }
 
-/* Animation container for smooth image transitions */
 .animation-container {
   text-align: center;
   margin: 20px auto;
-  width: 60%;  /* Adjust the width to keep it within reasonable size */
-  max-height: 300px;  /* Limit height to keep it within reasonable size */
+  width: 60%;
+  max-height: 300px;
 }
 
 .move-animation {
   width: 100%;
   height: auto;
-  animation: transitionPiece 5s infinite;  /* Duration of the animation */
+  animation: transitionPiece 5s infinite;
   object-fit: cover;
 }
 
 .pass-animation {
   width: 100%;
   height: auto;
-  animation: passTransition 5s infinite;  /* Duration of the animation */
+  animation: passTransition 5s infinite;
   object-fit: cover;
 }
 
@@ -129,23 +128,23 @@ img {
 @keyframes passTransition {
   0% {
     opacity: 1;
-    content: url('/images/pass1.png');  /* Show the first image */
+    content: url('/images/pass1.png');
   }
   25% {
     opacity: 1;
-    content: url('/images/pass2.png');  /* Switch to the second image */
+    content: url('/images/pass2.png'); 
   }
   50% {
     opacity: 1;
-    content: url('/images/pass3.png');  /* Switch to the third image */
+    content: url('/images/pass3.png');
   }
   75% {
     opacity: 1;
-    content: url('/images/pass4.png');  /* Switch to the fourth image */
+    content: url('/images/pass4.png');
   }
   100% {
     opacity: 1;
-    content: url('/images/pass1.png');  /* Loop back to the first image */
+    content: url('/images/pass1.png');
   }
 }
 
@@ -153,15 +152,15 @@ img {
 @keyframes transitionPiece {
   0% {
     opacity: 1;
-    content: url('/images/startingPiece.png');  /* Show the first image */
+    content: url('/images/startingPiece.png');
   }
   50% {
     opacity: 1;
-    content: url('/images/movedStartingPiece.png');  /* Switch to the second image */
+    content: url('/images/movedStartingPiece.png');
   }
   100% {
     opacity: 1;
-    content: url('/images/startingPiece.png');  /* Loop back to the first image */
+    content: url('/images/startingPiece.png');
   }
 }
 

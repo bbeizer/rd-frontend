@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById } from '../../services/gameService';
-import { generateUserID } from '../../utils/gameUtilities';
-import './home.css';
+import { generateGuestUserID } from '../../utils/gameUtilities';
+import './lobby.css';
 
-function Home() {
+function Lobby() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
@@ -18,7 +18,7 @@ function Home() {
 
   const handleJoinGame = async () => {
     try {
-      const userId = generateUserID();
+      const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
       const data = await joinQueue(userId, name);
       localStorage.setItem('userColor', data.playerColor);
 
@@ -135,4 +135,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Lobby;

@@ -1,12 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export const generateUserID = () => {
-  let userID = localStorage.getItem('userId');
-  if (!userID) {
-    userID = uuidv4();
-    localStorage.setItem('userID', userID);
-  }
-  return userID;
+export const generateGuestUserID = () => {
+  const guestId = uuidv4();  // Generate a unique ID
+  localStorage.setItem('guestUserID', guestId);  // Store it in local storage
+  return guestId;
 };
 
 const initialSetup = (rowIndex, colIndex) => {
