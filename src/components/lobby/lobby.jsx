@@ -60,7 +60,7 @@ function Lobby() {
           onChange={(e) => setName(e.target.value)}
         />
       </div>
-      <button className="join-button" onClick={handleJoinGame}>Join Game</button>
+      <button className="button" onClick={handleJoinGame}>Join Game</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>
       )}
