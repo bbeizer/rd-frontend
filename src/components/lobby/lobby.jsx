@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { joinQueue, getGameById } from '../../services/gameService';
-import { startSinglePlayerGame } from '../../services/aiService';
+import { joinQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
 import './lobby.css';
 
