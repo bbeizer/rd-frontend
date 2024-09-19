@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById } from '../../services/gameService';
+import { startSinglePlayerGame } from '../../services/aiService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
 import './lobby.css';
 
@@ -34,6 +35,16 @@ function Lobby() {
     }
   };
 
+  const handleSinglePlayerGame = async () => {
+    try{
+      const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
+      const data = await startSinglePlayerGame(userId, name);
+      navigate(`/game/${data.game._id}`);
+    } catch (error){
+      console.error('Failed to join game:', error);
+    }
+  };
+
   const pollGameStatus = async (id) => {
     try {
       const game = await getGameById(id);
@@ -61,6 +72,7 @@ function Lobby() {
         />
       </div>
       <button className="button" onClick={handleJoinGame}>Join Game</button>
+      <button className="button" onClick={handleSinglePlayerGame}>Single Player Mode</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>
       )}
