@@ -70,8 +70,8 @@ function Lobby() {
           onChange={(e) => setName(e.target.value)}
         />
       </div>
-      <button className="button" onClick={handleJoinGame}>Join Game</button>
-      <button className="button" onClick={handleSinglePlayerGame}>Single Player Mode</button>
+      <button className="button multiplayer" onClick={handleJoinGame}>Multiplayer Mode</button>
+      <button className="button singleplayer" onClick={handleSinglePlayerGame}>Single Player Mode</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>
       )}
