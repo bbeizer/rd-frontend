@@ -6,6 +6,7 @@ export async function fetchGame(gameId, updateState, currentPlayerColor) {
     updateState(prevState => ({
       ...prevState,
       gameData: fetchedGame,
+      gameType: fetchedGame.gameType,
       winner: fetchedGame.winner,
       isUserTurn: fetchedGame.currentPlayerTurn === currentPlayerColor,
       currentBoardStatus: fetchedGame.currentBoardStatus
