@@ -1,4 +1,4 @@
-const AI_SERVICE_URL = import.meta.env.REACT_APP_AI_SERVICE_URL;
+const AI_SERVICE_URL = import.meta.env.VITE_REACT_APP_AI_SERVICE_URL;
 
 /**
  * Sends the game state to the AI service and retrieves the AI's move.

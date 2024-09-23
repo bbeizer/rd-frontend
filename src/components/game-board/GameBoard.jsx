@@ -101,9 +101,15 @@ const GameBoard = () => {
       } else {
         //Call AI service and wait for the move
         const aiMove = await getAIMove(gameState);
+        console.log(aiMove)
         updates = {
-          ...aiMove,
-          currentPlayerTurn: currentPlayerColor  // Keep the turn on the player in single-player mode
+          currentBoardStatus: gameState.gameData.currentBoardStatus,
+          currentPlayerTurn: currentPlayerColor,  // Keep the turn on the player in single-player mode
+          activePiece: null,
+          movedPiece: null,
+          originalSquare: null,
+          possibleMoves: [],
+          possiblePasses: []
         };
       }
   
