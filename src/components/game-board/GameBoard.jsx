@@ -127,41 +127,35 @@ const GameBoard = () => {
   };
   
   const handleGameEnd = async (winnersName) => {
+    clearInterval(intervalId); // Stop polling
     setGameState((prevState) => ({
       ...prevState,
       gameData: { 
         ...prevState.gameData,
-        currentBoardStatus: gameState.gameData.currentBoardStatus, // Use prevState to ensure the correct board is used
+        currentBoardStatus: gameState.gameData.currentBoardStatus,
         status: 'completed', 
         winner: winnersName 
       },
       winner: winnersName, // Set the winner in the local state
     }));
-
+  
     try {
-      const updates = {
-        activePiece: null,
-        movedPiece: null,
-        originalSquare: null,
-        currentBoardStatus: gameState.gameData.currentBoardStatus,
-        possibleMoves: [],
-        possiblePasses: [],
-        status: 'completed', 
-        winner: winnersName 
-      };
+        const updates = {
+          currentBoardStatus: gameState.gameData.currentBoardStatus,
+          gameData: gameState.gameData,
+          activePiece: null,
+          movedPiece: null,
+          originalSquare: null,
+          possibleMoves: [],
+          possiblePasses: [],
+          winner: winnersName,
+          status: 'completed' 
+        }
       await updateGame(gameId, updates);
-  
-      // Continue polling for 10 more seconds to ensure both players see the final state
-      const delay = 10000; // 10 seconds
-      setTimeout(() => {
-        clearInterval(intervalId); // Stop polling after delay
-        setIntervalId(null);
-      }, delay);
-  
     } catch (error) {
       console.error('Failed to update game:', error);
     }
-  };  
+  };
   
 
   const renderBoard = () => {
