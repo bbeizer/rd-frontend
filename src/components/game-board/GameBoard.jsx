@@ -38,7 +38,8 @@ const GameBoard = () => {
     if (!gameId) return; // Exit if gameId is not defined
   
     const pollGameData = async () => {
-      await fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
+      const playerColor = gameState.gameType === 'single' ? 'white' : localStorage.getItem('userColor');
+      await fetchGame(gameId, setGameState, playerColor);
     };
   
     // Perform the initial fetch of the game data
@@ -51,7 +52,7 @@ const GameBoard = () => {
     }
   
     // Clear the interval when it becomes the user's turn or if the game switches to single-player
-    if ((gameState.gameType === 'singleplayer' || gameState.isUserTurn) && intervalId) {
+    if ((gameState.gameType === 'single' || gameState.isUserTurn) && intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
     }
