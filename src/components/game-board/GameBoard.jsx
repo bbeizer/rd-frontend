@@ -71,7 +71,7 @@ const GameBoard = () => {
     setGameState(newState);
 
     if (newState.winner) {
-      handleGameEnd(newState.winner);
+      handleGameEnd(newState);
     }
 
     try {
@@ -126,37 +126,38 @@ const GameBoard = () => {
     }
   };
   
-  const handleGameEnd = async (winnersName) => {
+  const handleGameEnd = async (newState) => {
     clearInterval(intervalId); // Stop polling
+
+    // Update local game state
     setGameState((prevState) => ({
-      ...prevState,
-      gameData: { 
-        ...prevState.gameData,
-        currentBoardStatus: gameState.gameData.currentBoardStatus,
-        status: 'completed', 
-        winner: winnersName 
-      },
-      winner: winnersName, // Set the winner in the local state
+        ...prevState,
+        gameData: {
+            ...prevState.gameData, // Preserve other properties in gameData
+            currentBoardStatus: newState.gameData.currentBoardStatus, // Update board status
+            status: 'completed', // Mark game as completed
+        },
     }));
-  
+
     try {
+        // Prepare updates for the server
         const updates = {
-          currentBoardStatus: gameState.gameData.currentBoardStatus,
-          gameData: gameState.gameData,
-          activePiece: null,
-          movedPiece: null,
-          originalSquare: null,
-          possibleMoves: [],
-          possiblePasses: [],
-          winner: winnersName,
-          status: 'completed' 
-        }
-      await updateGame(gameId, updates);
+            currentBoardStatus: newState.gameData.currentBoardStatus,
+            status: 'completed',
+            activePiece: null,
+            movedPiece: null,
+            originalSquare: null,
+            possibleMoves: [],
+            possiblePasses: [],
+        };
+
+        // Send updates to the server
+        await updateGame(gameId, updates);
     } catch (error) {
-      console.error('Failed to update game:', error);
+        console.error('Failed to update game:', error);
     }
-  };
-  
+};
+
 
   const renderBoard = () => {
     if (!gameState.gameData.currentBoardStatus) {
@@ -223,10 +224,10 @@ const GameBoard = () => {
           </Modal>
         )}
         {gameState.gameData.status === 'completed' && (
-          <div className="game-over-controls">
+            <Modal>
             <h2>{gameState.winner} wins!</h2>
             <button onClick={() => navigate('/')}>Return to Lobby</button>
-          </div>
+          </Modal>
         )}
       </div>
       <PlayerInfoBar

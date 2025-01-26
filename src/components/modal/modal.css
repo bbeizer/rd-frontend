@@ -1,0 +1,36 @@
+/* Modal CSS (GameBoard.css or Modal.css) */
+.modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, .2); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensures it appears above all content */
+}
+.modal-content {
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%; /* Responsive width */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    animation: fadeIn 0.3s ease-out;
+    text-align: center;
+    backdrop-filter: blur(5px); /* Optional: Adds a blurred background effect */
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
