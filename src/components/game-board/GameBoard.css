@@ -67,3 +67,7 @@ justify-content: center;
 width: 90%; /* Restricting width to avoid overly wide controls */
 max-width: 400px; /* Maximum width for better control */
 }
+
+.rotate-board {
+  transform: rotate(180deg);
+}
