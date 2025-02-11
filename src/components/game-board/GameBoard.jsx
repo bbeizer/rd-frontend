@@ -13,7 +13,6 @@ import { fetchGame } from './helpers/fetchGame';
 import { updateGameState } from './helpers/updateGameState';
 import { getAIMove } from '../../services/aiService';
 import { getKeyCoordinates } from '../../utils/gameUtilities'
-
 const GameBoard = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
@@ -38,34 +37,42 @@ const GameBoard = () => {
   useEffect(() => {
     console.log("UseEffect hit");
     if (!gameId) return; // Exit if gameId is not defined
+
     const pollGameData = async () => {
-      const playerColor = gameState.gameType === 'single' ? 'white' : localStorage.getItem('userColor');
-      await fetchGame(gameId, setGameState, playerColor);
+        const playerColor = gameState.gameType === 'single' ? 'white' : localStorage.getItem('userColor');
+        const gameData = await fetchGame(gameId, setGameState, playerColor);
+
+      // Wait until `gameData` is ready before touching `isUserTurn`
+        if (!gameData) {
+            console.log("gameData is still undefined, waiting...");
+            return;  // Just chill and wait
+        }
+
+        setGameState(prevState => ({
+            ...prevState,
+            gameData: gameData,
+            isUserTurn: gameState.gameType === 'single' ? true :
+                        gameData.currentPlayerTurn ? gameData.currentPlayerTurn === playerColor : prevState.isUserTurn,
+        }));
     };
-  
-    // Perform the initial fetch of the game data
+
+    // Perform the initial fetch
     pollGameData();
-  
-    // If it's a multiplayer game and not the user's turn, set up polling
+
+    // Multiplayer polling
     if (gameState.gameType === 'multiplayer' && !gameState.isUserTurn && !intervalId) {
-      const newIntervalId = setInterval(pollGameData, 3000);
-      setIntervalId(newIntervalId);
+        const newIntervalId = setInterval(pollGameData, 3000);
+        setIntervalId(newIntervalId);
     }
-  
-    // Clear the interval when it becomes the user's turn or if the game switches to single-player
-    if ((gameState.gameType === 'single' || gameState.isUserTurn) && intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
-  
-    // Cleanup on component unmount
+
+    // Cleanup polling on unmount
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
+        if (intervalId) {
+            clearInterval(intervalId);
+            setIntervalId(null);
+        }
     };
-  }, [gameId, gameState.isUserTurn, gameState.gameType, intervalId]); // Include gameState.gameType in dependencies
+}, [gameId, gameState.isUserTurn, gameState.gameType, intervalId]);
   
   const handleClick = async (event) => {
     event.stopPropagation();
