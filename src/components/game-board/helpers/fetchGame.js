@@ -11,7 +11,7 @@ export async function fetchGame(gameId, updateState, currentPlayerColor) {
       gameData: fetchedGame, // The entire game object from backend
       gameType: fetchedGame.gameType,
       playerColor: playerColor,
-      isUserTurn: fetchedGame.currentPlayerTurn === currentPlayerColor,
+      isUserTurn: isSinglePlayer ? true : fetchedGame.currentPlayerTurn === currentPlayerColor
     }));
   } catch (error) {
     console.error('Error fetching game data:', error);

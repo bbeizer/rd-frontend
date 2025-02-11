@@ -1,6 +1,4 @@
 // components/Modal.js
-import React from 'react';
-
 const Modal = ({children}) => {
     return (
         <div className="modal-background">
