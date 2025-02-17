@@ -3,7 +3,7 @@ const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
 export const joinQueue = async (playerId, playerName) => {
   try {
-    const response = await fetch(`${baseUrl}/games/joinMultiplayerGame`, {
+    const response = await fetch(`${baseUrl}/api/games/joinMultiplayerGame`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
