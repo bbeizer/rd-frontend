@@ -57,3 +57,7 @@ justify-content: center; /* Centering children horizontally */
 .rotate-board {
   transform: rotate(180deg);
 }
+
+.rotate-board {
+  transform: rotate(180deg);
+}
