@@ -11,12 +11,14 @@ import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { fetchGame } from './helpers/fetchGame';
 import { updateGameState } from './helpers/updateGameState';
+import { getAIMove } from '../../services/aiService';
 
 const GameBoard = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [gameState, setGameState] = useState({
     gameId: gameId,
+    gameType: null,
     gameData: null,
     isUserTurn: true,
     activePiece: null,
@@ -34,26 +36,26 @@ const GameBoard = () => {
 
   useEffect(() => {
     if (!gameId) return; // Exit if gameId is not defined
-    
+  
     const pollGameData = async () => {
       await fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
     };
-    
-    // Poll the game data once immediately
+  
+    // Perform the initial fetch of the game data
     pollGameData();
-    
-    // Set up interval polling if it's not the user's turn
-    if (!gameState.isUserTurn && !intervalId) {
+  
+    // If it's a multiplayer game and not the user's turn, set up polling
+    if (gameState.gameType === 'multiplayer' && !gameState.isUserTurn && !intervalId) {
       const newIntervalId = setInterval(pollGameData, 3000);
       setIntervalId(newIntervalId);
     }
-    
-    // Clear the interval when it becomes the user's turn
-    if (gameState.isUserTurn && intervalId) {
+  
+    // Clear the interval when it becomes the user's turn or if the game switches to single-player
+    if ((gameState.gameType === 'singleplayer' || gameState.isUserTurn) && intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
     }
-    
+  
     // Cleanup on component unmount
     return () => {
       if (intervalId) {
@@ -61,8 +63,7 @@ const GameBoard = () => {
         setIntervalId(null);
       }
     };
-  }, [gameState.isUserTurn, gameId, intervalId]);
-  
+  }, [gameState.isUserTurn, gameState.gameType, gameId, intervalId]); // Include gameState.gameType in dependencies
   
   const handleClick = async (event) => {
     event.stopPropagation();
@@ -86,18 +87,27 @@ const GameBoard = () => {
     const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
     
     try {
-      const updates = {
-        currentBoardStatus: gameState.gameData.currentBoardStatus,
-        currentPlayerTurn: nextPlayerTurn,
-        activePiece: null,
-        movedPiece: null,
-        originalSquare: null,
-        possibleMoves: [],
-        possiblePasses: []
-      };
-      
+      let updates;
+      if (gameState.gameType === 'multiplayer') {
+        updates = {
+          currentBoardStatus: gameState.gameData.currentBoardStatus,
+          currentPlayerTurn: nextPlayerTurn,
+          activePiece: null,
+          movedPiece: null,
+          originalSquare: null,
+          possibleMoves: [],
+          possiblePasses: []
+        };
+      } else {
+        //Call AI service and wait for the move
+        const aiMove = await getAIMove(gameState);
+        updates = {
+          ...aiMove,
+          currentPlayerTurn: currentPlayerColor  // Keep the turn on the player in single-player mode
+        };
+      }
+  
       const updatedGame = await updateGame(gameId, updates);
-      
       setGameState(prevState => ({
         ...prevState,
         gameData: updatedGame,
@@ -109,20 +119,24 @@ const GameBoard = () => {
         possiblePasses: []
       }));
       
-      // Manage polling interval
-      if (updatedGame.currentPlayerTurn === currentPlayerColor) {
-        if (intervalId) {
-          clearInterval(intervalId);
-          setIntervalId(null);
-        }
-      } else if (!intervalId) {
-        const newIntervalId = setInterval(() => {
-          fetchGame(gameId, setGameState, currentPlayerColor);
-        }, 3000);
-        setIntervalId(newIntervalId);
-      }
+      managePolling(updatedGame);
     } catch (error) {
       console.error('Failed to update game:', error);
+    }
+  };
+  
+
+  const managePolling = (updatedGame) => {
+    if (updatedGame.currentPlayerTurn === localStorage.getItem('userColor')) {
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
+    } else if (!intervalId && updatedGame.gameType === 'multiplayer') {
+      const newIntervalId = setInterval(() => {
+        fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
+      }, 3000);
+      setIntervalId(newIntervalId);
     }
   };
   
