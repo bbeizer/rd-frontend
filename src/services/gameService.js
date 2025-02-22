@@ -23,7 +23,7 @@ export const joinQueue = async (playerId, playerName) => {
 
 export const startSinglePlayerGame = async (playerId, playerName) => {
   try {
-      const response = await fetch(`${baseUrl}/games/startSinglePlayerGame`, {
+      const response = await fetch(`${baseUrl}/api/games/startSinglePlayerGame`, {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const startSinglePlayerGame = async (playerId, playerName) => {
 // Use try-catch in getGameById
 export const getGameById = async (id) => {
   try {
-    const response = await fetch(`${baseUrl}/games/${id}`, {
+    const response = await fetch(`${baseUrl}/api/games/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export const getGameById = async (id) => {
 // Use try-catch in updateGame
 export const updateGame = async (gameId, gameData) => {
   try {
-    const response = await fetch(`${baseUrl}/games/${gameId}`, {
+    const response = await fetch(`${baseUrl}api/games/${gameId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
