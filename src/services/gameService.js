@@ -6,7 +6,7 @@ if (!baseUrl) {
 
 export const joinQueue = async (playerId, playerName) => {
   try {
-    const response = await fetch(`${baseUrl}/games/joinMultiplayerGame`, {
+    const response = await fetch(`${baseUrl}api/games/joinMultiplayerGame`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId, playerName }),
@@ -23,7 +23,7 @@ export const joinQueue = async (playerId, playerName) => {
 
 export const startSinglePlayerGame = async (playerId, playerName) => {
   try {
-    const response = await fetch(`${baseUrl}/games/startSinglePlayerGame`, {
+    const response = await fetch(`${baseUrl}api/games/startSinglePlayerGame`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId, playerName }),
@@ -40,7 +40,7 @@ export const startSinglePlayerGame = async (playerId, playerName) => {
 
 export const getGameById = async (id) => {
   try {
-    const response = await fetch(`${baseUrl}/games/${id}`, {
+    const response = await fetch(`${baseUrl}api/games/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -56,7 +56,7 @@ export const getGameById = async (id) => {
 
 export const updateGame = async (gameId, gameData) => {
   try {
-    const response = await fetch(`${baseUrl}/games/${gameId}`, {
+    const response = await fetch(`${baseUrl}api/games/${gameId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gameData),
