@@ -1,11 +1,9 @@
-// Ensure baseUrl is correctly set from the environment
 const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
 if (!baseUrl) {
   console.error("⚠️ VITE_BACKEND_BASE_URL is not set! Check your .env file.");
 }
 
-// ✅ Join Multiplayer Queue
 export const joinQueue = async (playerId, playerName) => {
   try {
     const response = await fetch(`${baseUrl}/games/joinMultiplayerGame`, {
@@ -23,7 +21,6 @@ export const joinQueue = async (playerId, playerName) => {
   }
 };
 
-// ✅ Start Single Player Game
 export const startSinglePlayerGame = async (playerId, playerName) => {
   try {
     const response = await fetch(`${baseUrl}/games/startSinglePlayerGame`, {
@@ -41,7 +38,6 @@ export const startSinglePlayerGame = async (playerId, playerName) => {
   }
 };
 
-// ✅ Get Game by ID
 export const getGameById = async (id) => {
   try {
     const response = await fetch(`${baseUrl}/games/${id}`, {
@@ -58,7 +54,6 @@ export const getGameById = async (id) => {
   }
 };
 
-// ✅ Update Game
 export const updateGame = async (gameId, gameData) => {
   try {
     const response = await fetch(`${baseUrl}/games/${gameId}`, {
