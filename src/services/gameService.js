@@ -1,83 +1,77 @@
-// Handle response in joinQueue
+// Ensure baseUrl is correctly set from the environment
 const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
+if (!baseUrl) {
+  console.error("⚠️ VITE_BACKEND_BASE_URL is not set! Check your .env file.");
+}
+
+// ✅ Join Multiplayer Queue
 export const joinQueue = async (playerId, playerName) => {
   try {
-    const response = await fetch(`${baseUrl}/api/games/joinMultiplayerGame`, {
+    const response = await fetch(`${baseUrl}/games/joinMultiplayerGame`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId, playerName }),
     });
-    if (!response.ok) {
-      throw new Error(`Failed to join game queue: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data;  // Returning the whole response including game and playerColor
+
+    if (!response.ok) throw new Error(`Failed to join queue: ${response.statusText}`);
+
+    return await response.json();
   } catch (error) {
-    console.error('Could not add player to the queue:', error);
+    console.error("Could not add player to the queue:", error.message);
     throw error;
   }
 };
 
+// ✅ Start Single Player Game
 export const startSinglePlayerGame = async (playerId, playerName) => {
   try {
-      const response = await fetch(`${baseUrl}/api/games/startSinglePlayerGame`, {
+    const response = await fetch(`${baseUrl}/games/startSinglePlayerGame`, {
       method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId, playerName }),
-      });
-      if (!response.ok) {
-      throw new Error(`Failed to join game: ${response.statusText}`);
-      }
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      console.error('Could not add player to the queue:', error);
-      throw error;
-  }
-};
-
-// Use try-catch in getGameById
-export const getGameById = async (id) => {
-  try {
-    const response = await fetch(`${baseUrl}/api/games/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Include other headers as needed, e.g., authorization tokens
-      },
     });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch game: ${response.statusText}`);
-    }
+
+    if (!response.ok) throw new Error(`Failed to start game: ${response.statusText}`);
+
     return await response.json();
   } catch (error) {
-    console.error('Could not fetch the game:', error);
+    console.error("Could not start single-player game:", error.message);
     throw error;
   }
 };
 
-// Use try-catch in updateGame
-export const updateGame = async (gameId, gameData) => {
+// ✅ Get Game by ID
+export const getGameById = async (id) => {
   try {
-    const response = await fetch(`${baseUrl}api/games/${gameId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        // Include other headers as needed, e.g., authorization tokens
-      },
-      body: JSON.stringify(gameData),
+    const response = await fetch(`${baseUrl}/games/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     });
-    if (!response.ok) {
-      throw new Error(`Failed to update the game: ${response.statusText}`);
-    }
+
+    if (!response.ok) throw new Error(`Failed to fetch game: ${response.statusText}`);
+
     return await response.json();
   } catch (error) {
-    console.error('Could not update the game:', error);
+    console.error("Could not fetch game:", error.message);
+    throw error;
+  }
+};
+
+// ✅ Update Game
+export const updateGame = async (gameId, gameData) => {
+  try {
+    const response = await fetch(`${baseUrl}/games/${gameId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameData),
+    });
+
+    if (!response.ok) throw new Error(`Failed to update game: ${response.statusText}`);
+
+    return await response.json();
+  } catch (error) {
+    console.error("Could not update game:", error.message);
     throw error;
   }
 };
