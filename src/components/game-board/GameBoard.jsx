@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchGame } from './helpers/fetchGame';
 import { updateGameState } from './helpers/updateGameState';
 import { getAIMove } from '../../services/aiService';
+import { getKeyCoordinates } from '../../utils/gameUtilities';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -179,13 +180,23 @@ const GameBoard = () => {
     }
     return (
       <>
-        {Object.entries(gameState.gameData.currentBoardStatus).map(([cellKey, cellData]) => {
-          const isPossibleMove = gameState.possibleMoves.includes(cellKey);
-          const isPossiblePass = gameState.possiblePasses.includes(cellKey);
-          let isActivePiece = null;
-          if(gameState.activePiece){
-            isActivePiece = gameState.activePiece.position === cellKey;
-          }
+        {Object.entries(gameState.gameData.currentBoardStatus).sort(([keyA], [keyB]) => {
+        // Sort keys by row descending, then column ascending
+        const rowA = parseInt(keyA[1], 10);
+        const rowB = parseInt(keyB[1], 10);
+        const colA = keyA.charCodeAt(0);
+        const colB = keyB.charCodeAt(0);
+        return rowB - rowA || colA - colB; // Sort by row descending, then column ascending
+      }).map(([cellKey, cellData]) => {
+        const coords = getKeyCoordinates(cellKey);
+        console.log(`Cell: ${cellKey}, Row:${coords.row} Column:${coords.col}`);
+        const isPossibleMove = gameState.possibleMoves.includes(cellKey);
+        const isPossiblePass = gameState.possiblePasses.includes(cellKey);
+        let isActivePiece = null;
+
+    if (gameState.activePiece) {
+      isActivePiece = gameState.activePiece.position === cellKey;
+    }
           return (
             <GridCell
             key={cellKey}
