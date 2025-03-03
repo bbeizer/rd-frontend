@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
+import Modal from '../modal/modal';
 import './lobby.css';
 
 function Lobby() {
   const navigate = useNavigate();
+  const [showColorModal, setShowColorModal] = useState(false);
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
@@ -34,15 +36,20 @@ function Lobby() {
     }
   };
 
-  const handleSinglePlayerGame = async () => {
+  const handleSelectColor = async (color) => {
     try{
+      setShowColorModal(false)
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
-      const data = await startSinglePlayerGame(userId, name);
+      const data = await startSinglePlayerGame(userId, name, color);
       navigate(`/game/${data.game._id}`);
     } catch (error){
       console.error('Failed to join game:', error);
     }
   };
+
+  const handleSinglePlayerGame = () => {
+    setShowColorModal(true);
+  }
 
   const pollGameStatus = async (id) => {
     try {
@@ -71,10 +78,16 @@ function Lobby() {
         />
       </div>
       <button className="button multiplayer" onClick={handleJoinGame}>Multiplayer Mode</button>
-      <button className="button singleplayer" onClick={handleSinglePlayerGame}>Single Player Mode</button>
       {waitingForPlayer && (
         <p className="waiting-text">Waiting for another player to join...</p>
       )}
+      <button className="button singleplayer" onClick={handleSinglePlayerGame}>Single Player Mode</button>
+      {showColorModal && 
+        <Modal>
+            <h2> Choose Your Color</h2>
+            <button className= "color-button white" onClick={()=> handleSelectColor("white")}>Play as White</button>
+            <button className= "color-button black" onClick={()=> handleSelectColor("black")}>Play as Black</button>
+         </Modal>}
       <div className="rules">
         <h2>Game Rules</h2>
         
