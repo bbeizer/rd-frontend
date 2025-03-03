@@ -1,4 +1,4 @@
-const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+const baseUrl = window.location.hostname=== "localhost" ? "http://localhost:3000"  : import.meta.env.VITE_BACKEND_BASE_URL;
 
 if (!baseUrl) {
   console.error("⚠️ VITE_BACKEND_BASE_URL is not set! Check your .env file.");
