@@ -21,12 +21,12 @@ export const joinQueue = async (playerId, playerName) => {
   }
 };
 
-export const startSinglePlayerGame = async (playerId, playerName) => {
+export const startSinglePlayerGame = async (playerId, playerName, playerColor) => {
   try {
     const response = await fetch(`${baseUrl}/api/games/startSinglePlayerGame`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, playerName }),
+      body: JSON.stringify({ playerId, playerName, playerColor }),
     });
 
     if (!response.ok) throw new Error(`Failed to start game: ${response.statusText}`);

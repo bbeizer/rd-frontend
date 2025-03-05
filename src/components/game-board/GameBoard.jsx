@@ -1,18 +1,22 @@
-import { useState, useEffect } from 'react';
-import './GameBoard.css';
+import { useState, useEffect, useCallback} from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
 import Confetti from 'react-confetti';
+
 import GridCell from '../grid/grid-cell/GridCell';
-import Modal from '../modal/modal';
-import Piece from '../piece/Piece';
 import GridContainer from '../grid/grid-container/GridContainer';
+import Piece from '../piece/Piece';
 import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
+import Modal from '../modal/modal';
+
 import { updateGame } from '../../services/gameService';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { fetchGame } from './helpers/fetchGame';
-import { updateGameState } from './helpers/updateGameState';
 import { getAIMove } from '../../services/aiService';
+
 import { getKeyCoordinates } from '../../utils/gameUtilities';
+import { fetchGame, updateGameState} from './helpers';
+
+
+import './GameBoard.css';
 
 const GameBoard = () => {
   const { gameId } = useParams();
@@ -31,40 +35,55 @@ const GameBoard = () => {
     winner: null
   });
   const [intervalId, setIntervalId] = useState(null);
-  const isUserWhite = gameState.playerColor === 'white';
+  const isUserWhite = localStorage.getItem('userColor') === 'white';
   const currentPlayerName = gameState.gameData ? (isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
   const opponentPlayerName = gameState.gameData ? (!isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
+  
+  //updates
+  const pollGame = useCallback(async () => {
+    if (!gameId) return;
 
+    try {
+      await fetchGame(gameId, setGameState, localStorage.getItem("userColor"));
+    } catch (error) {
+      console.error("Error fetching game data:", error);
+    }
+  }, [gameId, setGameState]);
+
+  //For polling game for initial Render
   useEffect(() => {
-    if (!gameId) return; // Exit if gameId is not defined
+    pollGame();
+  }, [pollGame]);
   
-    const pollGameData = async () => {
-      await fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
-    };
-  
-    // Perform the initial fetch of the game data
-    pollGameData();
-  
-    // If it's a multiplayer game and not the user's turn, set up polling
-    if (gameState.gameType === 'multiplayer' && !gameState.isUserTurn && !intervalId) {
-      const newIntervalId = setInterval(pollGameData, 3000);
+  //useEffect for polling in multiplayer games
+  useEffect(() => {
+    if (!gameState || gameState.gameType !== "multiplayer") return;
+
+    let newIntervalId;
+    if (!gameState.isUserTurn) {
+      newIntervalId = setInterval(pollGame, 3000);
       setIntervalId(newIntervalId);
     }
-  
-    // Clear the interval when it becomes the user's turn or if the game switches to single-player
-    if ((gameState.gameType === 'singleplayer' || gameState.isUserTurn) && intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
-  
-    // Cleanup on component unmount
+
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (newIntervalId) {
+        clearInterval(newIntervalId);
         setIntervalId(null);
       }
     };
-  }, [gameState.isUserTurn, gameState.gameType, gameId, intervalId]); // Include gameState.gameType in dependencies
+  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
+
+  useEffect(() => {
+    if (!gameState || gameState.gameType !== "singleplayer") return;
+
+    // ✅ AI is White & User is Black → AI should move first
+    if (gameState.currentPlayerTurn === "white" && gameState.playerColor === "black") {
+      console.log("AI (White) is making the first move...");
+      getAIMove(gameId).then((updatedGame) => {
+        setGameState(updatedGame);
+      });
+    }
+  }, [gameState, gameState?.currentPlayerTurn, gameState?.gameType, gameId]);
   
   const handleClick = async (event) => {
     event.stopPropagation();
@@ -84,62 +103,46 @@ const GameBoard = () => {
   };
 
   const handlePassTurn = async () => {
-    const currentPlayerColor = localStorage.getItem('userColor');
-    const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
-    
+    const currentPlayerColor = localStorage.getItem("userColor");
+    const nextPlayerTurn = currentPlayerColor === "white" ? "black" : "white";
+  
     try {
       let updates;
-      if (gameState.gameType === 'multiplayer') {
+      if (gameState.gameType === "multiplayer") {
         updates = {
-          currentBoardStatus: gameState.gameData.currentBoardStatus,
+          ...gameState.gameData,
           currentPlayerTurn: nextPlayerTurn,
           activePiece: null,
           movedPiece: null,
-          originalSquare: null,
           possibleMoves: [],
           possiblePasses: []
         };
       } else {
-        //Call AI service and wait for the move
-        const aiMove = await getAIMove(gameState);
+        const aiMove = await getAIMove(gameId);
         updates = {
           ...aiMove,
-          currentPlayerTurn: currentPlayerColor  // Keep the turn on the player in single-player mode
+          currentPlayerTurn: currentPlayerColor, 
         };
       }
   
       const updatedGame = await updateGame(gameId, updates);
-      setGameState(prevState => ({
-        ...prevState,
-        gameData: updatedGame,
-        movedPiece: null,
-        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
-        activePiece: null,
-        originalSquare: null,
-        possibleMoves: [],
-        possiblePasses: []
-      }));
-      
-      managePolling(updatedGame);
-    } catch (error) {
-      console.error('Failed to update game:', error);
-    }
-  };
+      setGameState(updatedGame);
   
-
-  const managePolling = (updatedGame) => {
-    if (updatedGame.currentPlayerTurn === localStorage.getItem('userColor')) {
-      if (intervalId) {
+      // Start polling if it's multiplayer and not the user's turn
+      if (gameState.gameType === "multiplayer" && updatedGame.currentPlayerTurn !== currentPlayerColor) {
+        if (!intervalId) {
+          const newIntervalId = setInterval(pollGame, 3000);
+          setIntervalId(newIntervalId);
+        }
+      } else if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
       }
-    } else if (!intervalId && updatedGame.gameType === 'multiplayer') {
-      const newIntervalId = setInterval(() => {
-        fetchGame(gameId, setGameState, localStorage.getItem('userColor'));
-      }, 3000);
-      setIntervalId(newIntervalId);
+    } catch (error) {
+      console.error("Failed to update game:", error);
     }
   };
+  
   
   const handleGameEnd = async (newState) => {
     clearInterval(intervalId); // Stop polling
@@ -229,7 +232,7 @@ const GameBoard = () => {
   if (!gameState.gameData) {
     return <div>Loading game data...</div>;
   }
-  const rotationStyle = gameState.playerColor === 'black' ? '180deg' : '0deg';
+  const rotationStyle = localStorage.getItem('userColor') === 'black' ? '180deg' : '0deg';
   return (
     <div className="game-container">
       {gameState.gameData.status === 'completed' && <Confetti />}

@@ -40,6 +40,7 @@ function Lobby() {
     try{
       setShowColorModal(false)
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
+      localStorage.setItem('userColor', color);
       const data = await startSinglePlayerGame(userId, name, color);
       navigate(`/game/${data.game._id}`);
     } catch (error){
@@ -78,9 +79,7 @@ function Lobby() {
         />
       </div>
       <button className="button multiplayer" onClick={handleJoinGame}>Multiplayer Mode</button>
-      {waitingForPlayer && (
-        <p className="waiting-text">Waiting for another player to join...</p>
-      )}
+      {waitingForPlayer && (<Modal> <h2>Waiting for another player to join...</h2> </Modal>)}
       <button className="button singleplayer" onClick={handleSinglePlayerGame}>Single Player Mode</button>
       {showColorModal && 
         <Modal>

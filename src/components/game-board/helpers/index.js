@@ -1,2 +1,3 @@
-export * from './movePiece';
-export * from './canMovePiece';
+export * from './fetchGame';
+export * from './updateGameState'
+export * from './pollGameData'
