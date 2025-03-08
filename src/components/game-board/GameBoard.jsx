@@ -105,7 +105,6 @@ const GameBoard = () => {
   const handlePassTurn = async () => {
     const currentPlayerColor = localStorage.getItem("userColor");
     const nextPlayerTurn = currentPlayerColor === "white" ? "black" : "white";
-  
     try {
       let updates;
       if (gameState.gameType === "multiplayer") {
@@ -118,15 +117,25 @@ const GameBoard = () => {
           possiblePasses: []
         };
       } else {
-        const aiMove = await getAIMove(gameId);
+        const aiMove = await getAIMove(gameState);
         updates = {
           ...aiMove,
           currentPlayerTurn: currentPlayerColor, 
+          gameData: aiMove.gameData
         };
       }
-  
       const updatedGame = await updateGame(gameId, updates);
-      setGameState(updatedGame);
+      setGameState(prevState => ({
+        ...prevState,
+        ...updatedGame,  // Merge AI/multiplayer updates
+        gameData: updates.gameData || prevState.gameData,  // Ensure gameData persists
+        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor, // Ensure correct turn logic
+        activePiece: null, 
+        movedPiece: null, 
+        possibleMoves: [],
+        possiblePasses: []
+      }));
+      
   
       // Start polling if it's multiplayer and not the user's turn
       if (gameState.gameType === "multiplayer" && updatedGame.currentPlayerTurn !== currentPlayerColor) {

@@ -40,7 +40,7 @@ export const startSinglePlayerGame = async (playerId, playerName, playerColor) =
 
 export const getGameById = async (id) => {
   try {
-    const response = await fetch(`${baseUrl}/api/games/${id}`, {
+    const response = await fetch(`${baseUrl}/api/games/${id}`, { cache: "no-store" } , {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
