@@ -7,16 +7,22 @@ import { returnPieceToOriginalSquare } from './returnPieceToOriginalSquare';
 import { keepMovedPieceSelected } from './keepMovedPieceSelected';
 import { includesCoordinates } from "./includesCoordinates";
 import isEqual from 'lodash/isEqual';
-import { usersTurn } from './usersTurn';
 import { canReceiveBall } from './canReceiveBall';
 import { didWin } from './didWin';
 import { clickedOnWrongPiece } from './clickedOnWrongPiece';
 
 export function updateGameState(cellKey, gameState) {
-  const element = gameState.gameData.currentBoardStatus[cellKey];
+  console.log("cell key...")
+  console.log(cellKey)
+  console.log("gameState...")
+  console.log(gameState)
+  const playerColor = localStorage.getItem('userColor')
+  const isUserTurn = gameState.currentPlayerTurn = playerColor
+  const element = gameState.currentBoardStatus[cellKey];
   const clickedOnPiece = !!element;
   const pieceHasBall = element?.hasBall;
   const unselectingASelectedPiece = gameState.activePiece && isEqual(element, gameState.activePiece);
+  const reselectingTheMovedPiece = isEqual(gameState.movedPiece?.position, element?.position)
   const activePieceHasBall = gameState.activePiece?.hasBall;
   const noPieceHasMovedAndMoveIsValid = !gameState.movedPiece && includesCoordinates(gameState.possibleMoves, cellKey);
   const aPieceHasMoved = !!gameState.movedPiece;
@@ -24,15 +30,20 @@ export function updateGameState(cellKey, gameState) {
   const noActivePiece = !gameState.activePiece;
 
   let newState = { ...gameState };
-  if (!usersTurn(newState.isUserTurn)) return gameState;
+  if (!isUserTurn) return gameState;
   // Clicked on a piece
   if (clickedOnPiece) {
-    if (clickedOnWrongPiece(element.color, gameState.playerColor)){
+    if (clickedOnWrongPiece(element.color, playerColor)){
       console.log("You cannot select your opponent's piece.");
       return gameState;
     }
     // Case 1: A piece has moved and the active piece does not have the ball
-    if (aPieceHasMoved && !activePieceHasBall && !isEqual(element, gameState.movedPiece) && !pieceHasBall) {
+    console.log(`a PieceHasMoved...  ${aPieceHasMoved}`)
+    console.log(`activePieceHasBall ${activePieceHasBall}`)
+    console.log(`element... ${element}`)
+    console.log(`piece hasBall... ${pieceHasBall}`)
+    console.log(`unselectingASelectedPiece.. ${unselectingASelectedPiece}`)
+    if (aPieceHasMoved && !activePieceHasBall && !isEqual(element, gameState.movedPiece) && !pieceHasBall && !unselectingASelectedPiece && !reselectingTheMovedPiece)  {
       console.log("You can only select the piece that has already moved or the piece with the ball.");
       return gameState;
     }
@@ -48,10 +59,10 @@ export function updateGameState(cellKey, gameState) {
       if (activePieceHasBall) {
         if (canReceiveBall(element, gameState.possiblePasses)) {
           newState = passBallAndSetActivePiece(newState, element, cellKey);
-          if (didWin(newState.gameData.currentBoardStatus)) {
-            newState.winner = newState.gameData.currentPlayerTurn === 'white' 
-            ? newState.gameData.whitePlayerName 
-            : newState.gameData.blackPlayerName;
+          if (didWin(newState.currentBoardStatus)) {
+            newState.winner = newState.currentPlayerTurn === 'white' 
+            ? newState.whitePlayerName 
+            : newState.blackPlayerName;
             return newState;
           }
         } else {
@@ -78,9 +89,11 @@ export function updateGameState(cellKey, gameState) {
         newState = clearSelection(newState);
       } else if (noPieceHasMovedAndMoveIsValid) {
         newState = movePieceAndSetActivePiece(newState, gameState.activePiece.position, cellKey);
+        newState.hasMoved = true
       } else if (aPieceHasMoved) {
         if (isReturningToOriginalSquare) {
           newState = returnPieceToOriginalSquare(newState, cellKey);
+          newState.hasMoved = false;
         } else {
           newState = keepMovedPieceSelected(newState);
         }

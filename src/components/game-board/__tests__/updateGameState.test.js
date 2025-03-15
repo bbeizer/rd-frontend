@@ -18,7 +18,7 @@ describe('updateGameState', () => {
   it('should select a piece when clicked', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
-    expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
+    expect(newState.activePiece).toEqual({ ...initialState.currentBoardStatus[cellKeyClicked], position: 'e1' });
     
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
     expectedMoves.forEach(move => {
@@ -28,7 +28,7 @@ describe('updateGameState', () => {
 
   it('should deselect a piece when the same piece is clicked again', () => {
     const cellKeyClicked = 'e1';
-    initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
+    initialState.activePiece = initialState.currentBoardStatus['e1'];
     const newState = updateGameState(cellKeyClicked, initialState);
     expect(newState.activePiece).toBeNull();
     expect(newState.possibleMoves).toEqual([]);
@@ -43,32 +43,32 @@ describe('updateGameState', () => {
 
   it('active piece should move to cellKeyClicked if it is a possibleMove', () => {
     const cellKeyClicked = 'f3';
-    expect(initialState.gameData.currentBoardStatus['f3']).toBeNull();
+    expect(initialState.currentBoardStatus['f3']).toBeNull();
     
-    initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
+    initialState.activePiece = initialState.currentBoardStatus['e1'];
     initialState.possibleMoves = ['f3', 'g2', 'c2', 'd3']; 
     
     const newState = updateGameState(cellKeyClicked, initialState);
-    expect(newState.gameData.currentBoardStatus['f3']).not.toBeNull();
-    expect(newState.gameData.currentBoardStatus['e1']).toBeNull();
+    expect(newState.currentBoardStatus['f3']).not.toBeNull();
+    expect(newState.currentBoardStatus['e1']).toBeNull();
   });
 
   it('active piece should not move to cellKeyClicked if it is not a possibleMove', () => {
     const wrongDestinationKey = 'a1';
-    initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
+    initialState.activePiece = initialState.currentBoardStatus['e1'];
     
     const newState = updateGameState(wrongDestinationKey, initialState);
-    expect(newState.gameData.currentBoardStatus['e1']).toEqual({
-      ...initialState.gameData.currentBoardStatus['e1'],
+    expect(newState.currentBoardStatus['e1']).toEqual({
+      ...initialState.currentBoardStatus['e1'],
       position: 'e1'
     });
-    expect(newState.gameData.currentBoardStatus['a1']).toBeNull();
+    expect(newState.currentBoardStatus['a1']).toBeNull();
   });
 
   it('should update the possible moves when a piece is selected', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
-    expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'e1' });
+    expect(newState.activePiece).toEqual({ ...initialState.currentBoardStatus[cellKeyClicked], position: 'e1' });
     const expectedMoves = ['f3', 'g2', 'c2', 'd3'];
     expectedMoves.forEach(move => {
       expect(newState.possibleMoves).toContain(move);
@@ -78,7 +78,7 @@ describe('updateGameState', () => {
   it('should update the possible passes when a piece with a ball is selected', () => {
     const cellKeyClicked = 'd1'; // Adjusted to rank 1
     const newState = updateGameState(cellKeyClicked, initialState);
-    expect(newState.activePiece).toEqual({ ...initialState.gameData.currentBoardStatus[cellKeyClicked], position: 'd1', hasBall: true });
+    expect(newState.activePiece).toEqual({ ...initialState.currentBoardStatus[cellKeyClicked], position: 'd1', hasBall: true });
     const expectedPasses = ['e1', 'c1'];
     expectedPasses.forEach(pass => {
       expect(newState.possiblePasses).toContain(pass);
@@ -88,7 +88,7 @@ describe('updateGameState', () => {
   it('should clear possible moves when deselecting a piece', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
     initialState.activePiece = {
-      ...initialState.gameData.currentBoardStatus[cellKeyClicked],
+      ...initialState.currentBoardStatus[cellKeyClicked],
       position: cellKeyClicked
     };
     initialState.possibleMoves = ["f3", "g4"]; // Possible moves before deselecting
@@ -114,13 +114,13 @@ describe('updateGameState', () => {
 
   it('user should not be able to select another piece without the ball if theyve already moved a piece', () => {
     const firstMove = 'f3';
-    expect(initialState.gameData.currentBoardStatus[firstMove]).toBeNull(); // f3 is empty before move
-    initialState.activePiece = initialState.gameData.currentBoardStatus['e1'];
+    expect(initialState.currentBoardStatus[firstMove]).toBeNull(); // f3 is empty before move
+    initialState.activePiece = initialState.currentBoardStatus['e1'];
     initialState.possibleMoves = [firstMove, 'g2', 'c2', 'd3'];
     let newState = updateGameState(firstMove, initialState);
 
-    expect(newState.gameData.currentBoardStatus[firstMove]).not.toBeNull();
-    expect(newState.gameData.currentBoardStatus['e1']).toBeNull();
+    expect(newState.currentBoardStatus[firstMove]).not.toBeNull();
+    expect(newState.currentBoardStatus['e1']).toBeNull();
     expect(newState.activePiece.position).toEqual(firstMove); // f3 piece is now active
 
     const secondMoveAttempt = 'f1';

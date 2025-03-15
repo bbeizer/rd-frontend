@@ -24,71 +24,84 @@ const GameBoard = () => {
   const [gameState, setGameState] = useState({
     gameId: gameId,
     gameType: null,
-    gameData: null,
-    isUserTurn: true,
+    currentPlayerTurn: 'white',
     activePiece: null,
     possibleMoves: [],
     movedPiece: null,
     movedPieceOriginalPosition: null,
     possiblePasses: [],
     playerColor: localStorage.getItem('userColor'),
-    winner: null
+    winner: null,
   });
+  const isUsersTurn = gameState?.currentPlayerTurn === localStorage.getItem("userColor");
   const [intervalId, setIntervalId] = useState(null);
   const isUserWhite = localStorage.getItem('userColor') === 'white';
-  const currentPlayerName = gameState.gameData ? (isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
-  const opponentPlayerName = gameState.gameData ? (!isUserWhite ? gameState.gameData.whitePlayerName : gameState.gameData.blackPlayerName) : 'Loading...';
+  const currentPlayerName = gameState ? (isUserWhite ? gameState.whitePlayerName : gameState.blackPlayerName) : 'Loading...';
+  const opponentPlayerName = gameState ? (!isUserWhite ? gameState.whitePlayerName : gameState.blackPlayerName) : 'Loading...';
   
-  //updates
   const pollGame = useCallback(async () => {
     if (!gameId) return;
-
     try {
-      await fetchGame(gameId, setGameState, localStorage.getItem("userColor"));
+      const fetchedGame = await fetchGame(gameId, setGameState);
+      console.log("setting gameState");
+  
+      setGameState(prevState => {
+        if (JSON.stringify(prevState) === JSON.stringify(fetchedGame)) {
+          console.log("⚠️ No change in game data, skipping update.");
+          return prevState;
+        }
+        console.log("✅ Updating game state with backend data.");
+        return fetchedGame;
+      });
+  
     } catch (error) {
       console.error("Error fetching game data:", error);
     }
-  }, [gameId, setGameState]);
+  }, [gameId]); // ✅ Only re-run when `gameId` changes  
 
-  //For polling game for initial Render
-  useEffect(() => {
-    pollGame();
-  }, [pollGame]);
-  
-  //useEffect for polling in multiplayer games
-  useEffect(() => {
-    if (!gameState || gameState.gameType !== "multiplayer") return;
+//For polling game for initial Render
+useEffect(() => {
+  pollGame();
+}, [gameId, pollGame]);
 
-    let newIntervalId;
-    if (!gameState.isUserTurn) {
-      newIntervalId = setInterval(pollGame, 3000);
-      setIntervalId(newIntervalId);
+//useEffect for polling in multiplayer games
+useEffect(() => {
+  if (!gameState || gameState.gameType !== "multiplayer") return;
+
+  let newIntervalId;
+  if (!gameState.isUserTurn) {
+    newIntervalId = setInterval(pollGame, 3000);
+    setIntervalId(newIntervalId);
+  }
+
+  return () => {
+    if (newIntervalId) {
+      clearInterval(newIntervalId);
+      setIntervalId(null);
     }
+  };
+}, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
 
-    return () => {
-      if (newIntervalId) {
-        clearInterval(newIntervalId);
-        setIntervalId(null);
-      }
-    };
-  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
+useEffect(() => {
+  if (!gameState || gameState.gameType !== "singleplayer") return;
 
-  useEffect(() => {
-    if (!gameState || gameState.gameType !== "singleplayer") return;
+  // ✅ AI is White & User is Black → AI should move first
+  if (gameState.currentPlayerTurn === "white" && gameState.playerColor === "black") {
+    console.log("AI (White) is making the first move...");
+    getAIMove(gameId).then((updatedGame) => {
+      setGameState(updatedGame);
+    });
+  }
+}, [gameState, gameState?.currentPlayerTurn, gameState?.gameType, gameId]);
 
-    // ✅ AI is White & User is Black → AI should move first
-    if (gameState.currentPlayerTurn === "white" && gameState.playerColor === "black") {
-      console.log("AI (White) is making the first move...");
-      getAIMove(gameId).then((updatedGame) => {
-        setGameState(updatedGame);
-      });
-    }
-  }, [gameState, gameState?.currentPlayerTurn, gameState?.gameType, gameId]);
+
   
   const handleClick = async (event) => {
     event.stopPropagation();
     const cellKey = event.currentTarget.id;
     const newState = updateGameState(cellKey, gameState);
+    console.log("🔥 New State BEFORE updating backend:");
+    console.log(newState);
     setGameState(newState);
 
     if (newState.winner) {
@@ -97,6 +110,7 @@ const GameBoard = () => {
 
     try {
       await updateGame(gameId, newState);
+      console.log("✅ Successfully updated backend!");
     } catch (error) {
       console.error('Failed to update game on server:', error);
     }
@@ -108,49 +122,49 @@ const GameBoard = () => {
     try {
       let updates;
       if (gameState.gameType === "multiplayer") {
+        console.log("🌍 Multiplayer turn change detected");
         updates = {
-          ...gameState.gameData,
+          ...gameState,
           currentPlayerTurn: nextPlayerTurn,
           activePiece: null,
           movedPiece: null,
+          hasMoved: false,
           possibleMoves: [],
           possiblePasses: []
         };
       } else {
+        console.log("🧠 AI Move requested for singleplayer");
         const aiMove = await getAIMove(gameState);
+        console.log("🤖 AI Move response:", JSON.stringify(aiMove, null, 2));
+  
         updates = {
           ...aiMove,
           currentPlayerTurn: currentPlayerColor, 
-          gameData: aiMove.gameData
+          currentBoardStatus: aiMove.currentBoardStatus,
+          hasMoved: false
         };
       }
+  
+      console.log("🔄 Sending updateGame request...");
       const updatedGame = await updateGame(gameId, updates);
+      console.log("✅ Game updated:", JSON.stringify(updatedGame, null, 2));
+  
       setGameState(prevState => ({
         ...prevState,
-        ...updatedGame,  // Merge AI/multiplayer updates
-        gameData: updates.gameData || prevState.gameData,  // Ensure gameData persists
-        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor, // Ensure correct turn logic
+        ...updatedGame,
+        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
         activePiece: null, 
-        movedPiece: null, 
+        movedPiece: null,
+        hasMoved: false, 
         possibleMoves: [],
         possiblePasses: []
       }));
-      
   
-      // Start polling if it's multiplayer and not the user's turn
-      if (gameState.gameType === "multiplayer" && updatedGame.currentPlayerTurn !== currentPlayerColor) {
-        if (!intervalId) {
-          const newIntervalId = setInterval(pollGame, 3000);
-          setIntervalId(newIntervalId);
-        }
-      } else if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
     } catch (error) {
-      console.error("Failed to update game:", error);
+      console.error("❌ Failed to update game:", error);
     }
   };
+  
   
   
   const handleGameEnd = async (newState) => {
@@ -159,17 +173,15 @@ const GameBoard = () => {
     // Update local game state
     setGameState((prevState) => ({
         ...prevState,
-        gameData: {
-            ...prevState.gameData, // Preserve other properties in gameData
-            currentBoardStatus: newState.gameData.currentBoardStatus, // Update board status
-            status: 'completed', // Mark game as completed
-        },
+        currentBoardStatus: newState.currentBoardStatus, // Update board status
+        status: 'completed', // Mark game as completed
+        
     }));
 
     try {
         // Prepare updates for the server
         const updates = {
-            currentBoardStatus: newState.gameData.currentBoardStatus,
+            currentBoardStatus: newState.currentBoardStatus,
             status: 'completed',
             activePiece: null,
             movedPiece: null,
@@ -187,12 +199,12 @@ const GameBoard = () => {
 
 
   const renderBoard = () => {
-    if (!gameState.gameData.currentBoardStatus) {
+    if (!gameState.currentBoardStatus) {
       return <p>Loading game board...</p>;
     }
     return (
       <>
-        {Object.entries(gameState.gameData.currentBoardStatus).sort(([keyA], [keyB]) => {
+        {Object.entries(gameState.currentBoardStatus).sort(([keyA], [keyB]) => {
         // Sort keys by row descending, then column ascending
         const rowA = parseInt(keyA[1], 10);
         const rowB = parseInt(keyB[1], 10);
@@ -238,13 +250,13 @@ const GameBoard = () => {
     );
   };
 
-  if (!gameState.gameData) {
+  if (!gameState) {
     return <div>Loading game data...</div>;
   }
   const rotationStyle = localStorage.getItem('userColor') === 'black' ? '180deg' : '0deg';
   return (
     <div className="game-container">
-      {gameState.gameData.status === 'completed' && <Confetti />}
+      {gameState.status === 'completed' && <Confetti />}
       <PlayerInfoBar
         playerName={opponentPlayerName}
       />
@@ -255,12 +267,12 @@ const GameBoard = () => {
         </div>
         </div>
       
-        {gameState.gameData.status === 'playing' && !gameState.isUserTurn && (
-          <Modal>
-            <p>It&apos;s not your turn. Please wait for the other player.</p>
-          </Modal>
-        )}
-        {gameState.gameData.status === 'completed' && (
+        {gameState.status === 'playing' && !isUsersTurn && (
+      <Modal>
+        <p>It&apos;s s not your turn. Please wait for the other player.</p>
+      </Modal>
+    )}
+            {gameState.status === 'completed' && (
             <Modal>
             <h2>{gameState.winner} wins!</h2>
             <button onClick={() => navigate('/')}>Return to Lobby</button>
@@ -272,7 +284,7 @@ const GameBoard = () => {
       />
       <button 
         onClick={handlePassTurn} 
-        disabled={!gameState.isUserTurn} 
+        disabled={!isUsersTurn} 
         style={{ alignSelf: 'flex-start', margin: '10px' }}
       >
         Pass Turn
