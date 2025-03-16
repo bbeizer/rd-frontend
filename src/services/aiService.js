@@ -1,9 +1,9 @@
-//const AI_SERVICE_URL = import.meta.env.VITE_REACT_APP_AI_SERVICE_URL;
+const baseUrl = window.location.hostname=== "localhost" ? "http://localhost:5001/ai/move'"  : import.meta.env.VITE_BACKEND_BASE_URL;
 
 export async function getAIMove(game) {
     try {
         console.log("Sending gameState to AI service:", game);
-        const response = await fetch('http://localhost:5001/ai/move', {
+        const response = await fetch(baseUrl , {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(game),
