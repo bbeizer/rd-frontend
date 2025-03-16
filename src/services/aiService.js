@@ -1,4 +1,4 @@
-const baseUrl = window.location.hostname=== "localhost" ? "http://localhost:5001/ai/move'"  : import.meta.env.VITE_BACKEND_BASE_URL;
+const baseUrl = window.location.hostname=== "localhost" ? "http://localhost:5001/ai/move"  : import.meta.env.VITE_BACKEND_BASE_URL;
 
 export async function getAIMove(game) {
     try {
