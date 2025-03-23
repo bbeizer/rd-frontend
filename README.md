@@ -51,15 +51,10 @@ As RazzInDazzle continues to evolve, here are the key features and improvements 
 - **Temporary IDs**: Assign temporary IDs to guest users for the duration of their session, ensuring they can seamlessly join games.
 - **Optional Sign-Up**: Provide an option for guests to convert their session into a registered account, preserving any game history or statistics.
 
-### 2. Single-Player Mode with AI
-- **AI Development**: Create an AI opponent for users to play against in single-player mode, offering varying difficulty levels.
-- **User Interface**: Design a user-friendly interface for selecting AI difficulty and game settings.
-- **Gameplay Testing**: Thoroughly test the AI to ensure challenging and engaging gameplay.
-
-### 3. Overall UI/Bug Fixes
+### 2. Overall UI/Bug Fixes
 - **Better Design**: improve the overall look and feel of the app
 - **Feedback Form**: adding a feedback form
-- **In game Chat**: implementing and in game chat
+- **In game Chat**: implementing an in game chat
 - **Bug Fixes**: fix any known bugs
 
    
