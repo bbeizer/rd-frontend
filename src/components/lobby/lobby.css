@@ -1,4 +1,3 @@
-
 /* ✅ General Styles */
 body {
   font-family: 'Arial', sans-serif;
@@ -54,7 +53,9 @@ body {
   border-radius: 5px;
   margin: 10px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -105,7 +106,9 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
 .modal-close:hover {
@@ -121,7 +124,9 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
 .color-button.white {
@@ -210,7 +215,7 @@ img {
   }
   25% {
     opacity: 1;
-    content: url('/images/pass2.png'); 
+    content: url('/images/pass2.png');
   }
   50% {
     opacity: 1;

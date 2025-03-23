@@ -1,9 +1,8 @@
-
 .ball {
-  width: 14px; 
+  width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-color: #bbb; 
+  background-color: #bbb;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -15,14 +14,14 @@
 }
 
 .piece {
-  width: 35px; 
-  height: 35px; 
+  width: 35px;
+  height: 35px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   margin: 5px;
-  border: 2px solid rgba(0, 0, 0, 0.2); 
+  border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 .black-piece {
@@ -34,19 +33,19 @@
 }
 
 .hole {
-  width: 10px; 
-  height: 10px; 
-  border-radius: 50%; 
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); 
+  transform: translate(-50%, -50%);
 }
 
 .black-piece .hole {
-  background-color: white; 
+  background-color: white;
 }
 
 .white-piece .hole {
-  background-color: black; 
+  background-color: black;
 }

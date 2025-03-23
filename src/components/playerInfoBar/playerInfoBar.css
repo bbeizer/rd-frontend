@@ -1,26 +1,26 @@
 .player-info-bar {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    background: linear-gradient(to right, #f4deb4, #e8c689);
-    border: 1px solid #d3c1a5;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    width: 460px;  /* Set the width to fit your design */
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 16px;
-    color: #333;
-    margin: 5px auto 5px 0; /* Top, Right, Bottom, Left */
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #f4deb4, #e8c689);
+  border: 1px solid #d3c1a5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  width: 460px; /* Set the width to fit your design */
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
+  margin: 5px auto 5px 0; /* Top, Right, Bottom, Left */
 }
 
 .player-avatar {
-    margin-right: 15px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #d3c1a5; 
+  margin-right: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #d3c1a5;
 }
 
 .player-name {
-    font-weight: bold;
-    letter-spacing: 0.5px; 
+  font-weight: bold;
+  letter-spacing: 0.5px;
 }
