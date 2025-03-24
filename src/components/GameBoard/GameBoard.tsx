@@ -92,11 +92,14 @@ const GameBoard = () => {
       return;
   
     console.log('AI (White) is making the first move...');
-    getAIMove({ ...gameState, gameId: gameId! }).then((updatedGame) => {
-      setGameState(updatedGame);
+    getAIMove(gameState).then((updatedGame) => {
+      setGameState(prev => ({
+        ...prev,
+        ...updatedGame,
+        gameId: prev.gameId, // 🔥 ensure we don't lose gameId
+      }));
     });
-  }, [gameState]);
-  
+  }, [gameState]);  
 
   const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -141,6 +144,12 @@ const GameBoard = () => {
       } else {
         console.log('🧠 AI Move requested for singleplayer');
         const aiMove = await getAIMove(gameState);
+        setGameState(prev => ({
+          ...prev,
+          ...aiMove,
+          gameId: prev.gameId,
+        }));
+
         console.log('🤖 AI Move response:', JSON.stringify(aiMove, null, 2));
 
         updates = {
