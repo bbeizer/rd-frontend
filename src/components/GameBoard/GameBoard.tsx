@@ -16,8 +16,8 @@ import './GameBoard.css';
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const [gameState, setGameState] = useState<GameState>({
-    gameId: gameId,
+  const [gameState, setGameState] = useState<GameState>(() => ({
+    gameId: gameId ?? '',
     gameType: null,
     currentPlayerTurn: 'white',
     activePiece: null,
@@ -27,7 +27,7 @@ const GameBoard = () => {
     possiblePasses: [],
     playerColor: localStorage.getItem('userColor'),
     winner: null,
-  });
+  }));  
   const isUsersTurn = gameState?.currentPlayerTurn === localStorage.getItem('userColor');
   const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
   const isUserWhite = localStorage.getItem('userColor') === 'white';
@@ -92,7 +92,7 @@ const GameBoard = () => {
       return;
   
     console.log('AI (White) is making the first move...');
-    getAIMove(gameState).then((updatedGame) => {
+    getAIMove({ ...gameState, gameId: gameId! }).then((updatedGame) => {
       setGameState(updatedGame);
     });
   }, [gameState]);

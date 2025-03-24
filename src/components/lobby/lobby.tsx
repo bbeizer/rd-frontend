@@ -10,7 +10,7 @@ function Lobby() {
   const [showColorModal, setShowColorModal] = useState(false);
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
-  const [intervalId, setIntervalId] = useState(null);
+  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -25,7 +25,7 @@ function Lobby() {
       localStorage.setItem('userColor', data.playerColor);
 
       if (data.game.status === 'playing') {
-        navigate(`/game/${data.game._id}`);
+        navigate(`/game/${data._id}`);
       } else {
         setWaitingForPlayer(true);
         const id = setInterval(() => pollGameStatus(data.game._id), 3000);
@@ -36,7 +36,7 @@ function Lobby() {
     }
   };
 
-  const handleSelectColor = async (color) => {
+  const handleSelectColor = async (color: string) => {
     try {
       setShowColorModal(false);
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
@@ -52,17 +52,20 @@ function Lobby() {
     setShowColorModal(true);
   };
 
-  const pollGameStatus = async (id) => {
+  const pollGameStatus = async (id: string) => {
     try {
       const game = await getGameById(id);
       if (game.status === 'playing') {
-        clearInterval(intervalId);
+        if (intervalId !== null) {
+          clearInterval(intervalId);
+        }
         navigate(`/game/${game._id}`);
       }
     } catch (error) {
       console.error('Error polling game status:', error);
     }
   };
+  
 
   return (
     <div className="lobby">
