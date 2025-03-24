@@ -29,7 +29,7 @@ const GameBoard = () => {
     winner: null,
   });
   const isUsersTurn = gameState?.currentPlayerTurn === localStorage.getItem('userColor');
-  const [intervalId, setIntervalId] = useState(null);
+  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
   const isUserWhite = localStorage.getItem('userColor') === 'white';
   const currentPlayerName = gameState
     ? isUserWhite
@@ -69,20 +69,17 @@ const GameBoard = () => {
   //useEffect for polling in multiplayer games
   useEffect(() => {
     if (!gameState || gameState.gameType !== 'multiplayer') return;
-
-    let newIntervalId;
+  
     if (!gameState.isUserTurn) {
-      newIntervalId = setInterval(pollGame, 3000);
+      const newIntervalId: ReturnType<typeof setInterval> = setInterval(pollGame, 3000);
       setIntervalId(newIntervalId);
-    }
-
-    return () => {
-      if (newIntervalId) {
+  
+      return () => {
         clearInterval(newIntervalId);
         setIntervalId(null);
-      }
-    };
-  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
+      };
+    }
+  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);  
 
   useEffect(() => {
     if (!gameState || gameState.gameType !== 'singleplayer') return;
@@ -90,13 +87,13 @@ const GameBoard = () => {
     // ✅ AI is White & User is Black → AI should move first
     if (gameState.currentPlayerTurn === 'white' && gameState.playerColor === 'black') {
       console.log('AI (White) is making the first move...');
-      getAIMove(gameId).then((updatedGame) => {
+      getAIMove(gameState).then((updatedGame) => {
         setGameState(updatedGame);
       });
     }
   }, [gameState, gameState?.currentPlayerTurn, gameState?.gameType, gameId]);
 
-  const handleClick = async (event) => {
+  const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
     const cellKey = event.currentTarget.id;
     const newState = updateGameState(cellKey, gameState);
@@ -109,6 +106,10 @@ const GameBoard = () => {
     }
 
     try {
+      if (!gameId) {
+        console.error('gameId is undefined');
+        return;
+      }
       await updateGame(gameId, newState);
       console.log('✅ Successfully updated backend!');
     } catch (error) {
@@ -146,6 +147,10 @@ const GameBoard = () => {
       }
 
       console.log('🔄 Sending updateGame request...');
+      if (!gameId) {
+        console.error('gameId is undefined');
+        return;
+      }
       const updatedGame = await updateGame(gameId, updates);
       console.log('✅ Game updated:', JSON.stringify(updatedGame, null, 2));
 
@@ -164,9 +169,10 @@ const GameBoard = () => {
     }
   };
 
-  const handleGameEnd = async (newState) => {
-    clearInterval(intervalId); // Stop polling
-
+  const handleGameEnd = async (newState: GameState) => {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+    }
     // Update local game state
     setGameState((prevState) => ({
       ...prevState,
@@ -187,6 +193,10 @@ const GameBoard = () => {
       };
 
       // Send updates to the server
+      if (!gameId) {
+        console.error('gameId is undefined');
+        return;
+      }
       await updateGame(gameId, updates);
     } catch (error) {
       console.error('Failed to update game:', error);
@@ -234,10 +244,11 @@ const GameBoard = () => {
                     color={cellData.color}
                     hasBall={cellData.hasBall}
                     position={cellKey}
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                       e.stopPropagation();
                       handleClick(e);
                     }}
+                    
                   />
                 )}
               </GridCell>

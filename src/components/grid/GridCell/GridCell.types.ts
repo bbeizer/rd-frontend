@@ -8,5 +8,5 @@ export type GridCellProps = {
   col: number;
   id: string;
   highlight?: HighlightColor;
-  onClick: (event: MouseEvent) => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 };

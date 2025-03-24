@@ -7,7 +7,10 @@ if (!baseUrl) {
   console.error('⚠️ VITE_BACKEND_BASE_URL is not set! Check your .env file.');
 }
 
-export const joinQueue = async (playerId, playerName) => {
+export const joinQueue = async (
+  playerId: string,
+  playerName: string
+): Promise<any> => {
   try {
     const response = await fetch(`${baseUrl}/api/games/joinMultiplayerGame`, {
       method: 'POST',
@@ -18,13 +21,17 @@ export const joinQueue = async (playerId, playerName) => {
     if (!response.ok) throw new Error(`Failed to join queue: ${response.statusText}`);
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Could not add player to the queue:', error.message);
     throw error;
   }
 };
 
-export const startSinglePlayerGame = async (playerId, playerName, playerColor) => {
+export const startSinglePlayerGame = async (
+  playerId: string,
+  playerName: string,
+  playerColor: string
+): Promise<any> => {
   try {
     const response = await fetch(`${baseUrl}/api/games/startSinglePlayerGame`, {
       method: 'POST',
@@ -35,33 +42,31 @@ export const startSinglePlayerGame = async (playerId, playerName, playerColor) =
     if (!response.ok) throw new Error(`Failed to start game: ${response.statusText}`);
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Could not start single-player game:', error.message);
     throw error;
   }
 };
 
-export const getGameById = async (id) => {
+
+export const getGameById = async (id: string) => {
   try {
-    const response = await fetch(
-      `${baseUrl}/api/games/${id}`,
-      { cache: 'no-store' },
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/games/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });;
 
     if (!response.ok) throw new Error(`Failed to fetch game: ${response.statusText}`);
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Could not fetch game:', error.message);
     throw error;
   }
 };
 
-export const updateGame = async (gameId, gameData) => {
+export const updateGame = async (gameId: string, gameData: any) => {
   try {
     const response = await fetch(`${baseUrl}/api/games/${gameId}`, {
       method: 'PATCH',
@@ -72,7 +77,7 @@ export const updateGame = async (gameId, gameData) => {
     if (!response.ok) throw new Error(`Failed to update game: ${response.statusText}`);
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Could not update game:', error.message);
     throw error;
   }

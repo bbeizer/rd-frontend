@@ -4,5 +4,5 @@ export type PieceProps = {
   color: string;
   hasBall: boolean;
   position: string;
-  onClick?: (e: MouseEvent) => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 };

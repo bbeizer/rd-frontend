@@ -1,9 +1,10 @@
+import type { GameState } from '../types/GameState';
 const baseUrl =
   window.location.hostname === 'localhost'
     ? 'http://localhost:5002/ai/move'
-    : import.meta.env.VITE_BACKEND_BASE_URL;
+    : import.meta.env.AI_SERVICE_URL
 
-export async function getAIMove(game) {
+export async function getAIMove(game: GameState) {
   try {
     console.log('Sending gameState to AI service:', game);
     const response = await fetch(baseUrl, {
