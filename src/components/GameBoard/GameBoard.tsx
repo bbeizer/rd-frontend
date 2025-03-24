@@ -82,16 +82,21 @@ const GameBoard = () => {
   }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);  
 
   useEffect(() => {
-    if (!gameState || gameState.gameType !== 'singleplayer') return;
-
-    // ✅ AI is White & User is Black → AI should move first
-    if (gameState.currentPlayerTurn === 'white' && gameState.playerColor === 'black') {
-      console.log('AI (White) is making the first move...');
-      getAIMove(gameState).then((updatedGame) => {
-        setGameState(updatedGame);
-      });
-    }
-  }, [gameState, gameState?.currentPlayerTurn, gameState?.gameType, gameId]);
+    if (
+      !gameState ||
+      gameState.gameType !== 'singleplayer' ||
+      !gameState.gameId ||
+      gameState.currentPlayerTurn !== 'white' ||
+      gameState.playerColor !== 'black'
+    )
+      return;
+  
+    console.log('AI (White) is making the first move...');
+    getAIMove(gameState).then((updatedGame) => {
+      setGameState(updatedGame);
+    });
+  }, [gameState]);
+  
 
   const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
