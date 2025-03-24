@@ -14,7 +14,7 @@ import { fetchGame, updateGameState } from './helpers';
 import './GameBoard.css';
 
 const GameBoard = () => {
-  const { gameId } = useParams();
+  const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState>({
     gameId: gameId,
