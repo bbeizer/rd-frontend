@@ -1,3 +1,3 @@
-export function clickedOnWrongPiece(elementColor, currentPlayerColor) {
+export function clickedOnWrongPiece(elementColor: string, currentPlayerColor: string) {
   return elementColor !== currentPlayerColor;
 }

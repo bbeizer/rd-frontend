@@ -25,6 +25,9 @@ const GameBoard = () => {
     movedPiece: null,
     movedPieceOriginalPosition: null,
     possiblePasses: [],
+    hasMoved: false,
+    originalSquare: null,
+    currentBoardStatus: {},
     playerColor: localStorage.getItem('userColor'),
     winner: null,
   }));  
@@ -280,7 +283,7 @@ const GameBoard = () => {
   return (
     <div className="game-container">
       {gameState.status === 'completed' && <Confetti />}
-      <PlayerInfoBar playerName={opponentPlayerName} />
+      <PlayerInfoBar playerName={opponentPlayerName ?? "Opponent"} />
       <div className="board-and-info">
         <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
           <div className="board-container">
@@ -300,7 +303,7 @@ const GameBoard = () => {
           </Modal>
         )}
       </div>
-      <PlayerInfoBar playerName={currentPlayerName} />
+      <PlayerInfoBar playerName={currentPlayerName ?? "You"} />
       <button
         onClick={handlePassTurn}
         disabled={!isUsersTurn}

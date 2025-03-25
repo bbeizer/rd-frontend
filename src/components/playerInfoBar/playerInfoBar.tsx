@@ -1,6 +1,11 @@
 import React from 'react';
 import './playerInfoBar.css';
-const PlayerInfoBar = ({ playerName }) => {
+
+interface PlayerInfoBarProps {
+  playerName: string;
+}
+
+const PlayerInfoBar: React.FC<PlayerInfoBarProps> = ({ playerName }) => {
   return (
     <div className="player-info-bar">
       <img
@@ -14,3 +19,4 @@ const PlayerInfoBar = ({ playerName }) => {
 };
 
 export default PlayerInfoBar;
+

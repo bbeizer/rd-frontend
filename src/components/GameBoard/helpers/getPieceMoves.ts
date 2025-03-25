@@ -1,8 +1,9 @@
+import { Piece } from '@/types/Piece';
 import { getKeyCoordinates } from '../../../utils/gameUtilities';
 
-export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
+export const getPieceMoves = (cellKey: string, board: Record<string, Piece | null>, hasMoved: boolean, originalSquare: string) => {
   const { row: initialRow, col: initialCol } = getKeyCoordinates(cellKey);
-  const legalMoves = [];
+  const legalMoves: string[] = [];
 
   if (!hasMoved) {
     const moveOffsets = [
@@ -38,6 +39,6 @@ export const getPieceMoves = (cellKey, board, hasMoved, originalSquare) => {
   }
 };
 
-export const generateCellKey = (row, col) => {
+export const generateCellKey = (row: number, col: number) => {
   return `${String.fromCharCode(97 + col)}${8 - row}`;
 };

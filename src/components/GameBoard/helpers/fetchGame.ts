@@ -1,4 +1,7 @@
-export async function fetchGame(gameId, updateState) {
+import { GameState } from "@/types/GameState";
+import { Dispatch, SetStateAction } from "react";
+
+export async function fetchGame(gameId: string, updateState: Dispatch<SetStateAction<GameState>>) {
   try {
     const baseUrl =
       window.location.hostname === 'localhost'
@@ -9,8 +12,7 @@ export async function fetchGame(gameId, updateState) {
       throw new Error(`Error fetching game: ${response.statusText}`);
     }
     const gameData = await response.json();
-
-    updateState((prevState) => {
+    updateState((prevState: GameState) => {
       if (JSON.stringify(prevState) === JSON.stringify(gameData)) {
         console.log('⚠️ No change in game data, skipping update.');
         return prevState;

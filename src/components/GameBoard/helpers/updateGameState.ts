@@ -10,14 +10,15 @@ import isEqual from 'lodash/isEqual';
 import { canReceiveBall } from './canReceiveBall';
 import { didWin } from './didWin';
 import { clickedOnWrongPiece } from './clickedOnWrongPiece';
+import { GameState } from '@/types/GameState';
 
-export function updateGameState(cellKey, gameState) {
+export function updateGameState(cellKey: string, gameState: GameState) {
   console.log('cell key...');
   console.log(cellKey);
   console.log('gameState...');
   console.log(gameState);
   const playerColor = localStorage.getItem('userColor');
-  const isUserTurn = (gameState.currentPlayerTurn = playerColor);
+  const isUserTurn = gameState.currentPlayerTurn === playerColor!;
   const element = gameState.currentBoardStatus[cellKey];
   const clickedOnPiece = !!element;
   const pieceHasBall = element?.hasBall;
@@ -73,9 +74,9 @@ export function updateGameState(cellKey, gameState) {
           newState = passBallAndSetActivePiece(newState, element, cellKey);
           if (didWin(newState.currentBoardStatus)) {
             newState.winner =
-              newState.currentPlayerTurn === 'white'
-                ? newState.whitePlayerName
-                : newState.blackPlayerName;
+            newState.currentPlayerTurn === 'white'
+              ? newState.whitePlayerName ?? null
+              : newState.blackPlayerName ?? null;
             return newState;
           }
         } else {

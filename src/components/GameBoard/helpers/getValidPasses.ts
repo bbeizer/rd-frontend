@@ -1,5 +1,6 @@
+import { Piece } from '@/types/Piece';
 import { getKeyCoordinates, toCellKey } from '../../../utils/gameUtilities';
-export const getValidPasses = (cellKey, pieceColor, gameBoard) => {
+export const getValidPasses = (cellKey: string, pieceColor: string, gameBoard: Record<string, Piece | null>) => {
   const { row, col } = getKeyCoordinates(cellKey);
   const directions = [
     { dx: 1, dy: 0 },
@@ -12,7 +13,7 @@ export const getValidPasses = (cellKey, pieceColor, gameBoard) => {
     { dx: -1, dy: -1 }, // Diagonal Down Left, Diagonal Up Left
   ];
 
-  const validPasses = [];
+  const validPasses: string[] = [];
 
   directions.forEach(({ dx, dy }) => {
     let currentRow = row + dy;

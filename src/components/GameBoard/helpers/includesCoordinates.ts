@@ -1,1 +1,1 @@
-export const includesCoordinates = (movesArray, targetKey) => movesArray.includes(targetKey);
+export const includesCoordinates = (movesArray: string[], targetKey: string) => movesArray.includes(targetKey);
