@@ -8,6 +8,8 @@ import './lobby.css';
 function Lobby() {
   const navigate = useNavigate();
   const [showColorModal, setShowColorModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
@@ -66,6 +68,13 @@ function Lobby() {
     }
   };
 
+  const handleFeedbackSubmit = () => {
+    console.log('Feedback submitted:', feedbackText);
+    setFeedbackText('');
+    setShowFeedbackModal(false);
+    alert('Thank you for your feedback!');
+  };
+
   return (
     <div className="page-container">
       <div className="lobby">
@@ -77,9 +86,6 @@ function Lobby() {
           <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="button-group">
-          <button className="floating-feedback-button" onClick={() => window.open('https://your-feedback-form-link.com', '_blank')}>
-            📝 Feedback
-          </button>
           <button className="button" onClick={handleJoinGame}>Multiplayer Mode</button>
           <button className="button" onClick={handleSinglePlayerGame}>Single Player Mode</button>
         </div>
@@ -157,6 +163,27 @@ function Lobby() {
           </div>
         </div>
       </div>
+
+        <button className="floating-feedback-button" onClick={() => window.open('https://your-feedback-form-link.com', '_blank')}>
+            📝 Feedback
+        </button>
+        {/* Feedback Modal */}
+        {showFeedbackModal && (
+          <Modal>
+            <h2>Leave Feedback</h2>
+            <textarea
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              placeholder="Type your feedback here..."
+              className="feedback-textarea"
+            />
+            <div className="feedback-buttons">
+              <button className="submit-button" onClick={handleFeedbackSubmit}>Submit</button>
+              <button className="cancel-button" onClick={() => setShowFeedbackModal(false)}>Cancel</button>
+            </div>
+          </Modal>
+        )}
+
     </div>
   );
 }

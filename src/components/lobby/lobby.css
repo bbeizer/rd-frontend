@@ -88,6 +88,55 @@ body {
   transform: scale(1.1);
 }
 
+.feedback-textarea {
+  width: 90%;
+  height: 8rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #ddd;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.feedback-buttons {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.submit-button,
+.cancel-button {
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.submit-button {
+  background-color: #b5633d;
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #a55233;
+  transform: scale(1.05);
+}
+
+.cancel-button {
+  background-color: #ccc;
+  color: #333;
+}
+
+.cancel-button:hover {
+  background-color: #bbb;
+  transform: scale(1.05);
+}
+
 .button-group {
   display: flex;
   gap: 1.5rem;
