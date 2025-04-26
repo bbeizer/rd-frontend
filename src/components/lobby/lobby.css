@@ -1,62 +1,117 @@
-/* ✅ General Styles */
+/* ✅ General Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Arial', sans-serif;
   background-color: #f4f4f9;
   color: #333;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
 }
 
-/* ✅ Lobby Styles */
+/* ✅ Page Container */
+.page-container {
+  width: 100%;
+  max-width: 60rem; /* 960px */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ✅ Lobby Container */
 .lobby {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: #fdfdfd;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Header */
+.header h1 {
+  font-size: 2.5rem;
+  background: #b5633d;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
-.header h1 {
-  font-size: 3em;
-  margin-bottom: 20px;
-  color: white;
-  background-color: #b5633d;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+/* ✅ Input Section */
+.input-container {
+  width: 100%;
+  max-width: 25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
-/* ✅ Input Field */
-.input-container {
-  margin: 20px 0;
+.input-container label {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
 
 #name {
-  padding: 10px;
-  font-size: 1.2em;
   width: 100%;
-  max-width: 400px;
-  margin: 10px auto;
-  display: block;
+  padding: 0.75rem;
+  font-size: 1rem;
   border: 2px solid #b5633d;
-  border-radius: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Buttons */
-.button {
-  padding: 15px 30px;
-  font-size: 1.2em;
+.floating-feedback-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
   background-color: #b5633d;
   color: white;
   border: none;
-  border-radius: 5px;
-  margin: 10px;
+  border-radius: 2rem;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.3s;
+  z-index: 1000;
+}
+
+.floating-feedback-button:hover {
+  background-color: #a55233;
+  transform: scale(1.1);
+}
+
+
+/* ✅ Button Group */
+.button-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.2rem;
+  background-color: #b5633d;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
 .button:hover {
@@ -64,21 +119,20 @@ body {
   transform: scale(1.05);
 }
 
-/* ✅ MODAL Styles */
+/* ✅ Modal Styles */
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  padding: 20px;
+  padding: 2rem;
   width: 90%;
-  max-width: 400px;
+  max-width: 25rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  animation: fadeIn 0.5s ease-in-out;
 }
 
 .modal-overlay {
@@ -89,44 +143,17 @@ body {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.modal p {
-  font-size: 1.2em;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.modal-close {
-  padding: 10px 20px;
-  font-size: 1em;
-  background-color: #b5633d;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
-}
-
-.modal-close:hover {
-  background-color: #a55233;
-  transform: scale(1.05);
 }
 
 /* ✅ Color Selection Buttons */
 .color-button {
-  padding: 10px 20px;
-  font-size: 1.2em;
-  margin: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.2rem;
+  margin: 0.5rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
+  transition: all 0.2s ease-in-out;
 }
 
 .color-button.white {
@@ -146,111 +173,84 @@ body {
 
 /* ✅ Rules Section */
 .rules {
-  margin-top: 30px;
-  text-align: left;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 50rem;
   background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .rules h2 {
-  font-size: 2.2em;
-  margin-bottom: 20px;
-  color: #5a5a5a;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
   text-align: center;
+  color: #5a5a5a;
 }
 
 .section {
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
 }
 
 .section p,
 .section ul {
-  font-size: 1.2em;
+  font-size: 1.1rem;
   line-height: 1.6;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 
-/* ✅ Image Styling */
-.image-container {
-  text-align: center;
-  margin: 15px 0;
+.image-container,
+.animation-container {
+  width: 100%;
+  max-width: 30rem;
+  aspect-ratio: 1 / 1; /* 🧹 always square */
+  background: #fafafa;
+  border: 2px solid #eee;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 2rem auto;
+  overflow: hidden;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 img {
-  max-width: 60%;
-  max-height: 300px;
-  height: auto;
-  margin: 10px auto;
-  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: fadeInImage 0.6s ease-in-out;
 }
 
 /* ✅ Animations */
-.animation-container {
-  text-align: center;
-  margin: 20px auto;
-  width: 60%;
-  max-height: 300px;
-}
-
 .move-animation {
-  width: 100%;
-  height: auto;
   animation: transitionPiece 5s infinite;
-  object-fit: cover;
 }
 
 .pass-animation {
-  width: 100%;
-  height: auto;
   animation: passTransition 5s infinite;
-  object-fit: cover;
 }
 
 @keyframes passTransition {
-  0% {
-    opacity: 1;
-    content: url('/images/pass1.png');
-  }
-  25% {
-    opacity: 1;
-    content: url('/images/pass2.png');
-  }
-  50% {
-    opacity: 1;
-    content: url('/images/pass3.png');
-  }
-  75% {
-    opacity: 1;
-    content: url('/images/pass4.png');
-  }
-  100% {
-    opacity: 1;
-    content: url('/images/pass1.png');
-  }
+  0% { content: url('/images/pass1.png'); }
+  25% { content: url('/images/pass2.png'); }
+  50% { content: url('/images/pass3.png'); }
+  75% { content: url('/images/pass4.png'); }
+  100% { content: url('/images/pass1.png'); }
 }
 
 @keyframes transitionPiece {
-  0% {
-    opacity: 1;
-    content: url('/images/startingPiece.png');
-  }
-  50% {
-    opacity: 1;
-    content: url('/images/movedStartingPiece.png');
-  }
-  100% {
-    opacity: 1;
-    content: url('/images/startingPiece.png');
-  }
+  0% { content: url('/images/startingPiece.png'); }
+  50% { content: url('/images/movedStartingPiece.png'); }
+  100% { content: url('/images/startingPiece.png'); }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes fadeInImage {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
