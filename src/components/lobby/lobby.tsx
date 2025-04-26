@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { joinQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
+import { sendFeedbackEmail } from '../../services/mailService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
 import Modal from '../modal/modal';
 import './lobby.css';
@@ -10,6 +11,10 @@ function Lobby() {
   const [showColorModal, setShowColorModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackName, setFeedbackName] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);  
   const [name, setName] = useState('');
   const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
@@ -67,6 +72,35 @@ function Lobby() {
       console.error('Error polling game status:', error);
     }
   };
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackMessage.trim()) {
+      alert('Please enter a message.');
+      return;
+    }
+  
+    setIsSubmitting(true);
+  
+    try {
+      await sendFeedbackEmail(feedbackName, feedbackMessage);
+  
+      setSubmitSuccess(true);
+      setFeedbackName('');
+      setFeedbackMessage('');
+      setTimeout(() => {
+        setSubmitSuccess(false);
+      }, 1500);
+      
+      setTimeout(() => {
+        setShowFeedbackModal(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      alert('Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }; 
 
   const handleFeedbackSubmit = () => {
     console.log('Feedback submitted:', feedbackText);
@@ -164,7 +198,7 @@ function Lobby() {
         </div>
       </div>
 
-        <button className="floating-feedback-button" onClick={() => window.open('https://your-feedback-form-link.com', '_blank')}>
+        <button className="floating-feedback-button" onClick={() => setShowFeedbackModal(true)}>
             📝 Feedback
         </button>
         {/* Feedback Modal */}
@@ -183,6 +217,42 @@ function Lobby() {
             </div>
           </Modal>
         )}
+        {showFeedbackModal && (
+  <Modal>
+    <h2>Send Feedback</h2>
+    <input
+      type="text"
+      placeholder="Your name (optional)"
+      value={feedbackName}
+      onChange={(e) => setFeedbackName(e.target.value)}
+      className="feedback-input"
+    />
+    <textarea
+      placeholder="Your message"
+      value={feedbackMessage}
+      onChange={(e) => setFeedbackMessage(e.target.value)}
+      className="feedback-textarea"
+      rows={5}
+    />
+    <div style={{ marginTop: '1rem' }}>
+      <button
+        className="button"
+        onClick={handleSubmitFeedback}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Sending...' : 'Submit'}
+      </button>
+      <button
+        className="button"
+        style={{ backgroundColor: '#ccc', color: '#333', marginLeft: '1rem' }}
+        onClick={() => setShowFeedbackModal(false)}
+      >
+        Cancel
+      </button>
+    </div>
+    {submitSuccess && <p style={{ marginTop: '1rem', color: 'green' }}>Thank you for your feedback!</p>}
+  </Modal>
+)}
 
     </div>
   );
