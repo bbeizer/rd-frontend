@@ -8,19 +8,17 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #f4f4f9;
+  background-color: rgb(222, 177, 119);;
   color: #333;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 0.2rem;
-  background: linear-gradient(90deg, #b5633d, #f0e68c);
 }
 
 .page-container {
   width: 100%;
-  /* max-width: 60rem; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,9 +31,6 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  /* background-color: #fdfdfd; */
-  /* border-radius: 0.75rem; */
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 }
 
 .lobby-content {
@@ -64,7 +59,7 @@ body {
   border: 1px solid #00000023;
 }
 
-.dazzel-span {
+.dazzle-span {
   background-color: #b5633d;
   color: #f0e68c;
   border: #eee 2px solid;

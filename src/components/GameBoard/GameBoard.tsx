@@ -295,34 +295,38 @@ const GameBoard = () => {
   return (
     <div className="game-container">
       {gameState.status === 'completed' && <Confetti />}
-      <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
+      <div className="player-info top-player">
+        <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
+      </div>
       <div className="board-and-info">
-        <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
-          <div className="board-container">
+        <div className="board-and-chat-wrapper">
+          <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
             <GridContainer>{renderBoard()}</GridContainer>
           </div>
-        </div>
 
-        {gameState.status === 'playing' && !isUsersTurn && (
-          <Modal>
-            <p>It&apos;s not your turn. Please wait for the other player.</p>
-          </Modal>
-        )}
-        {gameState.status === 'completed' && (
-          <Modal>
-            <h2>{gameState.winner} wins!</h2>
-            <button onClick={() => navigate('/')}>Return to Lobby</button>
-          </Modal>
-        )}
+          {gameState.status === 'playing' && !isUsersTurn && (
+            <Modal>
+              <p>It&apos;s not your turn. Please wait for the other player.</p>
+            </Modal>
+          )}
+          {gameState.status === 'completed' && (
+            <Modal>
+              <h2>{gameState.winner} wins!</h2>
+              <button onClick={() => navigate('/')}>Return to Lobby</button>
+            </Modal>
+          )}
+        </div>
+        <button
+          onClick={handlePassTurn}
+          disabled={!isUsersTurn}
+          style={{ alignSelf: 'flex-start', margin: '10px' }}
+        >
+          Pass Turn
+        </button>
       </div>
-      <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
-      <button
-        onClick={handlePassTurn}
-        disabled={!isUsersTurn}
-        style={{ alignSelf: 'flex-start', margin: '10px' }}
-      >
-        Pass Turn
-      </button>
+      <div className="player-info bottom-player">
+        <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
+      </div>
     </div>
   );
 };

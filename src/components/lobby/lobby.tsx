@@ -143,7 +143,7 @@ function Lobby() {
         <div className="header">
           <h1>
             <span className="razzle-span">Razzle</span> <span className="circle"></span>{' '}
-            <span className="dazzel-span">Dazzle</span>
+            <span className="dazzle-span">Dazzle</span>
           </h1>
         </div>
         <div className="lobby-content">
