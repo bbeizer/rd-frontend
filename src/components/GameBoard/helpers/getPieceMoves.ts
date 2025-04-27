@@ -1,7 +1,12 @@
 import { Piece } from '@/types/Piece';
-import { getKeyCoordinates } from '../../../utils/gameUtilities';
+import { getKeyCoordinates } from '@/utils/gameUtilities';
 
-export const getPieceMoves = (cellKey: string, board: Record<string, Piece | null>, hasMoved: boolean, originalSquare: string) => {
+export const getPieceMoves = (
+  cellKey: string,
+  board: Record<string, Piece | null>,
+  hasMoved: boolean,
+  originalSquare: string
+) => {
   const { row: initialRow, col: initialCol } = getKeyCoordinates(cellKey);
   const legalMoves: string[] = [];
 

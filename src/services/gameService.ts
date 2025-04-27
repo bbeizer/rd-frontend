@@ -1,4 +1,4 @@
-import { apiPost, apiPatch, apiClient } from './apiClient';
+import { apiPost, apiClient } from './apiClient';
 import { ApiResponse } from '../types/ApiResponse';
 import { ServerGame } from '@/types/ServerGame';
 
@@ -15,7 +15,11 @@ export const joinMultiplayerQueue = async (playerId: string, playerName: string)
   return apiPost('/api/games/joinMultiplayerGame', { playerId, playerName });
 };
 
-export const startSinglePlayerGame = async <T = any>(userId: string, userName: string, userColor: string) => {
+export const startSinglePlayerGame = async <T = any>(
+  userId: string,
+  userName: string,
+  userColor: string
+) => {
   return apiPost<T>('/api/games/startSinglePlayerGame', {
     playerId: userId,
     playerName: userName,
@@ -23,10 +27,9 @@ export const startSinglePlayerGame = async <T = any>(userId: string, userName: s
   });
 };
 
-
 export const getGameById = async (id: string): Promise<ServerGame> => {
   const response = await apiClient<ServerGame>(`/api/games/${id}`);
-  return response.data; 
+  return response.data;
 };
 
 export const updateGame = async <T>(gameId: string, gameData: any): Promise<ApiResponse<T>> => {

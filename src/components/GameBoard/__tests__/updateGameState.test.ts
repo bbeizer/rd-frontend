@@ -1,5 +1,5 @@
 import { initialGameState } from '../__tests__/mockGameState'
-import type { GameState } from '../../../types/GameState';
+import type { GameState } from "@/../../../types/GameState';
 import '@testing-library/jest-dom';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { updateGameState } from '../helpers/updateGameState';

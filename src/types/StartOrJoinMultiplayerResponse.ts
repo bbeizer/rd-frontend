@@ -1,7 +1,6 @@
-import { ServerGame } from "./ServerGame";
+import { ServerGame } from './ServerGame';
 export type StartOrJoinMultiplayerResponse = {
-    game: ServerGame;
-    playerColor: 'white' | 'black';
-    message: string;
-  };
-  
+  game: ServerGame;
+  playerColor: 'white' | 'black';
+  message: string;
+};

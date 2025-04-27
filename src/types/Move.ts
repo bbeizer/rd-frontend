@@ -1,4 +1,4 @@
 export type Move = {
-    row: number;
-    col: number;
-  };
+  row: number;
+  col: number;
+};

@@ -1,6 +1,5 @@
 export type Piece = {
-    color: 'white' | 'black';
-    hasBall: boolean;
-    position: string;
-  };
-  
+  color: 'white' | 'black';
+  hasBall: boolean;
+  position: string;
+};

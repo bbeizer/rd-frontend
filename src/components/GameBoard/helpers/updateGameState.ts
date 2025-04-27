@@ -74,9 +74,9 @@ export function updateGameState(cellKey: string, gameState: GameState) {
           newState = passBallAndSetActivePiece(newState, element, cellKey);
           if (didWin(newState.currentBoardStatus)) {
             newState.winner =
-            newState.currentPlayerTurn === 'white'
-              ? newState.whitePlayerName ?? null
-              : newState.blackPlayerName ?? null;
+              newState.currentPlayerTurn === 'white'
+                ? (newState.whitePlayerName ?? null)
+                : (newState.blackPlayerName ?? null);
             return newState;
           }
         } else {
@@ -87,7 +87,7 @@ export function updateGameState(cellKey: string, gameState: GameState) {
         if (unselectingASelectedPiece) {
           newState = clearSelection(newState);
         } else {
-          debugger
+          debugger;
           newState = setActivePieceWithMoves(newState, element, cellKey);
         }
       }

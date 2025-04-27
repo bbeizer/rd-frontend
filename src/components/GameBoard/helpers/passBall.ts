@@ -1,4 +1,4 @@
-import { Piece } from "@/types/Piece";
+import { Piece } from '@/types/Piece';
 
 export const passBall = (
   sourceKey: string,
@@ -14,7 +14,7 @@ export const passBall = (
     newBoardStatus[targetKey] = { ...targetPiece, hasBall: true };
     newBoardStatus[sourceKey] = { ...sourcePiece, hasBall: false };
   } else {
-    console.warn("Invalid passBall: one or both pieces are null");
+    console.warn('Invalid passBall: one or both pieces are null');
   }
 
   return newBoardStatus;

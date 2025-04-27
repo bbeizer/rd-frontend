@@ -1,4 +1,4 @@
-import { GameState } from '../../../types/GameState'
+import { GameState } from "@/../../../types/GameState'
 export function clearSelection(state: GameState) {
   state.activePiece = null;
   state.possibleMoves = [];

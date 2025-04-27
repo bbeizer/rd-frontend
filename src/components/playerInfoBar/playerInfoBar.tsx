@@ -19,4 +19,3 @@ const PlayerInfoBar: React.FC<PlayerInfoBarProps> = ({ playerName }) => {
 };
 
 export default PlayerInfoBar;
-

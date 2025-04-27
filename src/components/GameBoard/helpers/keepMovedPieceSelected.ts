@@ -1,4 +1,4 @@
-import { GameState } from "@/types/GameState";
+import { GameState } from '@/types/GameState';
 
 export function keepMovedPieceSelected(state: GameState) {
   state.activePiece = state.movedPiece; // Ensure the moved piece stays selected

@@ -1,6 +1,6 @@
-import { ServerGame } from "./ServerGame";
+import { ServerGame } from './ServerGame';
 
 export type StartSinglePlayerResponse = {
-    game: ServerGame;
-    message: string;
-  };
+  game: ServerGame;
+  message: string;
+};

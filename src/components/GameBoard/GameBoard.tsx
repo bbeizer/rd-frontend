@@ -9,9 +9,9 @@ import GridContainer from '../grid/GridContainer/GridContainer';
 import Piece from '../piece/Piece';
 import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
 import Modal from '../modal/modal';
-import { updateGame } from '../../services/gameService';
-import { getAIMove } from '../../services/aiService';
-import { getKeyCoordinates } from '../../utils/gameUtilities';
+import { updateGame } from '@/services/gameService';
+import { getAIMove } from '@/services/aiService';
+import { getKeyCoordinates } from '@/utils/gameUtilities';
 import { fetchGame, updateGameState } from './helpers';
 import './GameBoard.css';
 
@@ -32,7 +32,7 @@ const GameBoard = () => {
     currentBoardStatus: {},
     playerColor: localStorage.getItem('userColor'),
     winner: null,
-  }));  
+  }));
   const isUsersTurn = gameState?.currentPlayerTurn === localStorage.getItem('userColor');
   const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
   const isUserWhite = localStorage.getItem('userColor') === 'white';
@@ -74,17 +74,17 @@ const GameBoard = () => {
   //useEffect for polling in multiplayer games
   useEffect(() => {
     if (!gameState || gameState.gameType !== 'multiplayer') return;
-  
+
     if (!gameState.isUserTurn) {
       const newIntervalId: ReturnType<typeof setInterval> = setInterval(pollGame, 3000);
       setIntervalId(newIntervalId);
-  
+
       return () => {
         clearInterval(newIntervalId);
         setIntervalId(null);
       };
     }
-  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);  
+  }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
 
   useEffect(() => {
     if (
@@ -95,16 +95,16 @@ const GameBoard = () => {
       gameState.playerColor !== 'black'
     )
       return;
-  
+
     console.log('AI (White) is making the first move...');
     getAIMove(gameState).then((updatedGame) => {
-      setGameState(prev => ({
+      setGameState((prev) => ({
         ...prev,
         ...updatedGame,
         gameId: prev.gameId, // 🔥 ensure we don't lose gameId
       }));
     });
-  }, [gameState]);  
+  }, [gameState]);
 
   const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -130,76 +130,74 @@ const GameBoard = () => {
     }
   };
 
-const handlePassTurn = async () => {
-  const currentPlayerColor = localStorage.getItem('userColor');
-  const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
+  const handlePassTurn = async () => {
+    const currentPlayerColor = localStorage.getItem('userColor');
+    const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
 
-  try {
-    let updates;
+    try {
+      let updates;
 
-    if (gameState.gameType === 'multiplayer') {
-      console.log('🌍 Multiplayer turn change detected');
-      updates = {
-        ...gameState,
-        currentPlayerTurn: nextPlayerTurn,
-        activePiece: null,
-        movedPiece: null,
-        hasMoved: false,
-        possibleMoves: [],
-        possiblePasses: [],
-      };
-    } else {
-      console.log('🧠 AI Move requested for singleplayer');
-      const aiMove = await getAIMove(gameState);
+      if (gameState.gameType === 'multiplayer') {
+        console.log('🌍 Multiplayer turn change detected');
+        updates = {
+          ...gameState,
+          currentPlayerTurn: nextPlayerTurn,
+          activePiece: null,
+          movedPiece: null,
+          hasMoved: false,
+          possibleMoves: [],
+          possiblePasses: [],
+        };
+      } else {
+        console.log('🧠 AI Move requested for singleplayer');
+        const aiMove = await getAIMove(gameState);
 
-      setGameState((prev) => ({
-        ...prev,
-        ...aiMove,
-        gameId: prev.gameId,
-      }));
+        setGameState((prev) => ({
+          ...prev,
+          ...aiMove,
+          gameId: prev.gameId,
+        }));
 
-      console.log('🤖 AI Move response:', JSON.stringify(aiMove, null, 2));
+        console.log('🤖 AI Move response:', JSON.stringify(aiMove, null, 2));
 
-      updates = {
-        ...aiMove,
-        currentPlayerTurn: currentPlayerColor,
-        currentBoardStatus: aiMove.currentBoardStatus,
-        hasMoved: false,
-      };
+        updates = {
+          ...aiMove,
+          currentPlayerTurn: currentPlayerColor,
+          currentBoardStatus: aiMove.currentBoardStatus,
+          hasMoved: false,
+        };
+      }
+
+      console.log('🔄 Sending updateGame request...');
+      if (!gameId) {
+        console.error('gameId is undefined');
+        return;
+      }
+
+      const updatedGame = await updateGame<ServerGame>(gameId, updates);
+
+      if (updatedGame.success) {
+        const updatedGameState = convertServerGameToGameState(updatedGame.data);
+
+        console.log('✅ Game updated:', JSON.stringify(updatedGameState, null, 2));
+
+        setGameState((prevState) => ({
+          ...prevState,
+          ...updatedGameState,
+          isUserTurn: updatedGameState.currentPlayerTurn === currentPlayerColor,
+          activePiece: null,
+          movedPiece: null,
+          hasMoved: false,
+          possibleMoves: [],
+          possiblePasses: [],
+        }));
+      } else {
+        console.error('Failed to update game:', updatedGame.error);
+      }
+    } catch (error) {
+      console.error('❌ Failed to update game:', error);
     }
-
-    console.log('🔄 Sending updateGame request...');
-    if (!gameId) {
-      console.error('gameId is undefined');
-      return;
-    }
-
-    const updatedGame = await updateGame<ServerGame>(gameId, updates);
-
-    if (updatedGame.success) {
-      const updatedGameState = convertServerGameToGameState(updatedGame.data);
-
-      console.log('✅ Game updated:', JSON.stringify(updatedGameState, null, 2));
-
-      setGameState((prevState) => ({
-        ...prevState,
-        ...updatedGameState,
-        isUserTurn: updatedGameState.currentPlayerTurn === currentPlayerColor,
-        activePiece: null,
-        movedPiece: null,
-        hasMoved: false,
-        possibleMoves: [],
-        possiblePasses: [],
-      }));
-    } else {
-      console.error('Failed to update game:', updatedGame.error);
-    }
-  } catch (error) {
-    console.error('❌ Failed to update game:', error);
-  }
-};
-
-
+  };
 
   const handleGameEnd = async (newState: GameState) => {
     if (intervalId !== null) {
@@ -280,7 +278,6 @@ const handlePassTurn = async () => {
                       e.stopPropagation();
                       handleClick(e);
                     }}
-                    
                   />
                 )}
               </GridCell>
@@ -298,7 +295,7 @@ const handlePassTurn = async () => {
   return (
     <div className="game-container">
       {gameState.status === 'completed' && <Confetti />}
-      <PlayerInfoBar playerName={opponentPlayerName ?? "Opponent"} />
+      <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
       <div className="board-and-info">
         <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
           <div className="board-container">
@@ -318,7 +315,7 @@ const handlePassTurn = async () => {
           </Modal>
         )}
       </div>
-      <PlayerInfoBar playerName={currentPlayerName ?? "You"} />
+      <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
       <button
         onClick={handlePassTurn}
         disabled={!isUsersTurn}

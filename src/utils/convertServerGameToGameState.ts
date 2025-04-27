@@ -2,7 +2,10 @@ import { ServerGame } from '../types/ServerGame';
 import { GameState } from '../types/GameState';
 import { Piece } from '../types/Piece';
 
-export function convertServerGameToGameState(serverGame: ServerGame, playerColor: 'white' | 'black' | null = null): GameState {
+export function convertServerGameToGameState(
+  serverGame: ServerGame,
+  playerColor: 'white' | 'black' | null = null
+): GameState {
   const normalizedBoardStatus: Record<string, Piece | null> = {};
 
   for (const square in serverGame.currentBoardStatus) {

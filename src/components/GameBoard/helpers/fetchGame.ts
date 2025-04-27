@@ -1,5 +1,5 @@
-import { GameState } from "@/types/GameState";
-import { Dispatch, SetStateAction } from "react";
+import { GameState } from '@/types/GameState';
+import { Dispatch, SetStateAction } from 'react';
 
 export async function fetchGame(gameId: string, updateState: Dispatch<SetStateAction<GameState>>) {
   try {
