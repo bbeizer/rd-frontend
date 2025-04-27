@@ -113,15 +113,21 @@ function Lobby() {
     <div className="page-container">
       <div className="lobby">
         <div className="header">
-          <h1>Welcome to Razzle Dazzle</h1>
+          <h1><span className='razzle-span'>Razzle</span> <span className='circle'></span> <span className='dazzel-span'>Dazzle</span></h1>
         </div>
+      <div className='lobby-content'>
         <div className="input-container">
-          <label htmlFor="name">Enter Your Name:</label>
-          <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
+          <label htmlFor="name"><i className="fas fa-user"></i> {name}</label>
+          <input type="text" id="name" placeholder="Enter Your Name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="button-group">
-          <button className="button" onClick={handleJoinGame}>Multiplayer Mode</button>
-          <button className="button" onClick={handleSinglePlayerGame}>Single Player Mode</button>
+          <button className="button" onClick={handleJoinGame}>
+            <i className="fas fa-users"></i> Multiplayer Mode
+          </button>
+          <button className="button" onClick={handleSinglePlayerGame}>
+            <i className="fas fa-user"></i> Single Player Mode
+          </button>
+        </div>
         </div>
         {waitingForPlayer && (
           <Modal>
@@ -136,7 +142,7 @@ function Lobby() {
           </Modal>
         )}
         <div className="rules">
-          <h2>Game Rules</h2>
+          <h2 className='gamerules-title'>Game Rules</h2>
           <div className="section">
             <p><strong>Game Objective:</strong> The goal is to move one of your pieces holding the ball to the opponent's back rank.</p>
           </div>
