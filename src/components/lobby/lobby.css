@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap'); 
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,15 +14,17 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 2rem;
+  padding: 0.2rem;
+  background: linear-gradient(90deg, #b5633d, #f0e68c);
 }
 
 .page-container {
   width: 100%;
-  max-width: 60rem;
+  /* max-width: 60rem; */
   display: flex;
   flex-direction: column;
   align-items: center;
+
 }
 
 .lobby {
@@ -29,19 +33,84 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background-color: #fdfdfd;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* background-color: #fdfdfd; */
+  /* border-radius: 0.75rem; */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+}
+
+.lobby-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 50rem;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+
+.razzle-span {
+  background-color: #f0e68c;
+  color: #b5633d;
+  border-radius: 16px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Righteous', cursive;
+  font-size: 4rem;
+  border: 1px solid #00000023;
+}
+
+.dazzel-span {
+  background-color: #b5633d;
+  color: #f0e68c;
+  border: #eee 2px solid;
+  border-radius: 16px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Righteous', cursive;
+  font-size: 4rem;
+  border: 1px solid #00000023;
+}
+
+.button i {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+  vertical-align: middle;
+}
+
+.circle {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  background: radial-gradient(circle, #ffffff, #d9d9d9);
+  border-radius: 50%;
+  margin: 0 0.5rem;
+  margin-bottom: 1.5rem;
+  vertical-align: middle;
+  box-shadow: 
+    0px 4px 8px rgba(0, 0, 0, 0.3), 
+    inset 0px -3px 6px rgba(0, 0, 0, 0.2), 
+    inset 0px 3px 6px rgba(255, 255, 255, 0.5);
+  animation: spin 2s linear infinite; /* Add spinning animation */
 }
 
 .header h1 {
   font-size: 2.5rem;
-  background: #b5633d;
-  color: white;
+  color: #333;
   padding: 1rem 2rem;
   border-radius: 0.5rem;
   margin-bottom: 2rem;
   text-align: center;
+ 
+}
+
+input {
+  background-color: #f0efef;
+  color: #333;
 }
 
 .input-container {
@@ -51,6 +120,7 @@ body {
   flex-direction: column;
   align-items: center;
   margin-bottom: 2rem;
+  
 }
 
 .input-container label {
@@ -62,9 +132,10 @@ body {
   width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
-  border: 2px solid #b5633d;
+  border: 1.5px solid #b5633d;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .floating-feedback-button {
@@ -262,7 +333,14 @@ body {
   font-size: 2rem;
   margin-bottom: 1.5rem;
   text-align: center;
-  color: #5a5a5a;
+  color: #b5633d;
+  font-family: 'Righteous', cursive;
+}
+
+.rules ul li::marker{
+  color: #b5633d;
+  font-size: 1.5rem;
+
 }
 
 .section {
@@ -326,3 +404,117 @@ img {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* For devices with a max width of 768px (tablets and smaller) */
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .lobby-content {
+    padding: 1.5rem;
+  }
+
+  .rules {
+    padding: 1.5rem;
+  }
+
+  .rules h2 {
+    font-size: 1.8rem;
+  }
+
+  .section p,
+  .section ul {
+    font-size: 1rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .button {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .floating-feedback-button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* For devices with a max width of 480px (mobile phones) */
+@media (max-width: 480px) {
+
+
+  .razzle-span,
+  .dazzel-span {
+    font-size: 2rem;
+    
+  }
+
+  .header h1 {
+   display: flex;
+   gap: 0.5rem;
+  }
+
+  .input-container {
+    width: 90%;
+  }
+
+  #name {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+
+  .rules {
+    padding: 2.5rem;
+  }
+
+  .rules h2 {
+    font-size: 1.5rem;
+  }
+
+  .section p,
+  .section ul {
+    font-size: 0.9rem;
+  }
+
+  .button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .floating-feedback-button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .feedback-textarea {
+    height: 6rem;
+  }
+
+  .circle {
+    display: none;
+
+  }
+
+ 
+}
+
+
+
