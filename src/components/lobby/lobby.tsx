@@ -32,7 +32,7 @@ function Lobby() {
       localStorage.setItem('userColor', data.playerColor);
 
       if (data.game.status === 'playing') {
-        navigate(`/game/${data._id}`);
+        navigate(`/game/${data.game._id}`);
       } else {
         setWaitingForPlayer(true);
         const id = setInterval(() => pollGameStatus(data.game._id), 3000);
