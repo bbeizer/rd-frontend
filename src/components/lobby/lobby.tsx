@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { StartOrJoinMultiplayerResponse } from '@/types/StartOrJoinMultiplayerResponse';
 import type { ServerGame } from '@/types/ServerGame';
 import { apiPost } from '@/services/apiClient';
-import { joinMultiplayerQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
+import { getGameById, startSinglePlayerGame } from '../../services/gameService'
 import { sendFeedbackEmail } from '../../services/mailService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
 import Modal from '../modal/modal';
