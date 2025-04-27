@@ -1,4 +1,6 @@
 import type { GameState } from '../types/GameState';
+import { apiPost, apiPatch, apiClient } from './apiClient';
+
 const aiMoveEndpoint =
   window.location.hostname === 'localhost'
     ? 'http://localhost:5002/ai/move'

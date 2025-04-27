@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { joinQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
+import type { StartOrJoinMultiplayerResponse } from '@/types/StartOrJoinMultiplayerResponse';
+import type { ServerGame } from '@/types/ServerGame';
+import { apiPost } from '@/services/apiClient';
+import { joinMultiplayerQueue, getGameById, startSinglePlayerGame } from '../../services/gameService';
 import { sendFeedbackEmail } from '../../services/mailService';
 import { generateGuestUserID } from '../../utils/gameUtilities';
 import Modal from '../modal/modal';
@@ -25,35 +28,59 @@ function Lobby() {
     };
   }, [intervalId]);
 
-  const handleJoinGame = async () => {
+  const handleJoinMultiplayerGame = async () => {
     try {
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
-      const data = await joinQueue(userId, name);
-      localStorage.setItem('userColor', data.playerColor);
-
-      if (data.game.status === 'playing') {
-        navigate(`/game/${data.game._id}`);
+      const result = await apiPost<StartOrJoinMultiplayerResponse>('/api/games/joinMultiplayerGame', {
+        playerId: userId,
+        playerName: name,
+      });
+  
+      if (!result.success || !result.data) {
+        console.error('Failed to join multiplayer:', result.error);
+        alert('Failed to join multiplayer. Please try again.');
+        return;
+      }
+  
+      const { playerColor, game } = result.data;
+      localStorage.setItem('userColor', playerColor);
+  
+      if (game.status === 'playing') {
+        navigate(`/game/${game._id}`);
       } else {
         setWaitingForPlayer(true);
-        const id = setInterval(() => pollGameStatus(data.game._id), 3000);
+        const id = setInterval(() => pollGameStatus(game._id), 3000);
         setIntervalId(id);
       }
     } catch (error) {
-      console.error('Failed to join game:', error);
+      console.error('Failed to join multiplayer game:', error);
+      alert('Unexpected error occurred.');
     }
   };
-
+  
   const handleSelectColor = async (color: string) => {
     try {
       setShowColorModal(false);
+  
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
       localStorage.setItem('userColor', color);
-      const data = await startSinglePlayerGame(userId, name, color);
-      navigate(`/game/${data.game._id}`);
+  
+      const result = await startSinglePlayerGame(userId, name, color);
+  
+      if (!result.success || !result.data) {
+        console.error('Failed to start single-player game:', result.error);
+        alert('Failed to start game. Please try again.');
+        return;
+      }
+  
+      const { game } = result.data;
+      navigate(`/game/${game._id}`);
     } catch (error) {
-      console.error('Failed to join game:', error);
+      console.error('Failed to start single-player game:', error);
+      alert('Unexpected error occurred.');
     }
-  };
+  };  
+  
 
   const handleSinglePlayerGame = () => {
     setShowColorModal(true);
@@ -121,7 +148,7 @@ function Lobby() {
           <input type="text" id="name" placeholder="Enter Your Name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="button-group">
-          <button className="button" onClick={handleJoinGame}>
+          <button className="button" onClick={handleJoinMultiplayerGame}>
             <i className="fas fa-users"></i> Multiplayer Mode
           </button>
           <button className="button" onClick={handleSinglePlayerGame}>

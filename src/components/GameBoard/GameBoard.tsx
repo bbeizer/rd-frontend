@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import type { GameState } from '../../types/GameState';
+import type { GameState } from '@/types/GameState';
+import type { ServerGame } from '@/types/ServerGame';
+import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
 import Confetti from 'react-confetti';
 import GridCell from '../grid/GridCell/GridCell';
 import GridContainer from '../grid/GridContainer/GridContainer';
@@ -128,63 +130,76 @@ const GameBoard = () => {
     }
   };
 
-  const handlePassTurn = async () => {
-    const currentPlayerColor = localStorage.getItem('userColor');
-    const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
-    try {
-      let updates;
-      if (gameState.gameType === 'multiplayer') {
-        console.log('🌍 Multiplayer turn change detected');
-        updates = {
-          ...gameState,
-          currentPlayerTurn: nextPlayerTurn,
-          activePiece: null,
-          movedPiece: null,
-          hasMoved: false,
-          possibleMoves: [],
-          possiblePasses: [],
-        };
-      } else {
-        console.log('🧠 AI Move requested for singleplayer');
-        const aiMove = await getAIMove(gameState);
-        setGameState(prev => ({
-          ...prev,
-          ...aiMove,
-          gameId: prev.gameId,
-        }));
+const handlePassTurn = async () => {
+  const currentPlayerColor = localStorage.getItem('userColor');
+  const nextPlayerTurn = currentPlayerColor === 'white' ? 'black' : 'white';
 
-        console.log('🤖 AI Move response:', JSON.stringify(aiMove, null, 2));
+  try {
+    let updates;
 
-        updates = {
-          ...aiMove,
-          currentPlayerTurn: currentPlayerColor,
-          currentBoardStatus: aiMove.currentBoardStatus,
-          hasMoved: false,
-        };
-      }
+    if (gameState.gameType === 'multiplayer') {
+      console.log('🌍 Multiplayer turn change detected');
+      updates = {
+        ...gameState,
+        currentPlayerTurn: nextPlayerTurn,
+        activePiece: null,
+        movedPiece: null,
+        hasMoved: false,
+        possibleMoves: [],
+        possiblePasses: [],
+      };
+    } else {
+      console.log('🧠 AI Move requested for singleplayer');
+      const aiMove = await getAIMove(gameState);
 
-      console.log('🔄 Sending updateGame request...');
-      if (!gameId) {
-        console.error('gameId is undefined');
-        return;
-      }
-      const updatedGame = await updateGame(gameId, updates);
-      console.log('✅ Game updated:', JSON.stringify(updatedGame, null, 2));
+      setGameState((prev) => ({
+        ...prev,
+        ...aiMove,
+        gameId: prev.gameId,
+      }));
+
+      console.log('🤖 AI Move response:', JSON.stringify(aiMove, null, 2));
+
+      updates = {
+        ...aiMove,
+        currentPlayerTurn: currentPlayerColor,
+        currentBoardStatus: aiMove.currentBoardStatus,
+        hasMoved: false,
+      };
+    }
+
+    console.log('🔄 Sending updateGame request...');
+    if (!gameId) {
+      console.error('gameId is undefined');
+      return;
+    }
+
+    const updatedGame = await updateGame<ServerGame>(gameId, updates);
+
+    if (updatedGame.success) {
+      const updatedGameState = convertServerGameToGameState(updatedGame.data);
+
+      console.log('✅ Game updated:', JSON.stringify(updatedGameState, null, 2));
 
       setGameState((prevState) => ({
         ...prevState,
-        ...updatedGame,
-        isUserTurn: updatedGame.currentPlayerTurn === currentPlayerColor,
+        ...updatedGameState,
+        isUserTurn: updatedGameState.currentPlayerTurn === currentPlayerColor,
         activePiece: null,
         movedPiece: null,
         hasMoved: false,
         possibleMoves: [],
         possiblePasses: [],
       }));
-    } catch (error) {
-      console.error('❌ Failed to update game:', error);
+    } else {
+      console.error('Failed to update game:', updatedGame.error);
     }
-  };
+  } catch (error) {
+    console.error('❌ Failed to update game:', error);
+  }
+};
+
+
 
   const handleGameEnd = async (newState: GameState) => {
     if (intervalId !== null) {
