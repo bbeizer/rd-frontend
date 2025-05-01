@@ -1,4 +1,4 @@
-import './GridCell.css';
+import './grid-cell.css';
 import type { GridCellProps } from './GridCell.types';
 
 const GridCell: React.FC<GridCellProps> = ({
