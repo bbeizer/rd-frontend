@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GameBoard from './components/GameBoard/GameBoard';
-import Lobby from './components/lobby/Lobby';
+import Lobby from './components/lobby/Lobby'
 
 function App() {
   return (
