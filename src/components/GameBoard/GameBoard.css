@@ -1,19 +1,3 @@
-.player-top, .player-bottom {
-  display: flex;
-  width: fit-content;
-  justify-content: left;
-  align-items: left;
-}
-
-.board-and-info {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-  justify-content: center; 
-}
-
 .game-container {
   display: flex;
   flex-direction: column;
@@ -21,141 +5,54 @@
   padding: 20px;
 }
 
-.board-and-chat-wrapper {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.board-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .player-info {
-  width: 100%;
   display: flex;
-  justify-content: left;
+  justify-content: center;
+  width: 500px
 }
 
 .player-info > div {
-  background-color:white;
+  background-color: white;
   padding: 10px 20px;
   border-radius: 8px;
   box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
   font-weight: bold;
-  min-width: 500px;
+  min-width: 300px;
   text-align: center;
 }
 
+.top-player {
+  margin-bottom: 8px;
+}
+
+.bottom-player {
+  margin-top: 8px;
+}
+
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .board-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: rotate(var(--rotation));
-  transition: transform 0.3s ease-in-out; 
+  transition: transform 0.3s ease-in-out;
 }
 
-.modal-side {
-  width: 250px;
-  margin-left: 20px; 
-  padding: 15px; 
-  background-color: white;
-  border: 1px solid #cccccc; 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  border-radius: 8px; 
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
-  justify-content: center;
-  transition:
-    transform 0.3s ease-out,
-    box-shadow 0.3s ease-out;
-}
-
-@media (max-width: 768px) {
-  .modal-side {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 20px;
-    border-top: 2px solid #007bff; 
-  }
-}
-
-.rotate-board {
-  transform: rotate(180deg);
-}
-
-.rotate-board {
-  transform: rotate(180deg);
-}
-
-.rotate-board {
-  transform: rotate(180deg);
-}
-
-.chat-container {
-  width: 300px;
-  height: 500px;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background-color: #f9f9f9;
-}
-
-.chat-input {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-}
-
-.chat-input input {
-  flex: 1;
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.chat-input button {
-  margin-left: 8px;
-  padding: 8px 12px;
+.board-wrapper button {
+  margin-top: 10px;
+  padding: 8px 16px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-.chat-input button:hover {
-  background-color: #0056b3;
-}
-
-.message {
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  max-width: 80%;
-}
-
-.message.user {
-  align-self: flex-end;
-  background-color: #dcf8c6;
-}
-
-.message.opponent {
-  align-self: flex-start;
-  background-color: #f1f0f0;
+.board-wrapper button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
 }

@@ -298,35 +298,32 @@ const GameBoard = () => {
       <div className="player-info top-player">
         <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
       </div>
-      <div className="board-and-info">
-        <div className="board-and-chat-wrapper">
-          <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
-            <GridContainer>{renderBoard()}</GridContainer>
-          </div>
-
-          {gameState.status === 'playing' && !isUsersTurn && (
-            <Modal>
-              <p>It&apos;s not your turn. Please wait for the other player.</p>
-            </Modal>
-          )}
-          {gameState.status === 'completed' && (
-            <Modal>
-              <h2>{gameState.winner} wins!</h2>
-              <button onClick={() => navigate('/')}>Return to Lobby</button>
-            </Modal>
-          )}
+      <div className="board-wrapper">
+        <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
+          <GridContainer>{renderBoard()}</GridContainer>
         </div>
-        <button
-          onClick={handlePassTurn}
-          disabled={!isUsersTurn}
-          style={{ alignSelf: 'flex-start', margin: '10px' }}
-        >
-          Pass Turn
-        </button>
+        {gameState.status === 'playing' && !isUsersTurn && (
+          <Modal>
+            <p>It&apos;s not your turn. Please wait for the other player.</p>
+          </Modal>
+        )}
+        {gameState.status === 'completed' && (
+          <Modal>
+            <h2>{gameState.winner} wins!</h2>
+            <button onClick={() => navigate('/')}>Return to Lobby</button>
+          </Modal>
+        )}
       </div>
       <div className="player-info bottom-player">
         <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
       </div>
+      <button
+        onClick={handlePassTurn}
+        disabled={!isUsersTurn}
+        style={{ marginTop: '8px' }}
+      >
+        Pass Turn
+      </button>
     </div>
   );
 };
