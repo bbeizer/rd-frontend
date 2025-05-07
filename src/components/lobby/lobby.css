@@ -261,6 +261,35 @@ input {
   transform: scale(1.05);
 }
 
+.lobby-text {
+  font-family: 'Quicksand', 'Poppins', 'Segoe UI', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+}
+
+.dot {
+  display: inline-block;
+  margin-left: 2px;
+  font-size: 1.2rem;
+  animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .modal {
   position: fixed;
   top: 50%;

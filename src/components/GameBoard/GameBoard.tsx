@@ -14,6 +14,8 @@ import { getAIMove } from '@/services/aiService';
 import { getKeyCoordinates } from '@/utils/gameUtilities';
 import { fetchGame, updateGameState } from './helpers';
 import './GameBoard.css';
+import ChatBox from '../ChatBox/ChatBox';
+import { MessageProps } from '../Message/Message';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -24,6 +26,7 @@ const GameBoard = () => {
     currentPlayerTurn: 'white',
     activePiece: null,
     possibleMoves: [],
+    conversation: [],
     movedPiece: null,
     movedPieceOriginalPosition: null,
     possiblePasses: [],
@@ -51,7 +54,6 @@ const GameBoard = () => {
     if (!gameId) return;
     try {
       const fetchedGame = await fetchGame(gameId, setGameState);
-      console.log('setting gameState');
 
       setGameState((prevState) => {
         if (JSON.stringify(prevState) === JSON.stringify(fetchedGame)) {
@@ -59,12 +61,15 @@ const GameBoard = () => {
           return prevState;
         }
         console.log('✅ Updating game state with backend data.');
-        return fetchedGame;
+        return {
+          ...fetchedGame,
+          conversation: fetchedGame.conversation || [],
+        };
       });
     } catch (error) {
       console.error('Error fetching game data:', error);
     }
-  }, [gameId]); // ✅ Only re-run when `gameId` changes
+  }, [gameId]);
 
   //For polling game for initial Render
   useEffect(() => {
@@ -101,7 +106,7 @@ const GameBoard = () => {
       setGameState((prev) => ({
         ...prev,
         ...updatedGame,
-        gameId: prev.gameId, // 🔥 ensure we don't lose gameId
+        gameId: prev.gameId,
       }));
     });
   }, [gameState]);
@@ -233,6 +238,31 @@ const GameBoard = () => {
     }
   };
 
+  const handleSendMessage = async (newMessage: MessageProps) => {
+    // Optimistically update local game state
+    setGameState(prev => ({
+      ...prev,
+      conversation: [...(prev.conversation || []), newMessage]
+    }));
+
+    try {
+      if (!gameId) {
+        console.error('gameId is undefined');
+        return;
+      }
+      await updateGame(gameId, {
+        newMessage: {
+          author: newMessage.author,
+          text: newMessage.text,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("❌ Failed to send message:", error);
+      // Optional: rollback UI or show an error toast
+    }
+  };
+
   const renderBoard = () => {
     if (!gameState.currentBoardStatus) {
       return <p>Loading game board...</p>;
@@ -293,38 +323,59 @@ const GameBoard = () => {
   }
   const rotationStyle = localStorage.getItem('userColor') === 'black' ? '180deg' : '0deg';
   return (
-    <div className="game-container">
-      {gameState.status === 'completed' && <Confetti />}
-      <div className="player-info top-player">
-        <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
-      </div>
-      <div className="board-wrapper">
-        <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
-          <GridContainer>{renderBoard()}</GridContainer>
+    <>
+      <div className="game-container">
+        {gameState.status === 'completed' && <Confetti />}
+        <div className="board-wrapper">
+          {/* Board + Button grouped together */}
+          <div className="board-column">
+            <div className="player-info top-player">
+              <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
+            </div>
+            <div className="board-container" style={{ transform: `rotate(${rotationStyle})` }}>
+              <GridContainer>{renderBoard()}</GridContainer>
+              {/* Modals */}
+              {gameState.status === 'playing' && !isUsersTurn && (
+                <Modal >
+                  <div style={{ transform: `rotate(${rotationStyle})` }}>
+                    <p>It&apos;s not your turn. Please wait for the other player.</p>
+                  </div>
+                </Modal>
+              )}
+              {gameState.status === 'completed' && (
+                <Modal>
+                  <div style={{ transform: `rotate(${rotationStyle})` }}>
+                    <h2>{gameState.winner} wins!</h2>
+                    <button onClick={() => navigate('/')}>Return to Lobby</button>
+                  </div>
+                </Modal>
+              )}
+            </div>
+            <div className="player-info bottom-player">
+              <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
+            </div>
+
+            <button
+              onClick={handlePassTurn}
+              disabled={!isUsersTurn}
+              className="pass-turn-btn"
+            >
+              Pass Turn
+            </button>
+
+          </div>
+
+          {/* Only show chat in multiplayer */}
+          {gameState.gameType === 'multiplayer' && (
+            <ChatBox
+              messages={gameState.conversation || []}
+              onSendMessage={handleSendMessage}
+              currentUserName={currentPlayerName ?? 'You'}
+            />
+          )}
         </div>
-        {gameState.status === 'playing' && !isUsersTurn && (
-          <Modal>
-            <p>It&apos;s not your turn. Please wait for the other player.</p>
-          </Modal>
-        )}
-        {gameState.status === 'completed' && (
-          <Modal>
-            <h2>{gameState.winner} wins!</h2>
-            <button onClick={() => navigate('/')}>Return to Lobby</button>
-          </Modal>
-        )}
       </div>
-      <div className="player-info bottom-player">
-        <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
-      </div>
-      <button
-        onClick={handlePassTurn}
-        disabled={!isUsersTurn}
-        style={{ marginTop: '8px' }}
-      >
-        Pass Turn
-      </button>
-    </div>
+    </>
   );
 };
 

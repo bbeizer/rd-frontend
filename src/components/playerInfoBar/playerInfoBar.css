@@ -1,7 +1,7 @@
 .player-info-bar {
   display: flex;
   flex-wrap: flex-start;
-  align-items: center;
+  align-items: flex-start;
   padding: 10px 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -21,4 +21,6 @@
 .player-name {
   font-weight: bold;
   letter-spacing: 0.5px;
+  justify-content: center;
+  align-self: center;
 }

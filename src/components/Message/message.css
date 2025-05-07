@@ -1,0 +1,12 @@
+.message {
+    margin-bottom: 6px;
+}
+
+.message-author {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.message-text {
+    word-wrap: break-word;
+}

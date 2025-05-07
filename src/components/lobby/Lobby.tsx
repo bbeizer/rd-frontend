@@ -170,7 +170,12 @@ function Lobby() {
         </div>
         {waitingForPlayer && (
           <Modal>
-            <h2>Waiting for another player to join...</h2>
+            <p className="lobby-text">
+              Waiting for another player
+              <span className="dot">.</span>
+              <span className="dot">.</span>
+              <span className="dot">.</span>
+            </p>
           </Modal>
         )}
         {showColorModal && (

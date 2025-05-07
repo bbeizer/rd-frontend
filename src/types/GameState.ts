@@ -1,3 +1,4 @@
+import { MessageProps } from '@/components/Message/Message';
 import { Piece } from './Piece';
 
 export type GameState = {
@@ -7,6 +8,7 @@ export type GameState = {
   activePiece: any;
   hasMoved: boolean;
   possibleMoves: string[];
+  conversation?: MessageProps[];
   movedPiece: any;
   movedPieceOriginalPosition: any;
   possiblePasses: string[];
