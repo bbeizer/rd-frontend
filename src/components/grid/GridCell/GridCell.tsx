@@ -9,7 +9,7 @@ const GridCell: React.FC<GridCellProps> = ({
   highlight = null,
   onClick,
 }) => {
-  const isLightCell = (row + col) % 2 === 0;
+  const isLightCell = (row + col) % 2 !== 0;
 
   const backgroundColor =
     highlight === 'red'
