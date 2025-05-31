@@ -1,9 +1,6 @@
 import type { GameState } from '../types/GameState';
 
-const aiMoveEndpoint =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5002/ai/move'
-    : `${import.meta.env.VITE_AI_SERVICE_URL}`;
+const aiMoveEndpoint = import.meta.env.VITE_AI_SERVICE_URL;
 
 export async function getAIMove(game: GameState) {
   try {
