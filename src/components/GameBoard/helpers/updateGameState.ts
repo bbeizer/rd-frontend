@@ -87,7 +87,6 @@ export function updateGameState(cellKey: string, gameState: GameState) {
         if (unselectingASelectedPiece) {
           newState = clearSelection(newState);
         } else {
-          debugger;
           newState = setActivePieceWithMoves(newState, element, cellKey);
         }
       }

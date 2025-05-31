@@ -63,7 +63,7 @@ const GameBoard = () => {
         console.log('✅ Updating game state with backend data.');
         return {
           ...fetchedGame,
-          conversation: fetchedGame.conversation || [],
+          conversation: fetchedGame?.conversation || [],
         };
       });
     } catch (error) {
@@ -95,20 +95,22 @@ const GameBoard = () => {
     if (
       !gameState ||
       gameState.gameType !== 'singleplayer' ||
-      !gameState.gameId ||
-      gameState.currentPlayerTurn !== 'white' ||
-      gameState.playerColor !== 'black'
-    )
-      return;
+      !gameState.gameId
+    ) return;
 
-    console.log('AI (White) is making the first move...');
-    getAIMove(gameState).then((updatedGame) => {
-      setGameState((prev) => ({
-        ...prev,
-        ...updatedGame,
-        gameId: prev.gameId,
-      }));
-    });
+    const userColor = localStorage.getItem('userColor');
+    const aiColor = userColor === 'white' ? 'black' : 'white';
+
+    if (gameState.currentPlayerTurn === aiColor) {
+      console.log(`🤖 AI (${aiColor}) making a move...`);
+      getAIMove(gameState).then((updatedGame) => {
+        setGameState((prev) => ({
+          ...prev,
+          ...updatedGame,
+          gameId: prev.gameId,
+        }));
+      });
+    }
   }, [gameState]);
 
   const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {

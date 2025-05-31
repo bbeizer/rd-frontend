@@ -5,7 +5,7 @@ export async function fetchGame(gameId: string, updateState: Dispatch<SetStateAc
   try {
     const baseUrl =
       window.location.hostname === 'localhost'
-        ? 'http://localhost:3000'
+        ? 'http://localhost:5050'
         : import.meta.env.VITE_BACKEND_BASE_URL;
     const response = await fetch(`${baseUrl}/api/games/${gameId}`);
     if (!response.ok) {

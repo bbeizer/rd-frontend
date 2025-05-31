@@ -2,7 +2,6 @@ import { GameState } from '@/types/GameState';
 import { getPieceMoves } from './getPieceMoves';
 import { isEqual } from 'lodash';
 import { Piece } from '@/types/Piece';
-debugger;
 export function setActivePieceWithMoves(state: GameState, element: Piece, cellKey: string) {
   const selectedPieceIsMovedPiece = state.movedPiece && isEqual(state.movedPiece.position, cellKey);
 
