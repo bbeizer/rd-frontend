@@ -17,6 +17,7 @@ import './GameBoard.css';
 import ChatBox from '../ChatBox/ChatBox';
 import { MessageProps } from '../Message/Message';
 
+
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const GameBoard = () => {
     playerColor: localStorage.getItem('userColor'),
     winner: null,
   }));
+  const userColor = localStorage.getItem('userColor');
+  const aiColor = userColor === 'white' ? 'black' : 'white';
   const isUsersTurn = gameState?.currentPlayerTurn === localStorage.getItem('userColor');
   const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
   const isUserWhite = localStorage.getItem('userColor') === 'white';
@@ -54,16 +57,17 @@ const GameBoard = () => {
     if (!gameId) return;
     try {
       const fetchedGame = await fetchGame(gameId, setGameState);
+      const convertedGame = convertServerGameToGameState(fetchedGame, localStorage.getItem('userColor') as 'white' | 'black');
 
       setGameState((prevState) => {
-        if (JSON.stringify(prevState) === JSON.stringify(fetchedGame)) {
+        if (JSON.stringify(prevState) === JSON.stringify(convertedGame)) {
           console.log('⚠️ No change in game data, skipping update.');
           return prevState;
         }
         console.log('✅ Updating game state with backend data.');
         return {
-          ...fetchedGame,
-          conversation: fetchedGame?.conversation || [],
+          ...convertedGame,
+          conversation: convertedGame?.conversation || [],
         };
       });
     } catch (error) {
@@ -92,25 +96,39 @@ const GameBoard = () => {
   }, [gameState, gameState?.isUserTurn, gameState?.gameType, gameId, pollGame]);
 
   useEffect(() => {
-    if (
-      !gameState ||
-      gameState.gameType !== 'singleplayer' ||
-      !gameState.gameId
-    ) return;
-
     const userColor = localStorage.getItem('userColor');
     const aiColor = userColor === 'white' ? 'black' : 'white';
+    console.log('🧠 useEffect triggered');
+    console.log(gameState)
+    console.log('🔍 gameState snapshot:', {
+      gameId: gameState?.gameId,
+      gameType: gameState?.gameType,
+      currentPlayerTurn: gameState?.currentPlayerTurn,
+    });
+    if (!gameState?.gameId || !gameState?.gameType || !gameState?.currentPlayerTurn) {
+      console.log('⏳ Waiting for full gameState...');
+      return;
+    }
 
-    if (gameState.currentPlayerTurn === aiColor) {
+    if (gameState.gameType === 'singleplayer' && gameState.currentPlayerTurn === aiColor) {
       console.log(`🤖 AI (${aiColor}) making a move...`);
-      getAIMove(gameState).then((updatedGame) => {
+      aiColor
+      getAIMove(gameState, aiColor).then((updatedGame) => {
         setGameState((prev) => ({
+          ...prev,
           ...updatedGame,
-          gameId: prev.gameId,
         }));
       });
+    } else {
+      console.log("🚫 Conditions not met for AI move");
+      console.log("gameId:", gameState?.gameId);
+      console.log("gameType:", gameState?.gameType);
+      console.log("currentPlayerTurn:", gameState?.currentPlayerTurn);
     }
   }, [gameState]);
+
+
+
 
   const handleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -156,7 +174,7 @@ const GameBoard = () => {
         };
       } else {
         console.log('🧠 AI Move requested for singleplayer');
-        const aiMove = await getAIMove(gameState);
+        const aiMove = await getAIMove(gameState, aiColor);
 
         setGameState((prev) => ({
           ...prev,
