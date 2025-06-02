@@ -105,7 +105,6 @@ const GameBoard = () => {
       console.log(`🤖 AI (${aiColor}) making a move...`);
       getAIMove(gameState).then((updatedGame) => {
         setGameState((prev) => ({
-          ...prev,
           ...updatedGame,
           gameId: prev.gameId,
         }));
