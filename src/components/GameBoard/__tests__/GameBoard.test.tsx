@@ -58,9 +58,9 @@ jest.mock('@/hooks/useGameSocket', () => ({
     useGameSocket: () => { }
 }));
 
-import GameBoardRefactored from '../GameBoardRefactored';
+import GameBoard from '../GameBoard';
 
-describe('Refactored GameBoard', () => {
+describe('GameBoard', () => {
     beforeEach(() => {
         // Set up localStorage for tests
         localStorage.setItem('userColor', 'white');
@@ -72,23 +72,23 @@ describe('Refactored GameBoard', () => {
     });
 
     it('renders the board and player info', () => {
-        render(<GameBoardRefactored />);
+        render(<GameBoard />);
         expect(screen.getByText('TestWhite')).toBeInTheDocument();
         expect(screen.getByText('TestBlack')).toBeInTheDocument();
     });
 
     it('renders the board container', () => {
-        render(<GameBoardRefactored />);
+        render(<GameBoard />);
         expect(screen.getByTestId('board-container')).toBeInTheDocument();
     });
 
     it('renders the pass turn button', () => {
-        render(<GameBoardRefactored />);
+        render(<GameBoard />);
         expect(screen.getByText('Pass Turn')).toBeInTheDocument();
     });
 
     it('renders game pieces on the board', () => {
-        render(<GameBoardRefactored />);
+        render(<GameBoard />);
         // Check that grid cells are rendered (they have id attributes)
         expect(screen.getByTestId('e1')).toBeInTheDocument();
         expect(screen.getByTestId('d1')).toBeInTheDocument();
@@ -135,8 +135,8 @@ describe('Refactored GameBoard', () => {
             }),
         }));
         // Re-import after mocking
-        const GameBoardRefactoredBlack = require('../GameBoardRefactored').default;
-        render(<GameBoardRefactoredBlack />);
+        const GameBoardBlack = require('../GameBoard').default;
+        render(<GameBoardBlack />);
         const board = screen.getByTestId('board-container');
         expect(board).toHaveStyle('transform: rotate(180deg)');
     });
@@ -180,8 +180,8 @@ describe('Refactored GameBoard', () => {
             }),
         }));
         // Re-import after mocking
-        const GameBoardRefactoredBlack = require('../GameBoardRefactored').default;
-        render(<GameBoardRefactoredBlack />);
+        const GameBoardBlack = require('../GameBoard').default;
+        render(<GameBoardBlack />);
         expect(screen.getByText(/not your turn/i)).toBeInTheDocument();
     });
 }); 

@@ -13,7 +13,7 @@ import { MessageProps } from '../Message/Message';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
 
-const GameBoardRefactored = () => {
+const GameBoard = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const navigate = useNavigate();
     const userColor = localStorage.getItem('userColor');
@@ -182,4 +182,4 @@ const GameBoardRefactored = () => {
     );
 };
 
-export default GameBoardRefactored; 
+export default GameBoard; 
