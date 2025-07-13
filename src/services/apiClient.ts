@@ -21,7 +21,6 @@ export const apiPost = async <T>(
         const { data } = await apiClient.post<T>(path, body);
         return { success: true, data };
     } catch (error: any) {
-        console.error('apiPost failed:', error.message);
         return { success: false, error: error.message };
     }
 };

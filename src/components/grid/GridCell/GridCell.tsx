@@ -8,6 +8,7 @@ const GridCell: React.FC<GridCellProps> = ({
   id,
   highlight = null,
   onClick,
+  ...restProps
 }) => {
   const isLightCell = (row + col) % 2 !== 0;
 
@@ -24,6 +25,7 @@ const GridCell: React.FC<GridCellProps> = ({
 
   return (
     <div
+      {...restProps}
       style={baseStyle}
       className={`grid-cell ${isLightCell ? 'light-cell' : 'dark-cell'}`}
       onClick={onClick}

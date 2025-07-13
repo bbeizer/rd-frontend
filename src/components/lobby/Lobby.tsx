@@ -39,7 +39,6 @@ function Lobby() {
       );
 
       if (!result.success || !result.data) {
-        console.error('Failed to join multiplayer:', result.error);
         alert('Failed to join multiplayer. Please try again.');
         return;
       }
@@ -55,7 +54,6 @@ function Lobby() {
         setIntervalId(id);
       }
     } catch (error) {
-      console.error('Failed to join multiplayer game:', error);
       alert('Unexpected error occurred.');
     }
   };
@@ -70,7 +68,6 @@ function Lobby() {
       const result = await startSinglePlayerGame(userId, name, color);
 
       if (!result.success || !result.data) {
-        console.error('Failed to start single-player game:', result.error);
         alert('Failed to start game. Please try again.');
         return;
       }
@@ -78,7 +75,6 @@ function Lobby() {
       const { game } = result.data;
       navigate(`/game/${game._id}`);
     } catch (error) {
-      console.error('Failed to start single-player game:', error);
       alert('Unexpected error occurred.');
     }
   };
@@ -97,7 +93,7 @@ function Lobby() {
         navigate(`/game/${game._id}`);
       }
     } catch (error) {
-      console.error('Error polling game status:', error);
+      // console.error('Error polling game status:', error); // Removed console.error
     }
   };
 
@@ -123,7 +119,6 @@ function Lobby() {
         setShowFeedbackModal(false);
       }, 2000);
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
       alert('Something went wrong.');
     } finally {
       setIsSubmitting(false);
@@ -131,7 +126,6 @@ function Lobby() {
   };
 
   const handleFeedbackSubmit = () => {
-    console.log('Feedback submitted:', feedbackText);
     setFeedbackText('');
     setShowFeedbackModal(false);
     alert('Thank you for your feedback!');

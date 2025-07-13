@@ -5,15 +5,15 @@ export const movePiece = (
   targetKey: string,
   gameBoard: Record<string, Piece | null>
 ) => {
-  console.log(sourceKey);
-  console.log(targetKey);
   const newBoardStatus = { ...gameBoard };
   const pieceToMove = newBoardStatus[sourceKey];
+
   if (pieceToMove) {
+    // Move the piece to the target position
     newBoardStatus[targetKey] = { ...pieceToMove, position: targetKey };
+    // Clear the source position
+    newBoardStatus[sourceKey] = null;
   }
-  newBoardStatus[sourceKey] = null;
-  newBoardStatus[targetKey] = pieceToMove;
-  newBoardStatus[sourceKey] = null;
+
   return newBoardStatus;
 };

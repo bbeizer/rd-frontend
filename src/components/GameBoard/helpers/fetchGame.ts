@@ -14,14 +14,13 @@ export async function fetchGame(gameId: string, updateState: Dispatch<SetStateAc
     const gameData = await response.json();
     updateState((prevState: GameState) => {
       if (JSON.stringify(prevState) === JSON.stringify(gameData)) {
-        console.log('⚠️ No change in game data, skipping update.');
         return prevState;
       }
-      console.log('✅ Updating game state with backend data.');
       return gameData;
     });
     return gameData;
   } catch (error) {
-    console.error('❌ Error fetching game data:', error);
+    // Optionally rethrow or handle error
+    return undefined;
   }
 }

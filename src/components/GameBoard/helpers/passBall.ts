@@ -6,16 +6,14 @@ export const passBall = (
   gameBoard: Record<string, Piece | null>
 ) => {
   const newBoardStatus = { ...gameBoard };
-
   const sourcePiece = newBoardStatus[sourceKey];
   const targetPiece = newBoardStatus[targetKey];
 
   if (sourcePiece && targetPiece) {
-    newBoardStatus[targetKey] = { ...targetPiece, hasBall: true };
     newBoardStatus[sourceKey] = { ...sourcePiece, hasBall: false };
-  } else {
-    console.warn('Invalid passBall: one or both pieces are null');
+    newBoardStatus[targetKey] = { ...targetPiece, hasBall: true };
   }
+  // else: do nothing if one or both pieces are null
 
   return newBoardStatus;
 };

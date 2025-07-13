@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import GameBoard from './components/GameBoard/GameBoard';
+import GameBoard from './components/GameBoard/GameBoardRefactored';
 import Lobby from './components/lobby/Lobby'
 
 function App() {
