@@ -43,7 +43,10 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
             setError(null);
 
             // For now, use localhost for both development and testing
-            const baseUrl = 'http://localhost:5050';
+            const baseUrl =
+                process.env.NODE_ENV === 'production'
+                    ? import.meta.env.VITE_API_BASE_URL
+                    : 'http://localhost:5050';
 
             const response = await fetch(`${baseUrl}/api/games/${gameId}`);
             if (!response.ok) {
