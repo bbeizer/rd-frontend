@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { getEnv } from '../utils/env';
 
-const SOCKET_URL = getEnv('VITE_API_URL', 'http://localhost:5050');
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function useGameSocket(gameId: string, onGameUpdate: (gameData: any) => void) {
     useEffect(() => {
@@ -26,4 +25,4 @@ export function useGameSocket(gameId: string, onGameUpdate: (gameData: any) => v
             socket.disconnect();
         };
     }, [gameId, onGameUpdate]);
-} 
+}

@@ -4,7 +4,7 @@ import axios from 'axios';
  * Core apiClient with typing
  */
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
