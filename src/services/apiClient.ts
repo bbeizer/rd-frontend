@@ -40,3 +40,7 @@ export const apiPatch = async <T>(
         return { success: false, error: error.message };
     }
 };
+
+export function getApiBaseUrl() {
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050';
+}

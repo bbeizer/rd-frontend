@@ -10,6 +10,10 @@ jest.mock('../../services/aiService', () => ({
     getAIMove: jest.fn(),
 }));
 
+jest.mock('../../services/apiClient', () => ({
+    getApiBaseUrl: () => 'http://localhost:5050',
+}));
+
 // Import the mocked functions
 import { updateGame } from '../../services/gameService';
 import { getAIMove } from '../../services/aiService';
@@ -138,5 +142,61 @@ describe('useGameState', () => {
         });
 
         expect(result.current.isUserTurn).toBe(true);
+    });
+
+    it('should initialize singleplayer game as white correctly', async () => {
+        const mockWhiteGame = {
+            ...mockServerGame,
+            whitePlayerName: 'PlayerWhite',
+            blackPlayerName: 'AI',
+            currentPlayerTurn: 'white',
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockWhiteGame,
+        });
+
+        const { result } = renderHook(() => useGameState({
+            gameId: mockGameId,
+            userColor: 'white'
+        }));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.gameState.whitePlayerName).toBe('PlayerWhite');
+        expect(result.current.gameState.blackPlayerName).toBe('AI');
+        expect(result.current.gameState.currentPlayerTurn).toBe('white');
+        expect(result.current.isUserTurn).toBe(true);
+    });
+
+    it('should initialize singleplayer game as black correctly', async () => {
+        const mockBlackGame = {
+            ...mockServerGame,
+            whitePlayerName: 'AI',
+            blackPlayerName: 'PlayerBlack',
+            currentPlayerTurn: 'white', // AI starts
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockBlackGame,
+        });
+
+        const { result } = renderHook(() => useGameState({
+            gameId: mockGameId,
+            userColor: 'black'
+        }));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.gameState.whitePlayerName).toBe('AI');
+        expect(result.current.gameState.blackPlayerName).toBe('PlayerBlack');
+        expect(result.current.gameState.currentPlayerTurn).toBe('white');
+        expect(result.current.isUserTurn).toBe(false); // AI's turn first
     });
 }); 
