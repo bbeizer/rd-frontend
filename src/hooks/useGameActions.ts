@@ -54,13 +54,13 @@ export const useGameActions = ({
                 return;
             }
 
-            const aiColor = userColor === 'white' ? 'black' : 'white';
+            const aiColor = gameState.aiColor;
 
             if (gameState.gameType === 'singleplayer') {
                 // In singleplayer, get AI move and switch back to user's turn
 
                 try {
-                    const aiMoveResult = await getAIMove(gameState, aiColor);
+                    const aiMoveResult = await getAIMove(gameState, aiColor || 'black');
 
                     // Update local state with AI move
                     setGameState(prev => ({

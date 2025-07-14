@@ -12,6 +12,7 @@ export type GameState = {
   movedPiece: any;
   movedPieceOriginalPosition: any;
   possiblePasses: string[];
+  aiColor?: string;
   playerColor: string | null;
   winner: string | null;
   whitePlayerName?: string;
