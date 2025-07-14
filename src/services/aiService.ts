@@ -2,7 +2,7 @@ import { getEnv } from '../utils/env';
 import type { GameState } from '../types/GameState';
 
 // Simple endpoint configuration - can be overridden by environment variables
-const aiMoveEndpoint = getEnv('VITE_AI_SERVICE_URL') || 'http://localhost:8000';
+const aiMoveEndpoint = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
 
 export async function getAIMove(game: GameState, color: String) {
   try {
