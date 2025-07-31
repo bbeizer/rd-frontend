@@ -62,28 +62,64 @@ export const useGameActions = ({
                 try {
                     const aiMoveResult = await getAIMove(gameState, aiColor || 'black');
 
-                    // Update local state with AI move
-                    setGameState(prev => ({
-                        ...prev,
+                    // Handle case where AI service doesn't return expected format
+                    if (!aiMoveResult) {
+                        // Fallback: just switch turn without AI move
+                        const updates = {
+                            ...gameState,
+                            currentPlayerTurn: userColor,
+                            activePiece: null,
+                            movedPiece: null,
+                            hasMoved: false,
+                            possibleMoves: [],
+                            possiblePasses: [],
+                        };
+
+                        await updateGameOnServer(updates);
+                        setGameState(prev => ({ ...prev, ...updates }));
+                        return;
+                    }
+
+                    // Preserve player names and important state
+                    const updatedState = {
+                        ...gameState,
                         ...aiMoveResult,
+                        // Preserve player names to prevent the "Nic" bug
+                        whitePlayerName: gameState.whitePlayerName,
+                        blackPlayerName: gameState.blackPlayerName,
+                        // Preserve game metadata
+                        gameId: gameState.gameId,
+                        gameType: gameState.gameType,
+                        aiColor: gameState.aiColor,
                         currentPlayerTurn: userColor, // Switch back to user's turn
                         activePiece: null,
                         movedPiece: null,
                         hasMoved: false,
                         possibleMoves: [],
                         possiblePasses: [],
-                    }));
+                    };
+
+                    // Check for win condition after AI move
+                    if (aiMoveResult.currentBoardStatus) {
+                        const { didWin } = await import('../components/GameBoard/helpers/didWin');
+                        const hasWon = didWin(aiMoveResult.currentBoardStatus);
+
+                        if (hasWon) {
+                            // Determine winner based on whose turn it was before AI move
+                            const winner = gameState.currentPlayerTurn === 'white'
+                                ? gameState.whitePlayerName
+                                : gameState.blackPlayerName;
+
+                            updatedState.winner = winner;
+                            updatedState.status = 'completed';
+                        }
+                    }
+
+                    // Update local state with AI move
+                    setGameState(updatedState);
 
                     // Update server with AI move and turn back to user
-                    await updateGameOnServer({
-                        ...aiMoveResult,
-                        currentPlayerTurn: userColor,
-                        activePiece: null,
-                        movedPiece: null,
-                        hasMoved: false,
-                        possibleMoves: [],
-                        possiblePasses: [],
-                    });
+                    await updateGameOnServer(updatedState);
 
                 } catch (aiError) {
                     // Fallback: just switch turn without AI move

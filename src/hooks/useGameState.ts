@@ -95,13 +95,45 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
 
         try {
             const aiMoveResult = await getAIMove(gameState, aiColor);
-            setGameState(prev => ({
-                ...prev,
+
+            // Handle case where AI service doesn't return expected format
+            if (!aiMoveResult) {
+                return;
+            }
+
+            // Preserve player names and other important state
+            const updatedGameState = {
+                ...gameState,
                 ...aiMoveResult,
-            }));
+                // Preserve player names to prevent the "Nic" bug
+                whitePlayerName: gameState.whitePlayerName,
+                blackPlayerName: gameState.blackPlayerName,
+                // Preserve game metadata
+                gameId: gameState.gameId,
+                gameType: gameState.gameType,
+                aiColor: gameState.aiColor,
+            };
+
+            // Check for win condition after AI move
+            if (aiMoveResult.currentBoardStatus) {
+                const { didWin } = await import('../components/GameBoard/helpers/didWin');
+                const hasWon = didWin(aiMoveResult.currentBoardStatus);
+
+                if (hasWon) {
+                    // Determine winner based on whose turn it was before AI move
+                    const winner = gameState.currentPlayerTurn === 'white'
+                        ? gameState.whitePlayerName
+                        : gameState.blackPlayerName;
+
+                    updatedGameState.winner = winner;
+                    updatedGameState.status = 'completed';
+                }
+            }
+
+            setGameState(updatedGameState);
 
             // Update server with AI move
-            await updateGameOnServer(aiMoveResult);
+            await updateGameOnServer(updatedGameState);
         } catch (err) {
             setError('AI move failed');
         }

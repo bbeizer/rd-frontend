@@ -12,13 +12,14 @@ import ChatBox from '../ChatBox/ChatBox';
 import { MessageProps } from '../Message/Message';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
+import { useEffect } from 'react';
 
 const GameBoard = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const navigate = useNavigate();
     const userColor = localStorage.getItem('userColor');
 
-    if (!gameId || !userColor) {
+    if (!userColor || !gameId) {
         return <div>Invalid game configuration</div>;
     }
 
@@ -31,9 +32,13 @@ const GameBoard = () => {
         updateGameOnServer,
     } = useGameState({ gameId, userColor });
 
-    const handleGameEnd = (winner: string) => {
-        // Handle game end logic
-    };
+    // Detect when game ends and trigger confetti/modal
+    useEffect(() => {
+        if (gameState.status === 'completed' && gameState.winner) {
+            // Game has ended - confetti and modal will be handled by existing logic
+            console.log(`Game completed! Winner: ${gameState.winner}`);
+        }
+    }, [gameState.status, gameState.winner]);
 
     useGameSocket(gameId, (gameData) => {
         setGameState(gameData);
@@ -47,7 +52,6 @@ const GameBoard = () => {
         gameState,
         setGameState,
         updateGameOnServer,
-        onGameEnd: handleGameEnd,
         userColor,
     });
 

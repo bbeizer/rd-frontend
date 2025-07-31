@@ -5,7 +5,9 @@ import { getAIMove } from '../../services/aiService';
 
 // Mock dependencies
 jest.mock('../../components/GameBoard/helpers/updateGameState');
-jest.mock('../../services/aiService');
+jest.mock('../../services/aiService', () => ({
+    getAIMove: jest.fn(),
+}));
 
 const mockUpdateGameState = updateGameState as jest.MockedFunction<typeof updateGameState>;
 const mockGetAIMove = getAIMove as jest.MockedFunction<typeof getAIMove>;
