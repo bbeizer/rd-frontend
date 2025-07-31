@@ -255,7 +255,8 @@ function Lobby() {
               <strong>Gameplay:</strong>
             </p>
             <ul>
-              <li>Move a piece or pass the ball on your turn.</li>
+              <li>On your turn, you can move any given piece once and/or pass the ball.</li>
+              <li>You can move 1 piece at a time, but make unlimited ball passes.</li>
               <li>Press "Pass Turn" to end your move.</li>
               <li>Turns alternate between players.</li>
             </ul>
