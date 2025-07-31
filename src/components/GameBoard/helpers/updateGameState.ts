@@ -57,10 +57,8 @@ export function updateGameState(cellKey: string, gameState: GameState) {
         if (canReceiveBall(element, gameState.possiblePasses)) {
           newState = passBallAndSetActivePiece(newState, element, cellKey);
           if (didWin(newState.currentBoardStatus)) {
-            newState.winner =
-              newState.currentPlayerTurn === 'white'
-                ? (newState.whitePlayerName ?? null)
-                : (newState.blackPlayerName ?? null);
+            // Don't set winner here - let the backend or AI service handle it
+            newState.status = 'completed';
             return newState;
           }
         }

@@ -120,12 +120,6 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
                 const hasWon = didWin(aiMoveResult.currentBoardStatus);
 
                 if (hasWon) {
-                    // Determine winner based on whose turn it was before AI move
-                    const winner = gameState.currentPlayerTurn === 'white'
-                        ? gameState.whitePlayerName
-                        : gameState.blackPlayerName;
-
-                    updatedGameState.winner = winner;
                     updatedGameState.status = 'completed';
                 }
             }

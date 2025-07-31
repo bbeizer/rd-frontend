@@ -36,7 +36,6 @@ const GameBoard = () => {
     useEffect(() => {
         if (gameState.status === 'completed' && gameState.winner) {
             // Game has ended - confetti and modal will be handled by existing logic
-            console.log(`Game completed! Winner: ${gameState.winner}`);
         }
     }, [gameState.status, gameState.winner]);
 

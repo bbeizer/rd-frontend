@@ -30,17 +30,32 @@ export const useGameActions = ({
 
             const newState = updateGameState(cellKey, gameState);
 
+            // Check for win condition after the move
+            if (newState.currentBoardStatus) {
+                const { didWin } = await import('../components/GameBoard/helpers/didWin');
+                const hasWon = didWin(newState.currentBoardStatus);
+
+                if (hasWon) {
+                    // Determine winner based on whose turn it was
+                    const winner = gameState.currentPlayerTurn === 'white'
+                        ? (gameState.whitePlayerName || 'White')
+                        : (gameState.blackPlayerName || 'Black');
+
+                    newState.winner = winner;
+                    newState.status = 'completed';
+                }
+            }
+
             // Update local state immediately for responsive UI
             setGameState(newState);
 
-            // Check for game end
+            // Update server (even if there's a winner, so other players get notified)
+            await updateGameOnServer(newState);
+
+            // Check for game end after server update
             if (newState.winner) {
                 onGameEnd?.(newState.winner);
-                return;
             }
-
-            // Update server
-            await updateGameOnServer(newState);
         } catch (error) {
             // Could add toast notification here
         }
@@ -105,12 +120,6 @@ export const useGameActions = ({
                         const hasWon = didWin(aiMoveResult.currentBoardStatus);
 
                         if (hasWon) {
-                            // Determine winner based on whose turn it was before AI move
-                            const winner = gameState.currentPlayerTurn === 'white'
-                                ? gameState.whitePlayerName
-                                : gameState.blackPlayerName;
-
-                            updatedState.winner = winner;
                             updatedState.status = 'completed';
                         }
                     }
