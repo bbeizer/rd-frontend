@@ -7,7 +7,8 @@ import { getAIMove } from '../services/aiService';
 interface UseGameActionsProps {
   gameState: GameState;
   setGameState: (state: GameState | ((prev: GameState) => GameState)) => void;
-  updateGameOnServer: (updates: any) => Promise<any>;
+  // TODO: Refactor to send actions instead of full state, and use server response as source of truth
+  updateGameOnServer: (updates: Partial<GameState>) => Promise<void>;
   onGameEnd?: (winner: string) => void;
   userColor: string | null;
 }
@@ -184,13 +185,14 @@ export const useGameActions = ({
         }));
 
         // Update server
+        // TODO: This should be a separate API endpoint for messages
         await updateGameOnServer({
           newMessage: {
             author: newMessage.author,
             text: newMessage.text,
             timestamp: new Date().toISOString(),
           },
-        });
+        } as unknown as Partial<GameState>);
       } catch (error) {
         // Could rollback optimistic update here
       }

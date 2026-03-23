@@ -74,17 +74,17 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
   }, [gameId, userColor]);
 
   // Update game on server
+  // TODO: Refactor to send actions instead of full state, and use server response as source of truth
   const updateGameOnServer = useCallback(
-    async (updates: Partial<GameState>) => {
+    async (updates: Partial<GameState>): Promise<void> => {
       if (!gameId) {
         throw new Error('Game ID is required');
       }
 
-      const response = await updateGame(gameId, updates);
+      const response = await updateGame(gameId, updates as Record<string, unknown>);
       if (!response.success) {
         throw new Error(response.error || 'Failed to update game');
       }
-      return response.data;
     },
     [gameId]
   );

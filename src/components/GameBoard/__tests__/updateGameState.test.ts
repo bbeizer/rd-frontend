@@ -1,11 +1,12 @@
 import type { GameState } from '@/types/GameState';
+import type { Piece } from '@/types/Piece';
 import '@testing-library/jest-dom';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { updateGameState } from '../helpers/updateGameState';
 
 // Create a simple mock game state for testing
 const initialGameState = (): GameState => {
-  const board: Record<string, any> = {};
+  const board: Record<string, Piece | null> = {};
 
   const files = 'abcdefgh';
   for (const file of files) {
@@ -138,10 +139,10 @@ describe('updateGameState', () => {
 
   it('should clear possible moves when deselecting a piece', () => {
     const cellKeyClicked = 'e1'; // Adjusted to rank 1
-    initialState.activePiece = {
-      ...initialState.currentBoardStatus![cellKeyClicked],
-      position: cellKeyClicked,
-    };
+    const piece = initialState.currentBoardStatus[cellKeyClicked];
+    if (piece) {
+      initialState.activePiece = { ...piece, position: cellKeyClicked };
+    }
     initialState.possibleMoves = ['f3', 'g4']; // Possible moves before deselecting
 
     const newState = updateGameState(cellKeyClicked, initialState);
@@ -174,11 +175,11 @@ describe('updateGameState', () => {
 
     expect(newState.currentBoardStatus?.[firstMove]).not.toBeNull();
     expect(newState.currentBoardStatus?.['e1']).toBeNull();
-    expect(newState.activePiece.position).toEqual(firstMove); // f3 piece is now active
+    expect(newState.activePiece?.position).toEqual(firstMove); // f3 piece is now active
 
     const secondMoveAttempt = 'f1';
     newState = updateGameState(secondMoveAttempt, newState);
-    expect(newState.activePiece.position).toEqual(firstMove); // The active piece is still the one at f3
-    expect(newState.activePiece.position).not.toEqual('f1');
+    expect(newState.activePiece?.position).toEqual(firstMove); // The active piece is still the one at f3
+    expect(newState.activePiece?.position).not.toEqual('f1');
   });
 });

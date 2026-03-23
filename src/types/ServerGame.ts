@@ -1,7 +1,7 @@
 export type ServerGame = {
   _id: string;
   status: 'playing' | 'not started' | 'completed';
-  gameType: 'single' | 'multiplayer';
+  gameType: 'singleplayer' | 'multiplayer';
   currentBoardStatus: Record<
     string,
     {

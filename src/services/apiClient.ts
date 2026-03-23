@@ -15,13 +15,14 @@ export const apiClient = axios.create({
  */
 export const apiPost = async <T>(
   path: string,
-  body: any
+  body: Record<string, unknown>
 ): Promise<{ success: boolean; data?: T; error?: string }> => {
   try {
     const { data } = await apiClient.post<T>(path, body);
     return { success: true, data };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: message };
   }
 };
 
@@ -30,14 +31,15 @@ export const apiPost = async <T>(
  */
 export const apiPatch = async <T>(
   path: string,
-  body: any
+  body: Record<string, unknown>
 ): Promise<{ success: boolean; data?: T; error?: string }> => {
   try {
     const { data } = await apiClient.patch<T>(path, body);
     return { success: true, data };
-  } catch (error: any) {
-    console.error('apiPatch failed:', error.message);
-    return { success: false, error: error.message };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('apiPatch failed:', message);
+    return { success: false, error: message };
   }
 };
 

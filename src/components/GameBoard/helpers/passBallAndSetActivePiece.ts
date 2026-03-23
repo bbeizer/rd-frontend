@@ -4,6 +4,8 @@ import { GameState } from '@/types/GameState';
 import { Piece } from '@/types/Piece';
 
 export function passBallAndSetActivePiece(state: GameState, element: Piece, cellKey: string) {
+  if (!state.activePiece) return state;
+
   state.currentBoardStatus = passBall(
     state.activePiece.position,
     cellKey,

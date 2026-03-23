@@ -5,12 +5,12 @@ export type GameState = {
   gameId: string | undefined;
   gameType: string | null;
   currentPlayerTurn: string;
-  activePiece: any;
+  activePiece: Piece | null;
   hasMoved: boolean;
   possibleMoves: string[];
   conversation?: MessageProps[];
-  movedPiece: any;
-  movedPieceOriginalPosition: any;
+  movedPiece: Piece | null;
+  movedPieceOriginalPosition: string | null;
   possiblePasses: string[];
   aiColor?: string;
   playerColor: string | null;

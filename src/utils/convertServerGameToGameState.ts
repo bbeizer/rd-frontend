@@ -22,14 +22,29 @@ export function convertServerGameToGameState(
     }
   }
 
+  // Normalize activePiece to match Piece type
+  const activePiece: Piece | null =
+    serverGame.activePiece?.position && serverGame.activePiece?.color
+      ? {
+          position: serverGame.activePiece.position,
+          color: serverGame.activePiece.color,
+          hasBall: serverGame.activePiece.hasBall,
+        }
+      : null;
+
+  // Normalize movedPiece - need to look it up from board to get full piece data
+  const movedPiece: Piece | null = serverGame.movedPiece?.position
+    ? (normalizedBoardStatus[serverGame.movedPiece.position] ?? null)
+    : null;
+
   return {
     gameId: serverGame._id,
     gameType: serverGame.gameType,
     currentPlayerTurn: serverGame.currentPlayerTurn,
-    activePiece: serverGame.activePiece,
+    activePiece,
     hasMoved: serverGame.hasMoved,
     possibleMoves: serverGame.possibleMoves,
-    movedPiece: serverGame.movedPiece,
+    movedPiece,
     movedPieceOriginalPosition: serverGame.movedPiece?.position ?? null,
     possiblePasses: serverGame.possiblePasses,
     playerColor: playerColor,

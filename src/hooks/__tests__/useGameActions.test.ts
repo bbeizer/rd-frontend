@@ -54,7 +54,11 @@ describe('useGameActions', () => {
   describe('handleCellClick', () => {
     it('should select a piece when clicking on a valid piece', async () => {
       const gameState = createMockGameState();
-      const newState = { ...gameState, activePiece: 'd1', possibleMoves: ['e2', 'f3'] };
+      const newState = {
+        ...gameState,
+        activePiece: { color: 'white' as const, hasBall: true, position: 'd1' },
+        possibleMoves: ['e2', 'f3'],
+      };
       mockUpdateGameState.mockReturnValue(newState);
 
       const { result } = renderHook(() =>
@@ -103,11 +107,13 @@ describe('useGameActions', () => {
     });
 
     it('should move a piece when clicking on a valid move square', async () => {
-      const gameState = createMockGameState({ activePiece: 'd1' });
+      const gameState = createMockGameState({
+        activePiece: { color: 'white' as const, hasBall: true, position: 'd1' },
+      });
       const newState = {
         ...gameState,
         activePiece: null,
-        movedPiece: 'd1',
+        movedPiece: { color: 'white' as const, hasBall: true, position: 'e2' },
         currentBoardStatus: {
           ...gameState.currentBoardStatus,
           e2: { color: 'white' as const, hasBall: true, position: 'e2' },
