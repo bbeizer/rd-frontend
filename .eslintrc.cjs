@@ -28,8 +28,10 @@ module.exports = {
     react: { version: 'detect' },
   },
   rules: {
+    'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-explicit-any': 'warn',
     'no-console': 'off',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
@@ -41,7 +43,21 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
-
     'prettier/prettier': 'warn',
   },
+  overrides: [
+    {
+      files: ['*.js', '*.cjs'],
+      env: {
+        node: true,
+      },
+    },
+    {
+      files: ['**/__tests__/**/*', '**/*.test.*', 'jest.setup.js'],
+      env: {
+        jest: true,
+        node: true,
+      },
+    },
+  ],
 };

@@ -188,7 +188,7 @@ function Lobby() {
           <div className="section">
             <p>
               <strong>Game Objective:</strong> The goal is to move one of your pieces holding the
-              ball to the opponent's back rank.
+              ball to the opponent&apos;s back rank.
             </p>
           </div>
           <div className="section">
@@ -244,7 +244,7 @@ function Lobby() {
             </p>
             <ul>
               <li>The ball can be passed to any adjacent piece (lateral or diagonal).</li>
-              <li>The path must be clear of opponent's pieces.</li>
+              <li>The path must be clear of opponent&apos;s pieces.</li>
             </ul>
             <div className="animation-container">
               <img src="/images/pass1.png" alt="Passing Ball" className="pass-animation" />
@@ -257,7 +257,7 @@ function Lobby() {
             <ul>
               <li>On your turn, you can move any given piece once and/or pass the ball.</li>
               <li>You can move 1 piece at a time, but make unlimited ball passes.</li>
-              <li>Press "Pass Turn" to end your move.</li>
+              <li>Press &quot;Pass Turn&quot; to end your move.</li>
               <li>Turns alternate between players.</li>
             </ul>
             <div className="image-container">
@@ -266,8 +266,8 @@ function Lobby() {
           </div>
           <div className="section">
             <p>
-              <strong>Winning the Game:</strong> Move a piece holding the ball to the opponent's
-              back rank to win.
+              <strong>Winning the Game:</strong> Move a piece holding the ball to the
+              opponent&apos;s back rank to win.
             </p>
             <div className="image-container">
               <img src="/images/win.png" alt="Winning Move" className="static-image" />

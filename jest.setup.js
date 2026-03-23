@@ -8,8 +8,8 @@ global.import = {
     env: {
       VITE_API_URL: 'http://localhost:5050',
       VITE_AI_SERVICE_URL: 'http://localhost:8000',
-    }
-  }
+    },
+  },
 };
 
 jest.mock('./src/services/gameService', () => ({

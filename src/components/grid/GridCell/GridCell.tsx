@@ -23,12 +23,21 @@ const GridCell: React.FC<GridCellProps> = ({
 
   const baseStyle = { backgroundColor };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.currentTarget.click();
+    }
+  };
+
   return (
     <div
       {...restProps}
       style={baseStyle}
       className={`grid-cell ${isLightCell ? 'light-cell' : 'dark-cell'}`}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       id={id}
     >
       {children}
