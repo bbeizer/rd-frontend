@@ -3,7 +3,6 @@ import { GameState } from '../types/GameState';
 import { ServerGame } from '../types/ServerGame';
 import { convertServerGameToGameState } from '../utils/convertServerGameToGameState';
 import { updateGame } from '../services/gameService';
-import { getAIMove } from '../services/aiService';
 import { getApiBaseUrl } from '../services/apiClient';
 
 interface UseGameStateProps {
@@ -32,7 +31,6 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const aiColor = userColor === 'white' ? 'black' : 'white';
   const isUserTurn = gameState.currentPlayerTurn === userColor;
 
   // Fetch game data from server
@@ -88,50 +86,6 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
     },
     [gameId]
   );
-
-  // Handle AI moves
-  const handleAIMove = useCallback(async () => {
-    if (gameState.gameType !== 'singleplayer' || gameState.currentPlayerTurn !== aiColor) {
-      return;
-    }
-
-    try {
-      const aiMoveResult = await getAIMove(gameState, aiColor);
-
-      // Handle case where AI service doesn't return expected format
-      if (!aiMoveResult) {
-        return;
-      }
-
-      // Preserve player names and other important state
-      const updatedGameState = {
-        ...gameState,
-        ...aiMoveResult,
-        // Preserve player names to prevent the "Nic" bug
-        whitePlayerName: gameState.whitePlayerName,
-        blackPlayerName: gameState.blackPlayerName,
-        // Preserve game metadata
-        gameId: gameState.gameId,
-        gameType: gameState.gameType,
-        aiColor: gameState.aiColor,
-      };
-
-      // TODO: Remove AI move handling - backend handles this now
-      // Win detection is handled by backend
-
-      setGameState(updatedGameState);
-
-      // Update server with AI move
-      await updateGameOnServer(updatedGameState);
-    } catch (err) {
-      setError('AI move failed');
-    }
-  }, [gameState, aiColor, updateGameOnServer]);
-
-  // Handle AI moves
-  useEffect(() => {
-    handleAIMove();
-  }, [handleAIMove]);
 
   // Initial game fetch
   useEffect(() => {
