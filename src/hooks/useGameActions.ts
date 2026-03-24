@@ -4,7 +4,7 @@ import { MessageProps } from '../components/Message/Message';
 import { sendGameAction } from '../services/actionService';
 import { convertServerGameToGameState } from '../utils/convertServerGameToGameState';
 
-interface UseGameActionsV2Props {
+interface UseGameActionsProps {
   gameState: GameState;
   setGameState: (state: GameState | ((prev: GameState) => GameState)) => void;
   onGameEnd?: (winner: string) => void;
@@ -16,13 +16,13 @@ interface UseGameActionsV2Props {
  * Action-based game actions hook.
  * Sends minimal actions to server, waits for server response as source of truth.
  */
-export const useGameActionsV2 = ({
+export const useGameActions = ({
   gameState,
   setGameState,
   onGameEnd,
   userColor,
   playerId,
-}: UseGameActionsV2Props) => {
+}: UseGameActionsProps) => {
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGameState } from '../../hooks/useGameState';
-import { useGameActionsV2 } from '../../hooks/useGameActionsV2';
+import { useGameActions } from '../../hooks/useGameActions';
 import Confetti from 'react-confetti';
 import GridCell from '../grid/GridCell/GridCell';
 import GridContainer from '../grid/GridContainer/GridContainer';
@@ -38,7 +38,7 @@ const GameBoard = () => {
   useGameSocket(gameId, handleSocketUpdate);
 
   const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
-    useGameActionsV2({
+    useGameActions({
       gameState,
       setGameState,
       userColor,

@@ -51,8 +51,8 @@ jest.mock('@/hooks/useGameSocket', () => ({
   useGameSocket: () => {},
 }));
 
-jest.mock('../../../hooks/useGameActionsV2', () => ({
-  useGameActionsV2: () => ({
+jest.mock('../../../hooks/useGameActions', () => ({
+  useGameActions: () => ({
     handleCellClick: jest.fn(),
     handlePassTurn: jest.fn(),
     handleSendMessage: jest.fn(),
