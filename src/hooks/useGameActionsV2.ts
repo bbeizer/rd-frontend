@@ -33,20 +33,7 @@ export const useGameActionsV2 = ({
   // Handle cell click - send action to server
   const handleCellClick = useCallback(
     async (cellKey: string) => {
-      // Quick client-side check - don't send if not user's turn
-      if (gameState.currentPlayerTurn !== userColor) {
-        return;
-      }
-
-      // Don't allow concurrent actions
-      if (isProcessingAction) {
-        return;
-      }
-
-      if (!gameState.gameId) {
-        setActionError('Game ID is missing');
-        return;
-      }
+      if (isProcessingAction || !gameState.gameId) return;
 
       setIsProcessingAction(true);
       setActionError(null);
@@ -64,7 +51,6 @@ export const useGameActionsV2 = ({
           );
           setGameState(newState);
 
-          // Check for game end
           if (newState.winner) {
             onGameEnd?.(newState.winner);
           }
@@ -77,25 +63,13 @@ export const useGameActionsV2 = ({
         setIsProcessingAction(false);
       }
     },
-    [gameState, userColor, playerId, isProcessingAction, setGameState, onGameEnd]
+    [gameState.gameId, userColor, playerId, isProcessingAction, setGameState, onGameEnd]
   );
 
   // Handle pass turn - send action to server
   // For singleplayer, server handles AI move internally and returns state after AI has moved
   const handlePassTurn = useCallback(async () => {
-    // Quick client-side check
-    if (gameState.currentPlayerTurn !== userColor) {
-      return;
-    }
-
-    if (isProcessingAction) {
-      return;
-    }
-
-    if (!gameState.gameId) {
-      setActionError('Game ID is missing');
-      return;
-    }
+    if (isProcessingAction || !gameState.gameId) return;
 
     setIsProcessingAction(true);
     setActionError(null);
@@ -112,7 +86,6 @@ export const useGameActionsV2 = ({
         );
         setGameState(newState);
 
-        // Check for game end (AI might have won)
         if (newState.winner) {
           onGameEnd?.(newState.winner);
         }
@@ -124,17 +97,14 @@ export const useGameActionsV2 = ({
     } finally {
       setIsProcessingAction(false);
     }
-  }, [gameState, userColor, playerId, isProcessingAction, setGameState, onGameEnd]);
+  }, [gameState.gameId, userColor, playerId, isProcessingAction, setGameState, onGameEnd]);
 
-  // Handle sending message
+  // Handle sending message (optimistic update)
   const handleSendMessage = useCallback(
     async (newMessage: MessageProps) => {
-      if (!gameState.gameId) {
-        setActionError('Game ID is missing');
-        return;
-      }
+      if (!gameState.gameId) return;
 
-      // Optimistically update local state for messages (low risk)
+      // Optimistically update local state
       setGameState((prev) => ({
         ...prev,
         conversation: [...(prev.conversation || []), newMessage],
@@ -143,17 +113,12 @@ export const useGameActionsV2 = ({
       try {
         const response = await sendGameAction(gameState.gameId, playerId, {
           type: 'SEND_MESSAGE',
-          payload: {
-            author: newMessage.author,
-            text: newMessage.text,
-          },
+          payload: { author: newMessage.author, text: newMessage.text },
         });
 
         if (!response.success) {
-          // Could rollback optimistic update here
           setActionError(response.error?.message || 'Failed to send message');
         }
-        // Don't update state from response for messages - optimistic is fine
       } catch (error) {
         setActionError(error instanceof Error ? error.message : 'Failed to send message');
       }

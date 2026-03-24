@@ -11,7 +11,8 @@ import Modal from '../modal/modal';
 import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
-import { useEffect } from 'react';
+import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
+import { useEffect, useCallback } from 'react';
 import { USE_ACTION_API } from '@/config/featureFlags';
 
 const GameBoard = () => {
@@ -34,9 +35,14 @@ const GameBoard = () => {
     }
   }, [gameState.status, gameState.winner]);
 
-  useGameSocket(gameId, (gameData) => {
-    setGameState(gameData);
-  });
+  const handleSocketUpdate = useCallback(
+    (gameData: Parameters<typeof convertServerGameToGameState>[0]) => {
+      setGameState(convertServerGameToGameState(gameData, userColor as 'white' | 'black'));
+    },
+    [setGameState, userColor]
+  );
+
+  useGameSocket(gameId, handleSocketUpdate);
 
   // Use action-based API or legacy full-state sync based on feature flag
   const legacyActions = useGameActions({
@@ -53,16 +59,10 @@ const GameBoard = () => {
     playerId,
   });
 
-  const {
-    handleCellClick,
-    handlePassTurn,
-    handleSendMessage,
-    isProcessingAction,
-    actionError,
-    clearError,
-  } = USE_ACTION_API
-    ? actionBasedActions
-    : { ...legacyActions, isProcessingAction: false, actionError: null, clearError: () => {} };
+  const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
+    USE_ACTION_API
+      ? actionBasedActions
+      : { ...legacyActions, actionError: null, clearError: () => {} };
 
   // Loading state
   if (isLoading) {
@@ -180,10 +180,10 @@ const GameBoard = () => {
 
           <button
             onClick={handlePassTurn}
-            disabled={!isUserTurn || isProcessingAction}
+            disabled={!isUserTurn}
             className="pass-turn-btn"
           >
-            {isProcessingAction ? 'Processing...' : 'Pass Turn'}
+            Pass Turn
           </button>
         </div>
 
