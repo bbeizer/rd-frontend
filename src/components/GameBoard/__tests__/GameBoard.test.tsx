@@ -39,15 +39,6 @@ jest.mock('../../../hooks/useGameState', () => ({
     isLoading: false,
     error: null,
     isUserTurn: true,
-    updateGameOnServer: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../hooks/useGameActions', () => ({
-  useGameActions: () => ({
-    handleCellClick: jest.fn(),
-    handlePassTurn: jest.fn(),
-    handleSendMessage: jest.fn(),
   }),
 }));
 
@@ -58,6 +49,18 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@/hooks/useGameSocket', () => ({
   useGameSocket: () => {},
+}));
+
+jest.mock('../../../hooks/useGameActions', () => ({
+  useGameActions: () => ({
+    handleCellClick: jest.fn(),
+    handlePassTurn: jest.fn(),
+    handleSendMessage: jest.fn(),
+    handleGameEnd: jest.fn(),
+    isProcessingAction: false,
+    actionError: null,
+    clearError: jest.fn(),
+  }),
 }));
 
 import GameBoard from '../GameBoard';

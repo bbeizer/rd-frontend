@@ -1,232 +1,139 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { GameState } from '../types/GameState';
-import { updateGameState } from '../components/GameBoard/helpers/updateGameState';
 import { MessageProps } from '../components/Message/Message';
-import { getAIMove } from '../services/aiService';
+import { sendGameAction } from '../services/actionService';
+import { convertServerGameToGameState } from '../utils/convertServerGameToGameState';
 
 interface UseGameActionsProps {
   gameState: GameState;
   setGameState: (state: GameState | ((prev: GameState) => GameState)) => void;
-  // TODO: Refactor to send actions instead of full state, and use server response as source of truth
-  updateGameOnServer: (updates: Partial<GameState>) => Promise<void>;
   onGameEnd?: (winner: string) => void;
   userColor: string | null;
+  playerId: string;
 }
 
+/**
+ * Action-based game actions hook.
+ * Sends minimal actions to server, waits for server response as source of truth.
+ */
 export const useGameActions = ({
   gameState,
   setGameState,
-  updateGameOnServer,
   onGameEnd,
   userColor,
+  playerId,
 }: UseGameActionsProps) => {
-  // Handle cell click
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => {
+    setActionError(null);
+  }, []);
+
+  // Handle cell click - send action to server
   const handleCellClick = useCallback(
     async (cellKey: string) => {
+      if (isProcessingAction || !gameState.gameId) return;
+
+      setIsProcessingAction(true);
+      setActionError(null);
+
       try {
-        // Check if it's the user's turn
-        if (gameState.currentPlayerTurn !== userColor) {
-          return;
-        }
+        const response = await sendGameAction(gameState.gameId, playerId, {
+          type: 'CELL_CLICK',
+          payload: { cellKey },
+        });
 
-        const newState = updateGameState(cellKey, gameState);
+        if (response.success && response.gameState) {
+          const newState = convertServerGameToGameState(
+            response.gameState,
+            userColor as 'white' | 'black'
+          );
+          setGameState(newState);
 
-        // Check for win condition after the move
-        if (newState.currentBoardStatus) {
-          const { didWin } = await import('../components/GameBoard/helpers/didWin');
-          const hasWon = didWin(newState.currentBoardStatus);
-
-          if (hasWon) {
-            // Determine winner based on whose turn it was
-            const winner =
-              gameState.currentPlayerTurn === 'white'
-                ? gameState.whitePlayerName || 'White'
-                : gameState.blackPlayerName || 'Black';
-
-            newState.winner = winner;
-            newState.status = 'completed';
+          if (newState.winner) {
+            onGameEnd?.(newState.winner);
           }
+        } else {
+          setActionError(response.error?.message || 'Action failed');
         }
+      } catch (error) {
+        setActionError(error instanceof Error ? error.message : 'Failed to connect to server');
+      } finally {
+        setIsProcessingAction(false);
+      }
+    },
+    [gameState.gameId, userColor, playerId, isProcessingAction, setGameState, onGameEnd]
+  );
 
-        // Update local state immediately for responsive UI
+  // Handle pass turn - send action to server
+  // For singleplayer, server handles AI move internally and returns state after AI has moved
+  const handlePassTurn = useCallback(async () => {
+    if (isProcessingAction || !gameState.gameId) return;
+
+    setIsProcessingAction(true);
+    setActionError(null);
+
+    try {
+      const response = await sendGameAction(gameState.gameId, playerId, {
+        type: 'PASS_TURN',
+      });
+
+      if (response.success && response.gameState) {
+        const newState = convertServerGameToGameState(
+          response.gameState,
+          userColor as 'white' | 'black'
+        );
         setGameState(newState);
 
-        // Update server (even if there's a winner, so other players get notified)
-        await updateGameOnServer(newState);
-
-        // Check for game end after server update
         if (newState.winner) {
           onGameEnd?.(newState.winner);
         }
-      } catch (error) {
-        // Could add toast notification here
-      }
-    },
-    [gameState, setGameState, updateGameOnServer, onGameEnd, userColor]
-  );
-
-  // Handle pass turn
-  const handlePassTurn = useCallback(async () => {
-    try {
-      // Check if it's the user's turn
-      if (gameState.currentPlayerTurn !== userColor) {
-        return;
-      }
-
-      const aiColor = gameState.aiColor;
-
-      if (gameState.gameType === 'singleplayer') {
-        // In singleplayer, get AI move and switch back to user's turn
-
-        try {
-          const aiMoveResult = await getAIMove(gameState, aiColor || 'black');
-
-          // Handle case where AI service doesn't return expected format
-          if (!aiMoveResult) {
-            // Fallback: just switch turn without AI move
-            const updates = {
-              ...gameState,
-              currentPlayerTurn: userColor,
-              activePiece: null,
-              movedPiece: null,
-              hasMoved: false,
-              possibleMoves: [],
-              possiblePasses: [],
-            };
-
-            await updateGameOnServer(updates);
-            setGameState((prev) => ({ ...prev, ...updates }));
-            return;
-          }
-
-          // Preserve player names and important state
-          const updatedState = {
-            ...gameState,
-            ...aiMoveResult,
-            // Preserve player names to prevent the "Nic" bug
-            whitePlayerName: gameState.whitePlayerName,
-            blackPlayerName: gameState.blackPlayerName,
-            // Preserve game metadata
-            gameId: gameState.gameId,
-            gameType: gameState.gameType,
-            aiColor: gameState.aiColor,
-            currentPlayerTurn: userColor, // Switch back to user's turn
-            activePiece: null,
-            movedPiece: null,
-            hasMoved: false,
-            possibleMoves: [],
-            possiblePasses: [],
-          };
-
-          // Check for win condition after AI move
-          if (aiMoveResult.currentBoardStatus) {
-            const { didWin } = await import('../components/GameBoard/helpers/didWin');
-            const hasWon = didWin(aiMoveResult.currentBoardStatus);
-
-            if (hasWon) {
-              updatedState.status = 'completed';
-            }
-          }
-
-          // Update local state with AI move
-          setGameState(updatedState);
-
-          // Update server with AI move and turn back to user
-          await updateGameOnServer(updatedState);
-        } catch (aiError) {
-          // Fallback: just switch turn without AI move
-          const updates = {
-            ...gameState,
-            currentPlayerTurn: userColor,
-            activePiece: null,
-            movedPiece: null,
-            hasMoved: false,
-            possibleMoves: [],
-            possiblePasses: [],
-          };
-
-          await updateGameOnServer(updates);
-          setGameState((prev) => ({ ...prev, ...updates }));
-        }
       } else {
-        // In multiplayer, just switch to next player's turn
-        const nextPlayerTurn = userColor === 'white' ? 'black' : 'white';
-
-        const updates = {
-          ...gameState,
-          currentPlayerTurn: nextPlayerTurn,
-          activePiece: null,
-          movedPiece: null,
-          hasMoved: false,
-          possibleMoves: [],
-          possiblePasses: [],
-        };
-
-        await updateGameOnServer(updates);
-
-        setGameState((prev) => ({
-          ...prev,
-          ...updates,
-        }));
+        setActionError(response.error?.message || 'Failed to pass turn');
       }
-    } catch {
-      // Silently fail - UI state already updated optimistically
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Failed to connect to server');
+    } finally {
+      setIsProcessingAction(false);
     }
-  }, [gameState, setGameState, updateGameOnServer, userColor]);
+  }, [gameState.gameId, userColor, playerId, isProcessingAction, setGameState, onGameEnd]);
 
-  // Handle sending message
+  // Handle sending message (optimistic update)
   const handleSendMessage = useCallback(
     async (newMessage: MessageProps) => {
-      try {
-        // Optimistically update local state
-        setGameState((prev) => ({
-          ...prev,
-          conversation: [...(prev.conversation || []), newMessage],
-        }));
+      if (!gameState.gameId) return;
 
-        // Update server
-        // TODO: This should be a separate API endpoint for messages
-        await updateGameOnServer({
-          newMessage: {
-            author: newMessage.author,
-            text: newMessage.text,
-            timestamp: new Date().toISOString(),
-          },
-        } as unknown as Partial<GameState>);
+      // Optimistically update local state
+      setGameState((prev) => ({
+        ...prev,
+        conversation: [...(prev.conversation || []), newMessage],
+      }));
+
+      try {
+        const response = await sendGameAction(gameState.gameId, playerId, {
+          type: 'SEND_MESSAGE',
+          payload: { author: newMessage.author, text: newMessage.text },
+        });
+
+        if (!response.success) {
+          setActionError(response.error?.message || 'Failed to send message');
+        }
       } catch (error) {
-        // Could rollback optimistic update here
+        setActionError(error instanceof Error ? error.message : 'Failed to send message');
       }
     },
-    [setGameState, updateGameOnServer]
+    [gameState.gameId, playerId, setGameState]
   );
 
-  // Handle game end
+  // Handle game end - used when game ends from other triggers
   const handleGameEnd = useCallback(
     async (winner: string) => {
-      try {
-        const updates = {
-          winner,
-          status: 'completed',
-          activePiece: null,
-          movedPiece: null,
-          originalSquare: null,
-          possibleMoves: [],
-          possiblePasses: [],
-        };
-
-        await updateGameOnServer(updates);
-
-        setGameState((prev) => ({
-          ...prev,
-          ...updates,
-        }));
-
-        onGameEnd?.(winner);
-      } catch {
-        // Silently fail - game end is best-effort
-      }
+      // For action-based API, the server determines game end
+      // This is just for local notification
+      onGameEnd?.(winner);
     },
-    [setGameState, updateGameOnServer, onGameEnd]
+    [onGameEnd]
   );
 
   return {
@@ -234,5 +141,9 @@ export const useGameActions = ({
     handlePassTurn,
     handleSendMessage,
     handleGameEnd,
+    // New properties for loading/error UI
+    isProcessingAction,
+    actionError,
+    clearError,
   };
 };

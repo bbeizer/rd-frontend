@@ -10,37 +10,40 @@ import Modal from '../modal/modal';
 import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
-import { useEffect } from 'react';
+import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
+import { useCallback } from 'react';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const userColor = localStorage.getItem('userColor');
+  const playerId = localStorage.getItem('guestUserID') || '';
 
   if (!userColor || !gameId) {
     return <div>Invalid game configuration</div>;
   }
 
-  const { gameState, setGameState, isLoading, error, isUserTurn, updateGameOnServer } =
-    useGameState({ gameId, userColor });
-
-  // Detect when game ends and trigger confetti/modal
-  useEffect(() => {
-    if (gameState.status === 'completed' && gameState.winner) {
-      // Game has ended - confetti and modal will be handled by existing logic
-    }
-  }, [gameState.status, gameState.winner]);
-
-  useGameSocket(gameId, (gameData) => {
-    setGameState(gameData);
-  });
-
-  const { handleCellClick, handlePassTurn, handleSendMessage } = useGameActions({
-    gameState,
-    setGameState,
-    updateGameOnServer,
+  const { gameState, setGameState, isLoading, error, isUserTurn } = useGameState({
+    gameId,
     userColor,
   });
+
+  const handleSocketUpdate = useCallback(
+    (gameData: Parameters<typeof convertServerGameToGameState>[0]) => {
+      setGameState(convertServerGameToGameState(gameData, userColor as 'white' | 'black'));
+    },
+    [setGameState, userColor]
+  );
+
+  useGameSocket(gameId, handleSocketUpdate);
+
+  const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
+    useGameActions({
+      gameState,
+      setGameState,
+      userColor,
+      playerId,
+    });
 
   // Loading state
   if (isLoading) {
@@ -112,6 +115,14 @@ const GameBoard = () => {
     <div className="game-container">
       {gameState.status === 'completed' && <Confetti />}
 
+      {/* Action error toast */}
+      {actionError && (
+        <button type="button" className="action-error-toast" onClick={clearError}>
+          {actionError}
+          <span className="close-btn">&times;</span>
+        </button>
+      )}
+
       <div className="board-wrapper">
         <div className="board-column">
           <div className="player-info top-player">
@@ -148,7 +159,11 @@ const GameBoard = () => {
             <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
           </div>
 
-          <button onClick={handlePassTurn} disabled={!isUserTurn} className="pass-turn-btn">
+          <button
+            onClick={handlePassTurn}
+            disabled={!isUserTurn}
+            className="pass-turn-btn"
+          >
             Pass Turn
           </button>
         </div>
