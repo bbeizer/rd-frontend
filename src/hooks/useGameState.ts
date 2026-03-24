@@ -116,15 +116,8 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
         aiColor: gameState.aiColor,
       };
 
-      // Check for win condition after AI move
-      if (aiMoveResult.currentBoardStatus) {
-        const { didWin } = await import('../components/GameBoard/helpers/didWin');
-        const hasWon = didWin(aiMoveResult.currentBoardStatus);
-
-        if (hasWon) {
-          updatedGameState.status = 'completed';
-        }
-      }
+      // TODO: Remove AI move handling - backend handles this now
+      // Win detection is handled by backend
 
       setGameState(updatedGameState);
 
