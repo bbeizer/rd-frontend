@@ -39,15 +39,6 @@ jest.mock('../../../hooks/useGameState', () => ({
     isLoading: false,
     error: null,
     isUserTurn: true,
-    updateGameOnServer: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../hooks/useGameActions', () => ({
-  useGameActions: () => ({
-    handleCellClick: jest.fn(),
-    handlePassTurn: jest.fn(),
-    handleSendMessage: jest.fn(),
   }),
 }));
 
@@ -70,10 +61,6 @@ jest.mock('../../../hooks/useGameActionsV2', () => ({
     actionError: null,
     clearError: jest.fn(),
   }),
-}));
-
-jest.mock('@/config/featureFlags', () => ({
-  USE_ACTION_API: false,
 }));
 
 import GameBoard from '../GameBoard';

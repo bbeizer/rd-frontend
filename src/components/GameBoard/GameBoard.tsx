@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGameState } from '../../hooks/useGameState';
-import { useGameActions } from '../../hooks/useGameActions';
 import { useGameActionsV2 } from '../../hooks/useGameActionsV2';
 import Confetti from 'react-confetti';
 import GridCell from '../grid/GridCell/GridCell';
@@ -12,8 +11,7 @@ import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
 import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
-import { useEffect, useCallback } from 'react';
-import { USE_ACTION_API } from '@/config/featureFlags';
+import { useCallback } from 'react';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -25,15 +23,10 @@ const GameBoard = () => {
     return <div>Invalid game configuration</div>;
   }
 
-  const { gameState, setGameState, isLoading, error, isUserTurn, updateGameOnServer } =
-    useGameState({ gameId, userColor });
-
-  // Detect when game ends and trigger confetti/modal
-  useEffect(() => {
-    if (gameState.status === 'completed' && gameState.winner) {
-      // Game has ended - confetti and modal will be handled by existing logic
-    }
-  }, [gameState.status, gameState.winner]);
+  const { gameState, setGameState, isLoading, error, isUserTurn } = useGameState({
+    gameId,
+    userColor,
+  });
 
   const handleSocketUpdate = useCallback(
     (gameData: Parameters<typeof convertServerGameToGameState>[0]) => {
@@ -44,25 +37,13 @@ const GameBoard = () => {
 
   useGameSocket(gameId, handleSocketUpdate);
 
-  // Use action-based API or legacy full-state sync based on feature flag
-  const legacyActions = useGameActions({
-    gameState,
-    setGameState,
-    updateGameOnServer,
-    userColor,
-  });
-
-  const actionBasedActions = useGameActionsV2({
-    gameState,
-    setGameState,
-    userColor,
-    playerId,
-  });
-
   const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
-    USE_ACTION_API
-      ? actionBasedActions
-      : { ...legacyActions, actionError: null, clearError: () => {} };
+    useGameActionsV2({
+      gameState,
+      setGameState,
+      userColor,
+      playerId,
+    });
 
   // Loading state
   if (isLoading) {
