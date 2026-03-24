@@ -36,7 +36,7 @@ This is **Razzle Dazzle** - a React/TypeScript board game frontend where players
 ### Key Patterns
 
 **State Management**: Game state flows through two custom hooks:
-- `useGameState` (`src/hooks/useGameState.ts`) - Fetches game from server, handles AI moves in singleplayer, provides `updateGameOnServer`
+- `useGameState` (`src/hooks/useGameState.ts`) - Fetches game from server, provides `updateGameOnServer`
 - `useGameActions` (`src/hooks/useGameActions.ts`) - Handles cell clicks, pass turn, chat messages. Uses `updateGameState` helper for move logic
 
 **Game State Updates**: The core game logic lives in `src/components/GameBoard/helpers/updateGameState.ts`. This function is a state machine that handles:
@@ -48,13 +48,11 @@ This is **Razzle Dazzle** - a React/TypeScript board game frontend where players
 **API Layer**:
 - `src/services/apiClient.ts` - Axios instance configured with `VITE_API_BASE_URL`
 - `src/services/gameService.ts` - Game CRUD operations
-- `src/services/aiService.ts` - Calls AI service at `VITE_AI_SERVICE_URL` for singleplayer moves
 
 **Real-time Updates**: `useGameSocket` hook connects to Socket.IO for multiplayer game state sync.
 
 ### Environment Variables
 - `VITE_API_BASE_URL` - Backend API URL (default: `http://localhost:5050`)
-- `VITE_AI_SERVICE_URL` - AI service URL (default: `http://localhost:8000`)
 
 ### Path Alias
 `@/*` maps to `src/*` (configured in both `tsconfig.json` and `vite.config.js`)

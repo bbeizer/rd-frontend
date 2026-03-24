@@ -6,10 +6,6 @@ jest.mock('../../services/gameService', () => ({
   updateGame: jest.fn(),
 }));
 
-jest.mock('../../services/aiService', () => ({
-  getAIMove: jest.fn(),
-}));
-
 jest.mock('../../services/apiClient', () => ({
   getApiBaseUrl: () => 'http://localhost:5050',
 }));

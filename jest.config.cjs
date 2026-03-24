@@ -27,8 +27,7 @@ module.exports = {
   globals: {
     'import.meta': {
       env: {
-        VITE_BACKEND_BASE_URL: 'http://localhost:5050',
-        VITE_AI_SERVICE_URL: 'http://localhost:8000'
+        VITE_BACKEND_BASE_URL: 'http://localhost:5050'
       }
     }
   }
