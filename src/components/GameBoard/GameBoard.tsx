@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGameState } from '../../hooks/useGameState';
 import { useGameActions } from '../../hooks/useGameActions';
+import { useGameActionsV2 } from '../../hooks/useGameActionsV2';
 import Confetti from 'react-confetti';
 import GridCell from '../grid/GridCell/GridCell';
 import GridContainer from '../grid/GridContainer/GridContainer';
@@ -11,11 +12,13 @@ import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
 import { useGameSocket } from '@/hooks/useGameSocket';
 import { useEffect } from 'react';
+import { USE_ACTION_API } from '@/config/featureFlags';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const userColor = localStorage.getItem('userColor');
+  const playerId = localStorage.getItem('guestUserID') || '';
 
   if (!userColor || !gameId) {
     return <div>Invalid game configuration</div>;
@@ -35,12 +38,31 @@ const GameBoard = () => {
     setGameState(gameData);
   });
 
-  const { handleCellClick, handlePassTurn, handleSendMessage } = useGameActions({
+  // Use action-based API or legacy full-state sync based on feature flag
+  const legacyActions = useGameActions({
     gameState,
     setGameState,
     updateGameOnServer,
     userColor,
   });
+
+  const actionBasedActions = useGameActionsV2({
+    gameState,
+    setGameState,
+    userColor,
+    playerId,
+  });
+
+  const {
+    handleCellClick,
+    handlePassTurn,
+    handleSendMessage,
+    isProcessingAction,
+    actionError,
+    clearError,
+  } = USE_ACTION_API
+    ? actionBasedActions
+    : { ...legacyActions, isProcessingAction: false, actionError: null, clearError: () => {} };
 
   // Loading state
   if (isLoading) {
@@ -112,6 +134,14 @@ const GameBoard = () => {
     <div className="game-container">
       {gameState.status === 'completed' && <Confetti />}
 
+      {/* Action error toast */}
+      {actionError && (
+        <button type="button" className="action-error-toast" onClick={clearError}>
+          {actionError}
+          <span className="close-btn">&times;</span>
+        </button>
+      )}
+
       <div className="board-wrapper">
         <div className="board-column">
           <div className="player-info top-player">
@@ -148,8 +178,12 @@ const GameBoard = () => {
             <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
           </div>
 
-          <button onClick={handlePassTurn} disabled={!isUserTurn} className="pass-turn-btn">
-            Pass Turn
+          <button
+            onClick={handlePassTurn}
+            disabled={!isUserTurn || isProcessingAction}
+            className="pass-turn-btn"
+          >
+            {isProcessingAction ? 'Processing...' : 'Pass Turn'}
           </button>
         </div>
 

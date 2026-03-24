@@ -123,6 +123,49 @@
   box-shadow: none;
 }
 
+/* Action error toast */
+.action-error-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff6b6b;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  animation: slideDown 0.3s ease-out;
+}
+
+.action-error-toast .close-btn {
+  font-size: 18px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+.action-error-toast:hover .close-btn {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Loading and error states */
 .loading {
   display: flex;

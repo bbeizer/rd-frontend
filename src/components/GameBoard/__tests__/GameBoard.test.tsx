@@ -60,6 +60,22 @@ jest.mock('@/hooks/useGameSocket', () => ({
   useGameSocket: () => {},
 }));
 
+jest.mock('../../../hooks/useGameActionsV2', () => ({
+  useGameActionsV2: () => ({
+    handleCellClick: jest.fn(),
+    handlePassTurn: jest.fn(),
+    handleSendMessage: jest.fn(),
+    handleGameEnd: jest.fn(),
+    isProcessingAction: false,
+    actionError: null,
+    clearError: jest.fn(),
+  }),
+}));
+
+jest.mock('@/config/featureFlags', () => ({
+  USE_ACTION_API: false,
+}));
+
 import GameBoard from '../GameBoard';
 
 describe('GameBoard', () => {
