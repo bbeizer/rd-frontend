@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap'); 
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 * {
   box-sizing: border-box;
@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background-color: rgb(222, 177, 119);;
+  background-color: rgb(222, 177, 119);
   color: #333;
   min-height: 100vh;
   display: flex;
@@ -22,7 +22,43 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
 
+.auth-nav {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-nav-link {
+  color: #b5633d;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.auth-nav-link:hover {
+  background-color: #fff;
+}
+
+.auth-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.auth-nav-username {
+  color: #333;
+  font-weight: 500;
 }
 
 .lobby {
@@ -45,8 +81,6 @@ body {
   border-radius: 1rem;
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.08);
 }
-
-
 
 .razzle-span {
   background-color: #f0e68c;
@@ -86,9 +120,9 @@ body {
   margin: 0 0.5rem;
   margin-bottom: 1.5rem;
   vertical-align: middle;
-  box-shadow: 
-    0px 4px 8px rgba(0, 0, 0, 0.3), 
-    inset 0px -3px 6px rgba(0, 0, 0, 0.2), 
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0px -3px 6px rgba(0, 0, 0, 0.2),
     inset 0px 3px 6px rgba(255, 255, 255, 0.5);
   animation: spin 2s linear infinite; /* Add spinning animation */
 }
@@ -100,7 +134,6 @@ body {
   border-radius: 0.5rem;
   margin-bottom: 2rem;
   text-align: center;
- 
 }
 
 input {
@@ -115,7 +148,6 @@ input {
   flex-direction: column;
   align-items: center;
   margin-bottom: 2rem;
-  
 }
 
 .input-container label {
@@ -145,7 +177,9 @@ input {
   border-radius: 2rem;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
   z-index: 1000;
 }
 
@@ -179,7 +213,9 @@ input {
   border-radius: 2rem;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
   z-index: 999;
 }
 
@@ -214,7 +250,9 @@ input {
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .submit-button {
@@ -285,9 +323,15 @@ input {
 }
 
 @keyframes blink {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .modal {
@@ -361,10 +405,9 @@ input {
   font-family: 'Righteous', cursive;
 }
 
-.rules ul li::marker{
+.rules ul li::marker {
   color: #b5633d;
   font-size: 1.5rem;
-
 }
 
 .section {
@@ -389,7 +432,7 @@ input {
   padding: 1rem;
   margin: 2rem auto;
   overflow: hidden;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -411,22 +454,44 @@ img {
 }
 
 @keyframes passTransition {
-  0% { content: url('/images/pass1.png'); }
-  25% { content: url('/images/pass2.png'); }
-  50% { content: url('/images/pass3.png'); }
-  75% { content: url('/images/pass4.png'); }
-  100% { content: url('/images/pass1.png'); }
+  0% {
+    content: url('/images/pass1.png');
+  }
+  25% {
+    content: url('/images/pass2.png');
+  }
+  50% {
+    content: url('/images/pass3.png');
+  }
+  75% {
+    content: url('/images/pass4.png');
+  }
+  100% {
+    content: url('/images/pass1.png');
+  }
 }
 
 @keyframes transitionPiece {
-  0% { content: url('/images/startingPiece.png'); }
-  50% { content: url('/images/movedStartingPiece.png'); }
-  100% { content: url('/images/startingPiece.png'); }
+  0% {
+    content: url('/images/startingPiece.png');
+  }
+  50% {
+    content: url('/images/movedStartingPiece.png');
+  }
+  100% {
+    content: url('/images/startingPiece.png');
+  }
 }
 
 @keyframes fadeInImage {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes spin {
@@ -483,17 +548,14 @@ img {
 
 /* For devices with a max width of 480px (mobile phones) */
 @media (max-width: 480px) {
-
-
   .razzle-span,
   .dazzel-span {
     font-size: 2rem;
-    
   }
 
   .header h1 {
-   display: flex;
-   gap: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
   }
 
   .input-container {
@@ -534,11 +596,5 @@ img {
 
   .circle {
     display: none;
-
   }
-
- 
 }
-
-
-

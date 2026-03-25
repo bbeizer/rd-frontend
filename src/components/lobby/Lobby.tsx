@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { StartOrJoinMultiplayerResponse } from '@/types/StartOrJoinMultiplayerResponse';
 import { apiPost } from '@/services/apiClient';
 import { getGameById, startSinglePlayerGame } from '@/services/gameService';
 import { sendFeedbackEmail } from '@/services/mailService';
 import { generateGuestUserID } from '@/utils/gameUtilities';
+import { useAuth } from '@/hooks/useAuth';
 import Modal from '../modal/modal';
 import './lobby.css';
 
 function Lobby() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [showColorModal, setShowColorModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
@@ -27,6 +29,8 @@ function Lobby() {
     };
   }, [intervalId]);
 
+  const playerName = isAuthenticated && user ? user.username : name;
+
   const handleJoinMultiplayerGame = async () => {
     try {
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
@@ -34,7 +38,7 @@ function Lobby() {
         '/api/games/joinMultiplayerGame',
         {
           playerId: userId,
-          playerName: name,
+          playerName,
         }
       );
 
@@ -65,7 +69,7 @@ function Lobby() {
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
       localStorage.setItem('userColor', color);
 
-      const result = await startSinglePlayerGame(userId, name, color);
+      const result = await startSinglePlayerGame(userId, playerName, color);
 
       if (!result.success || !result.data) {
         alert('Failed to start game. Please try again.');
@@ -134,6 +138,25 @@ function Lobby() {
   return (
     <div className="page-container">
       <div className="lobby">
+        <div className="auth-nav">
+          {isAuthenticated ? (
+            <div className="auth-nav-user">
+              <span className="auth-nav-username">Hi, {user?.username}</span>
+              <Link to="/profile" className="auth-nav-link">
+                Profile
+              </Link>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="auth-nav-link">
+                Login
+              </Link>
+              <Link to="/register" className="auth-nav-link">
+                Register
+              </Link>
+            </>
+          )}
+        </div>
         <div className="header">
           <h1>
             <span className="razzle-span">Razzle</span> <span className="circle"></span>{' '}
@@ -141,18 +164,20 @@ function Lobby() {
           </h1>
         </div>
         <div className="lobby-content">
-          <div className="input-container">
-            <label htmlFor="name">
-              <i className="fas fa-user"></i> {name}
-            </label>
-            <input
-              type="text"
-              id="name"
-              placeholder="Enter Your Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+          {!isAuthenticated && (
+            <div className="input-container">
+              <label htmlFor="name">
+                <i className="fas fa-user"></i> {name}
+              </label>
+              <input
+                type="text"
+                id="name"
+                placeholder="Enter Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          )}
           <div className="button-group">
             <button className="button" onClick={handleJoinMultiplayerGame}>
               <i className="fas fa-users"></i> Multiplayer Mode
