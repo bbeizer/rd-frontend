@@ -159,11 +159,7 @@ const GameBoard = () => {
             <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
           </div>
 
-          <button
-            onClick={handlePassTurn}
-            disabled={!isUserTurn}
-            className="pass-turn-btn"
-          >
+          <button onClick={handlePassTurn} disabled={!isUserTurn} className="pass-turn-btn">
             Pass Turn
           </button>
         </div>

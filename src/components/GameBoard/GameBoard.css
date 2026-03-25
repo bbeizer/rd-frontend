@@ -18,7 +18,7 @@
   margin: 10px 0;
 }
 
-.player-info>div {
+.player-info > div {
   background-color: #fff;
   padding: 15px 25px;
   border-radius: 16px;
@@ -30,14 +30,14 @@
   border: 2px solid transparent;
 }
 
-.player-info>div:hover {
+.player-info > div:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-.player-info>div.active {
-  border-color: #4CAF50;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+.player-info > div.active {
+  border-color: #4caf50;
+  background: linear-gradient(135deg, #4caf50, #45a049);
   color: white;
 }
 
@@ -89,7 +89,7 @@
 .pass-turn-btn {
   margin: 8px 0 0 0;
   padding: 0.7em 2.2em;
-  background: #8B4513;
+  background: #8b4513;
   /* SaddleBrown */
   color: #fff;
   border: none;
@@ -97,14 +97,17 @@
   cursor: pointer;
   font-weight: bold;
   font-size: 1.1rem;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-  box-shadow: 0 2px 8px rgba(60, 60, 90, 0.10);
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.1s;
+  box-shadow: 0 2px 8px rgba(60, 60, 90, 0.1);
   letter-spacing: 0.5px;
   min-width: 160px;
 }
 
 .pass-turn-btn:hover:not(:disabled) {
-  background: #A0522D;
+  background: #a0522d;
   /* Sienna */
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 4px 16px rgba(60, 60, 90, 0.16);
@@ -324,7 +327,7 @@
     gap: 20px;
   }
 
-  .player-info>div {
+  .player-info > div {
     min-width: 250px;
     padding: 10px 15px;
   }
