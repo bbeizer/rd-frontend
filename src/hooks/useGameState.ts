@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameState } from '../types/GameState';
 import { ServerGame } from '../types/ServerGame';
-import { convertServerGameToGameState } from '../utils/convertServerGameToGameState';
+import {
+  convertServerGameToGameState,
+  derivePlayerColor,
+} from '../utils/convertServerGameToGameState';
 import { updateGame } from '../services/gameService';
 import { getApiBaseUrl } from '../services/apiClient';
 
 interface UseGameStateProps {
   gameId: string;
   userColor: string | null;
+  playerId: string;
 }
 
-export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
+export const useGameState = ({ gameId, userColor, playerId }: UseGameStateProps) => {
   const [gameState, setGameState] = useState<GameState>(() => ({
     gameId,
     gameType: null,
@@ -31,7 +35,7 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isUserTurn = gameState.currentPlayerTurn === userColor;
+  const isUserTurn = gameState.currentPlayerTurn === gameState.playerColor;
 
   // Fetch game data from server
   const fetchGameData = useCallback(async () => {
@@ -50,10 +54,8 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
       }
 
       const serverGame: ServerGame = await response.json();
-      const convertedGame = convertServerGameToGameState(
-        serverGame,
-        userColor as 'white' | 'black'
-      );
+      const derivedColor = derivePlayerColor(serverGame, playerId);
+      const convertedGame = convertServerGameToGameState(serverGame, derivedColor);
 
       setGameState((prevState) => {
         if (JSON.stringify(prevState) === JSON.stringify(convertedGame)) {
@@ -69,7 +71,7 @@ export const useGameState = ({ gameId, userColor }: UseGameStateProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [gameId, userColor]);
+  }, [gameId, playerId]);
 
   // Update game on server
   // TODO: Refactor to send actions instead of full state, and use server response as source of truth

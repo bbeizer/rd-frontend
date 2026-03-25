@@ -10,7 +10,10 @@ import Modal from '../modal/modal';
 import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
 import { useGameSocket, RematchEvents } from '@/hooks/useGameSocket';
-import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
+import {
+  convertServerGameToGameState,
+  derivePlayerColor,
+} from '@/utils/convertServerGameToGameState';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { requestRematch, declineRematch } from '@/services/gameService';
 
@@ -26,20 +29,22 @@ const GameBoard = () => {
   const [rematchStatus, setRematchStatus] = useState<RematchStatus>('idle');
   const [rematchMessage, setRematchMessage] = useState<string | null>(null);
 
-  if (!userColor || !gameId) {
+  if (!gameId) {
     return <div>Invalid game configuration</div>;
   }
 
   const { gameState, setGameState, isLoading, error, isUserTurn } = useGameState({
     gameId,
     userColor,
+    playerId,
   });
 
   const handleSocketUpdate = useCallback(
     (gameData: Parameters<typeof convertServerGameToGameState>[0]) => {
-      setGameState(convertServerGameToGameState(gameData, userColor as 'white' | 'black'));
+      const derivedColor = derivePlayerColor(gameData, playerId);
+      setGameState(convertServerGameToGameState(gameData, derivedColor));
     },
-    [setGameState, userColor]
+    [setGameState, playerId]
   );
 
   // Rematch socket event handlers
@@ -75,11 +80,15 @@ const GameBoard = () => {
 
   // Initialize rematch status from game state (e.g., page refresh)
   useEffect(() => {
-    if (gameState.status === 'completed') {
+    if (gameState.status === 'completed' && gameState.playerColor) {
       const userWantsRematch =
-        userColor === 'white' ? gameState.whiteWantsRematch : gameState.blackWantsRematch;
+        gameState.playerColor === 'white'
+          ? gameState.whiteWantsRematch
+          : gameState.blackWantsRematch;
       const opponentWantsRematch =
-        userColor === 'white' ? gameState.blackWantsRematch : gameState.whiteWantsRematch;
+        gameState.playerColor === 'white'
+          ? gameState.blackWantsRematch
+          : gameState.whiteWantsRematch;
 
       if (userWantsRematch && !opponentWantsRematch) {
         setRematchStatus('waiting');
@@ -87,7 +96,12 @@ const GameBoard = () => {
         setRematchStatus('opponent-requested');
       }
     }
-  }, [gameState.status, gameState.whiteWantsRematch, gameState.blackWantsRematch, userColor]);
+  }, [
+    gameState.status,
+    gameState.whiteWantsRematch,
+    gameState.blackWantsRematch,
+    gameState.playerColor,
+  ]);
 
   // Rematch handlers
   const handleRequestRematch = async () => {
@@ -95,7 +109,6 @@ const GameBoard = () => {
     if (result.success && result.data) {
       // Single player: immediate redirect
       if (result.data.rematchGameId) {
-        localStorage.setItem('userColor', userColor === 'white' ? 'black' : 'white');
         navigate(`/game/${result.data.rematchGameId}`);
       } else {
         // Multiplayer: waiting for opponent
@@ -107,7 +120,6 @@ const GameBoard = () => {
   const handleAcceptRematch = async () => {
     const result = await requestRematch(gameId, playerId);
     if (result.success && result.data?.rematchGameId) {
-      localStorage.setItem('userColor', userColor === 'white' ? 'black' : 'white');
       navigate(`/game/${result.data.rematchGameId}`);
     }
   };
@@ -121,7 +133,7 @@ const GameBoard = () => {
     useGameActions({
       gameState,
       setGameState,
-      userColor,
+      userColor: gameState.playerColor,
       playerId,
     });
 
@@ -140,10 +152,10 @@ const GameBoard = () => {
     return <div>Game not found</div>;
   }
 
-  const isUserWhite = userColor === 'white';
+  const isUserWhite = gameState.playerColor === 'white';
   const currentPlayerName = isUserWhite ? gameState.whitePlayerName : gameState.blackPlayerName;
   const opponentPlayerName = !isUserWhite ? gameState.whitePlayerName : gameState.blackPlayerName;
-  const rotationStyle = userColor === 'black' ? '180deg' : '0deg';
+  const rotationStyle = gameState.playerColor === 'black' ? '180deg' : '0deg';
 
   const renderBoard = () => {
     if (!gameState.currentBoardStatus) {
