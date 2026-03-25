@@ -21,6 +21,7 @@ global.fetch = jest.fn();
 describe('useGameState', () => {
   const mockGameId = 'test-game-id';
   const mockUserColor = 'white';
+  const mockPlayerId = 'test-player-id';
 
   const mockServerGame = {
     _id: mockGameId,
@@ -37,6 +38,8 @@ describe('useGameState', () => {
     movedPiece: { position: '' },
     hasMoved: false,
     originalSquare: null,
+    whitePlayerId: mockPlayerId,
+    blackPlayerId: 'opponent-id',
     whitePlayerName: 'TestWhite',
     blackPlayerName: 'TestBlack',
     aiColor: 'black' as const,
@@ -57,6 +60,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: mockUserColor,
+        playerId: mockPlayerId,
       })
     );
 
@@ -76,6 +80,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: mockUserColor,
+        playerId: mockPlayerId,
       })
     );
 
@@ -95,6 +100,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: mockUserColor,
+        playerId: mockPlayerId,
       })
     );
 
@@ -116,6 +122,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: mockUserColor,
+        playerId: mockPlayerId,
       })
     );
 
@@ -138,6 +145,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: mockUserColor,
+        playerId: mockPlayerId,
       })
     );
 
@@ -165,6 +173,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: 'white',
+        playerId: mockPlayerId,
       })
     );
 
@@ -179,8 +188,11 @@ describe('useGameState', () => {
   });
 
   it('should initialize singleplayer game as black correctly', async () => {
+    const blackPlayerId = 'black-player-id';
     const mockBlackGame = {
       ...mockServerGame,
+      whitePlayerId: 'ai-id',
+      blackPlayerId: blackPlayerId,
       whitePlayerName: 'AI',
       blackPlayerName: 'PlayerBlack',
       currentPlayerTurn: 'white', // AI starts
@@ -195,6 +207,7 @@ describe('useGameState', () => {
       useGameState({
         gameId: mockGameId,
         userColor: 'black',
+        playerId: blackPlayerId,
       })
     );
 

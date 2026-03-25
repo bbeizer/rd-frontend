@@ -2,6 +2,19 @@ import { ServerGame } from '../types/ServerGame';
 import { GameState } from '../types/GameState';
 import { Piece } from '../types/Piece';
 
+export function derivePlayerColor(
+  serverGame: ServerGame,
+  playerId: string
+): 'white' | 'black' | null {
+  if (serverGame.whitePlayerId === playerId) {
+    return 'white';
+  }
+  if (serverGame.blackPlayerId === playerId) {
+    return 'black';
+  }
+  return null;
+}
+
 export function convertServerGameToGameState(
   serverGame: ServerGame,
   playerColor: 'white' | 'black' | null = null
@@ -55,5 +68,8 @@ export function convertServerGameToGameState(
     originalSquare: serverGame.originalSquare ?? null,
     status: serverGame.status ?? 'not started',
     isUserTurn: undefined,
+    whiteWantsRematch: serverGame.whiteWantsRematch,
+    blackWantsRematch: serverGame.blackWantsRematch,
+    rematchGameId: serverGame.rematchGameId,
   };
 }
