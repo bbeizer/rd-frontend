@@ -37,3 +37,43 @@ export const updateGame = async (
     return { success: false, error: message };
   }
 };
+
+export interface RematchResponse {
+  rematchGameId?: string;
+  game?: ServerGame;
+  message?: string;
+  whiteWantsRematch?: boolean;
+  blackWantsRematch?: boolean;
+}
+
+export const requestRematch = async (
+  gameId: string,
+  playerId: string
+): Promise<ApiResponse<RematchResponse>> => {
+  try {
+    const response = await apiClient.post<RematchResponse>(`/api/games/${gameId}/rematch`, {
+      playerId,
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Could not request rematch:', message);
+    return { success: false, error: message };
+  }
+};
+
+export const declineRematch = async (
+  gameId: string,
+  playerId: string
+): Promise<ApiResponse<{ message: string }>> => {
+  try {
+    const response = await apiClient.delete<{ message: string }>(`/api/games/${gameId}/rematch`, {
+      data: { playerId },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Could not decline rematch:', message);
+    return { success: false, error: message };
+  }
+};

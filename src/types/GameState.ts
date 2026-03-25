@@ -21,4 +21,7 @@ export type GameState = {
   originalSquare: string | null;
   status?: string;
   isUserTurn?: boolean;
+  whiteWantsRematch?: boolean;
+  blackWantsRematch?: boolean;
+  rematchGameId?: string;
 };

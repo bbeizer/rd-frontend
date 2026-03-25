@@ -35,6 +35,9 @@ export type ServerGame = {
     black: string;
     white: string;
   }>;
+  whiteWantsRematch?: boolean;
+  blackWantsRematch?: boolean;
+  rematchGameId?: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -320,6 +320,80 @@
   }
 }
 
+/* Game over buttons */
+.game-over-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.game-over-buttons p {
+  margin: 0;
+  font-weight: 500;
+  color: #333;
+}
+
+.rematch-btn,
+.lobby-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.rematch-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.rematch-btn:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+.rematch-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.rematch-btn.waiting {
+  background: #ff9800;
+}
+
+.rematch-btn.accept {
+  background: #4caf50;
+}
+
+.rematch-btn.decline {
+  background: #f44336;
+}
+
+.rematch-btn.decline:hover {
+  background: #d32f2f;
+}
+
+.lobby-btn {
+  background: #666;
+  color: white;
+}
+
+.lobby-btn:hover {
+  background: #555;
+  transform: translateY(-2px);
+}
+
+.rematch-message {
+  color: #f44336;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .board-wrapper {

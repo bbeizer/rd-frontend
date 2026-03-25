@@ -9,15 +9,22 @@ import PlayerInfoBar from '../playerInfoBar/playerInfoBar';
 import Modal from '../modal/modal';
 import ChatBox from '../ChatBox/ChatBox';
 import './GameBoard.css';
-import { useGameSocket } from '@/hooks/useGameSocket';
+import { useGameSocket, RematchEvents } from '@/hooks/useGameSocket';
 import { convertServerGameToGameState } from '@/utils/convertServerGameToGameState';
-import { useCallback } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
+import { requestRematch, declineRematch } from '@/services/gameService';
+
+type RematchStatus = 'idle' | 'waiting' | 'opponent-requested' | 'declined';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const userColor = localStorage.getItem('userColor');
   const playerId = localStorage.getItem('guestUserID') || '';
+
+  // Rematch state
+  const [rematchStatus, setRematchStatus] = useState<RematchStatus>('idle');
+  const [rematchMessage, setRematchMessage] = useState<string | null>(null);
 
   if (!userColor || !gameId) {
     return <div>Invalid game configuration</div>;
@@ -35,7 +42,80 @@ const GameBoard = () => {
     [setGameState, userColor]
   );
 
-  useGameSocket(gameId, handleSocketUpdate);
+  // Rematch socket event handlers
+  const rematchEvents: RematchEvents = useMemo(
+    () => ({
+      onRematchRequested: () => {
+        setRematchStatus('opponent-requested');
+        setRematchMessage(null);
+      },
+      onRematchDeclined: () => {
+        setRematchStatus('declined');
+        setRematchMessage('Opponent declined the rematch');
+        setTimeout(() => {
+          setRematchStatus('idle');
+          setRematchMessage(null);
+        }, 3000);
+      },
+      onRematchReady: ({ newGameId }) => {
+        navigate(`/game/${newGameId}`);
+      },
+    }),
+    [navigate]
+  );
+
+  useGameSocket(gameId, handleSocketUpdate, rematchEvents);
+
+  // Check for existing rematch game on mount (reconnect scenario)
+  useEffect(() => {
+    if (gameState.rematchGameId) {
+      navigate(`/game/${gameState.rematchGameId}`);
+    }
+  }, [gameState.rematchGameId, navigate]);
+
+  // Initialize rematch status from game state (e.g., page refresh)
+  useEffect(() => {
+    if (gameState.status === 'completed') {
+      const userWantsRematch =
+        userColor === 'white' ? gameState.whiteWantsRematch : gameState.blackWantsRematch;
+      const opponentWantsRematch =
+        userColor === 'white' ? gameState.blackWantsRematch : gameState.whiteWantsRematch;
+
+      if (userWantsRematch && !opponentWantsRematch) {
+        setRematchStatus('waiting');
+      } else if (opponentWantsRematch && !userWantsRematch) {
+        setRematchStatus('opponent-requested');
+      }
+    }
+  }, [gameState.status, gameState.whiteWantsRematch, gameState.blackWantsRematch, userColor]);
+
+  // Rematch handlers
+  const handleRequestRematch = async () => {
+    const result = await requestRematch(gameId, playerId);
+    if (result.success && result.data) {
+      // Single player: immediate redirect
+      if (result.data.rematchGameId) {
+        localStorage.setItem('userColor', userColor === 'white' ? 'black' : 'white');
+        navigate(`/game/${result.data.rematchGameId}`);
+      } else {
+        // Multiplayer: waiting for opponent
+        setRematchStatus('waiting');
+      }
+    }
+  };
+
+  const handleAcceptRematch = async () => {
+    const result = await requestRematch(gameId, playerId);
+    if (result.success && result.data?.rematchGameId) {
+      localStorage.setItem('userColor', userColor === 'white' ? 'black' : 'white');
+      navigate(`/game/${result.data.rematchGameId}`);
+    }
+  };
+
+  const handleDeclineRematch = async () => {
+    await declineRematch(gameId, playerId);
+    setRematchStatus('idle');
+  };
 
   const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
     useGameActions({
@@ -149,7 +229,44 @@ const GameBoard = () => {
               <Modal>
                 <div style={{ transform: `rotate(${rotationStyle})` }}>
                   <h2>{gameState.winner} wins!</h2>
-                  <button onClick={() => navigate('/')}>Return to Lobby</button>
+
+                  {rematchMessage && <p className="rematch-message">{rematchMessage}</p>}
+
+                  <div className="game-over-buttons">
+                    {rematchStatus === 'idle' && (
+                      <button onClick={handleRequestRematch} className="rematch-btn">
+                        Rematch
+                      </button>
+                    )}
+
+                    {rematchStatus === 'waiting' && (
+                      <button disabled className="rematch-btn waiting">
+                        Waiting for opponent...
+                      </button>
+                    )}
+
+                    {rematchStatus === 'opponent-requested' && (
+                      <>
+                        <p>Opponent wants a rematch!</p>
+                        <button onClick={handleAcceptRematch} className="rematch-btn accept">
+                          Accept
+                        </button>
+                        <button onClick={handleDeclineRematch} className="rematch-btn decline">
+                          Decline
+                        </button>
+                      </>
+                    )}
+
+                    {rematchStatus === 'declined' && (
+                      <button disabled className="rematch-btn">
+                        Rematch
+                      </button>
+                    )}
+
+                    <button onClick={() => navigate('/')} className="lobby-btn">
+                      Return to Lobby
+                    </button>
+                  </div>
                 </div>
               </Modal>
             )}

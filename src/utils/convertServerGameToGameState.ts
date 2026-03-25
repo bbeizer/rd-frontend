@@ -55,5 +55,8 @@ export function convertServerGameToGameState(
     originalSquare: serverGame.originalSquare ?? null,
     status: serverGame.status ?? 'not started',
     isUserTurn: undefined,
+    whiteWantsRematch: serverGame.whiteWantsRematch,
+    blackWantsRematch: serverGame.blackWantsRematch,
+    rematchGameId: serverGame.rematchGameId,
   };
 }
