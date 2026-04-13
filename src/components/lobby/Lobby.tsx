@@ -13,6 +13,8 @@ function Lobby() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [showColorModal, setShowColorModal] = useState(false);
+  const [showDifficultyModal, setShowDifficultyModal] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackName, setFeedbackName] = useState('');
@@ -69,7 +71,7 @@ function Lobby() {
       const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
       localStorage.setItem('userColor', color);
 
-      const result = await startSinglePlayerGame(userId, playerName, color);
+      const result = await startSinglePlayerGame(userId, playerName, color, difficulty);
 
       if (!result.success || !result.data) {
         alert('Failed to start game. Please try again.');
@@ -84,6 +86,13 @@ function Lobby() {
   };
 
   const handleSinglePlayerGame = () => {
+    setDifficulty('medium');
+    setShowDifficultyModal(true);
+  };
+
+  const handleSelectDifficulty = (selected: 'easy' | 'medium' | 'hard') => {
+    setDifficulty(selected);
+    setShowDifficultyModal(false);
     setShowColorModal(true);
   };
 
@@ -195,6 +204,20 @@ function Lobby() {
               <span className="dot">.</span>
               <span className="dot">.</span>
             </p>
+          </Modal>
+        )}
+        {showDifficultyModal && (
+          <Modal>
+            <h2>Select Difficulty</h2>
+            <button className="difficulty-button easy" onClick={() => handleSelectDifficulty('easy')}>
+              Easy
+            </button>
+            <button className="difficulty-button medium" onClick={() => handleSelectDifficulty('medium')}>
+              Medium
+            </button>
+            <button className="difficulty-button hard" onClick={() => handleSelectDifficulty('hard')}>
+              Hard
+            </button>
           </Modal>
         )}
         {showColorModal && (
