@@ -394,6 +394,29 @@
   margin: 8px 0;
 }
 
+/* Back to lobby floating button */
+.back-to-lobby-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #666;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.back-to-lobby-btn:hover {
+  background: #555;
+  transform: translateY(-2px);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .board-wrapper {

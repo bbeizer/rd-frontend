@@ -28,6 +28,7 @@ const GameBoard = () => {
   // Rematch state
   const [rematchStatus, setRematchStatus] = useState<RematchStatus>('idle');
   const [rematchMessage, setRematchMessage] = useState<string | null>(null);
+  const [showGameOverModal, setShowGameOverModal] = useState(true);
 
   if (!gameId) {
     return <div>Invalid game configuration</div>;
@@ -205,7 +206,16 @@ const GameBoard = () => {
 
   return (
     <div className="game-container">
-      {gameState.status === 'completed' && <Confetti />}
+      {gameState.status === 'completed' && showGameOverModal && <Confetti />}
+
+      {gameState.status === 'completed' && !showGameOverModal && (
+        <button
+          onClick={() => navigate('/')}
+          className="back-to-lobby-btn"
+        >
+          &larr; Back to Lobby
+        </button>
+      )}
 
       {/* Action error toast */}
       {actionError && (
@@ -237,7 +247,7 @@ const GameBoard = () => {
               </Modal>
             )}
 
-            {gameState.status === 'completed' && (
+            {gameState.status === 'completed' && showGameOverModal && (
               <Modal>
                 <div style={{ transform: `rotate(${rotationStyle})` }}>
                   <h2>{gameState.winner} wins!</h2>
@@ -274,6 +284,13 @@ const GameBoard = () => {
                         Rematch
                       </button>
                     )}
+
+                    <button
+                      onClick={() => setShowGameOverModal(false)}
+                      className="lobby-btn"
+                    >
+                      View Board
+                    </button>
 
                     <button onClick={() => navigate('/')} className="lobby-btn">
                       Return to Lobby
