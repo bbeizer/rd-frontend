@@ -359,6 +359,49 @@ input {
   z-index: 999;
 }
 
+.difficulty-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.2rem;
+  margin: 0.5rem;
+  border: 2px solid #b5633d;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #ffffff;
+  color: #333;
+  width: 80%;
+}
+
+.difficulty-button:hover {
+  transform: scale(1.05);
+  background-color: #b5633d;
+  color: white;
+}
+
+.difficulty-button.easy {
+  border-color: #4caf50;
+}
+
+.difficulty-button.easy:hover {
+  background-color: #4caf50;
+}
+
+.difficulty-button.medium {
+  border-color: #ff9800;
+}
+
+.difficulty-button.medium:hover {
+  background-color: #ff9800;
+}
+
+.difficulty-button.hard {
+  border-color: #f44336;
+}
+
+.difficulty-button.hard:hover {
+  background-color: #f44336;
+}
+
 .color-button {
   padding: 0.75rem 1.5rem;
   font-size: 1.2rem;

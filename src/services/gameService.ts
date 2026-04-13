@@ -10,12 +10,14 @@ export const joinMultiplayerQueue = async (playerId: string, playerName: string)
 export const startSinglePlayerGame = async (
   userId: string,
   userName: string,
-  userColor: string
+  userColor: string,
+  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ) => {
   return apiPost<StartSinglePlayerResponse>('/api/games/startSinglePlayerGame', {
     playerId: userId,
     playerName: userName,
     playerColor: userColor,
+    difficulty,
   });
 };
 
