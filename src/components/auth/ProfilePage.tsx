@@ -68,13 +68,16 @@ function ProfilePage() {
 
   const getOpponentName = (game: GameSummary) => {
     if (game.gameType === 'singleplayer') {
-      const label = game.difficulty ? `AI (${game.difficulty})` : 'AI';
-      return label;
+      return game.difficulty ? `AI (${game.difficulty})` : 'AI';
     }
     if (game.whitePlayerName === user?.username) {
       return game.blackPlayerName;
     }
     return game.whitePlayerName;
+  };
+
+  const getPlayerColor = (game: GameSummary): 'white' | 'black' => {
+    return game.whitePlayerName === user?.username ? 'white' : 'black';
   };
 
   const getResult = (game: GameSummary) => {
@@ -159,30 +162,38 @@ function ProfilePage() {
           <h2 className="profile-subtitle">Game History</h2>
           {games.length > 0 ? (
             <ul className="game-history-list">
-              {games.map((game) => (
-                <li key={game._id} className="game-history-item">
-                  <div className="game-history-info">
-                    <span className="game-history-opponent">vs {getOpponentName(game)}</span>
-                    <span
-                      className={`game-history-result ${getResult(game) === 'Won' ? 'result-won' : 'result-lost'}`}
-                    >
-                      {getResult(game)}
-                    </span>
-                    <span className="game-history-meta">
-                      {game.moveHistory?.length ? `${game.moveHistory.length} turns \u00b7 ` : ''}
-                      {formatDate(game.createdAt)}
-                    </span>
-                  </div>
-                  <div className="game-history-actions">
+              {games.map((game) => {
+                const result = getResult(game);
+                const color = getPlayerColor(game);
+                const turns = game.turnCount ?? game.moveHistory?.length ?? game.turnNumber ?? 0;
+                return (
+                  <li key={game._id} className="game-history-item">
+                    <div className="game-history-info">
+                      <div className="game-history-top-row">
+                        <span className="game-history-opponent">vs {getOpponentName(game)}</span>
+                        <span
+                          className={`game-history-result ${result === 'Won' ? 'result-won' : 'result-lost'}`}
+                        >
+                          {result}
+                        </span>
+                      </div>
+                      <span className="game-history-meta">
+                        <span className={`game-history-color ${color}`}>
+                          {color === 'white' ? '\u25CB' : '\u25CF'}
+                        </span>
+                        {turns > 0 && <span>{turns} turns</span>}
+                        <span>{formatDate(game.createdAt)}</span>
+                      </span>
+                    </div>
                     <button
                       onClick={() => navigate(`/game/${game._id}/replay`)}
                       className="view-game-btn"
                     >
-                      View
+                      Replay
                     </button>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="no-games">No games played yet</p>

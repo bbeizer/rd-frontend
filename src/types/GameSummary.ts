@@ -1,8 +1,25 @@
+export interface BoardSnapshot {
+  [cellKey: string]: {
+    color: 'white' | 'black';
+    hasBall: boolean;
+    position: string;
+  } | null;
+}
+
+export interface ActionState {
+  action: string;
+  boardSnapshot: BoardSnapshot;
+}
+
 export interface MoveHistoryEntry {
   turnNumber: number;
   player: 'white' | 'black';
   pieceMove?: { from: string; to: string };
-  ballPass?: { from: string; to: string };
+  ballPasses?: Array<{ from: string; to: string }>;
+  /** Per-action snapshots (new games) */
+  actionStates?: ActionState[];
+  /** Turn-final board snapshot (new games) */
+  boardSnapshot?: BoardSnapshot;
 }
 
 export interface GameSummary {
@@ -15,5 +32,7 @@ export interface GameSummary {
   difficulty?: 'easy' | 'medium' | 'hard';
   aiColor: 'white' | 'black' | null;
   moveHistory: MoveHistoryEntry[];
+  turnNumber?: number;
+  turnCount?: number;
   createdAt: string;
 }

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getGameById } from '@/services/gameService';
-import { reconstructBoardAtTurn } from '@/utils/gameUtilities';
+import { buildReplaySteps } from '@/utils/gameUtilities';
 import type { MoveHistoryEntry } from '@/types/GameSummary';
-import type { Piece as PieceType } from '@/types/Piece';
+import type { ReplayStep } from '@/utils/gameUtilities';
 import GridCell from '../grid/GridCell/GridCell';
 import GridContainer from '../grid/GridContainer/GridContainer';
 import Piece from '../piece/Piece';
@@ -23,10 +23,10 @@ const ReplayViewer = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [game, setGame] = useState<ReplayGame | null>(null);
-  const [currentTurn, setCurrentTurn] = useState(0);
-  const [boardState, setBoardState] = useState<Record<string, PieceType | null>>({});
+  const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const activeStepRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -34,7 +34,6 @@ const ReplayViewer = () => {
       try {
         const data = await getGameById(gameId);
         setGame(data as unknown as ReplayGame);
-        setBoardState(reconstructBoardAtTurn(data.moveHistory as unknown as MoveHistoryEntry[], 0));
       } catch {
         setError('Failed to load game');
       } finally {
@@ -44,20 +43,20 @@ const ReplayViewer = () => {
     fetchGame();
   }, [gameId]);
 
-  useEffect(() => {
-    if (!game) return;
-    setBoardState(reconstructBoardAtTurn(game.moveHistory, currentTurn));
-  }, [currentTurn, game]);
+  const steps: ReplayStep[] = useMemo(() => {
+    if (!game) return [];
+    return buildReplaySteps(game.moveHistory);
+  }, [game]);
 
-  const totalTurns = game?.moveHistory.length ?? 0;
+  const totalSteps = steps.length - 1; // exclude step 0 (start) from max
 
-  const goToStart = useCallback(() => setCurrentTurn(0), []);
-  const goBack = useCallback(() => setCurrentTurn((t) => Math.max(0, t - 1)), []);
+  const goToStart = useCallback(() => setCurrentStep(0), []);
+  const goBack = useCallback(() => setCurrentStep((s) => Math.max(0, s - 1)), []);
   const goForward = useCallback(
-    () => setCurrentTurn((t) => Math.min(totalTurns, t + 1)),
-    [totalTurns]
+    () => setCurrentStep((s) => Math.min(totalSteps, s + 1)),
+    [totalSteps]
   );
-  const goToEnd = useCallback(() => setCurrentTurn(totalTurns), [totalTurns]);
+  const goToEnd = useCallback(() => setCurrentStep(totalSteps), [totalSteps]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -70,30 +69,40 @@ const ReplayViewer = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goBack, goForward, goToStart, goToEnd]);
 
-  const getCurrentMoveHighlights = (): Set<string> => {
-    if (currentTurn === 0 || !game) return new Set();
-    const move = game.moveHistory[currentTurn - 1];
-    const squares = new Set<string>();
-    if (move.pieceMove) {
-      squares.add(move.pieceMove.from);
-      squares.add(move.pieceMove.to);
-    }
-    if (move.ballPass) {
-      squares.add(move.ballPass.from);
-      squares.add(move.ballPass.to);
-    }
-    return squares;
-  };
+  useEffect(() => {
+    activeStepRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [currentStep]);
 
-  const highlights = getCurrentMoveHighlights();
+  const step = steps[currentStep];
+
+  // Group steps by turn for the move list sidebar
+  const turnGroups = useMemo(() => {
+    const groups: { turnIndex: number; turnNumber: number; player: string; steps: { stepIndex: number; step: ReplayStep }[] }[] = [];
+    for (let i = 1; i < steps.length; i++) {
+      const s = steps[i];
+      const last = groups[groups.length - 1];
+      if (last && last.turnIndex === s.turnIndex) {
+        last.steps.push({ stepIndex: i, step: s });
+      } else {
+        groups.push({
+          turnIndex: s.turnIndex,
+          turnNumber: s.turnNumber,
+          player: s.player,
+          steps: [{ stepIndex: i, step: s }],
+        });
+      }
+    }
+    return groups;
+  }, [steps]);
 
   const renderBoard = () => {
+    if (!step) return null;
     const cells = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         const cellKey = `${String.fromCharCode(97 + col)}${8 - row}`;
-        const piece = boardState[cellKey];
-        const isHighlighted = highlights.has(cellKey);
+        const piece = step.board[cellKey];
+        const highlight = step.highlights[cellKey] ?? null;
 
         cells.push(
           <GridCell
@@ -102,7 +111,7 @@ const ReplayViewer = () => {
             col={col}
             id={cellKey}
             data-testid={cellKey}
-            highlight={isHighlighted ? 'yellow' : null}
+            highlight={highlight}
             onClick={() => {}}
           >
             {piece && (
@@ -118,20 +127,6 @@ const ReplayViewer = () => {
       }
     }
     return cells;
-  };
-
-  const formatMove = (move: MoveHistoryEntry) => {
-    const parts: string[] = [];
-    if (move.pieceMove) {
-      parts.push(`${move.pieceMove.from} \u2192 ${move.pieceMove.to}`);
-    }
-    if (move.ballPass) {
-      parts.push(`pass ${move.ballPass.from} \u2192 ${move.ballPass.to}`);
-    }
-    if (parts.length === 0) {
-      parts.push('pass turn');
-    }
-    return parts.join(', ');
   };
 
   if (isLoading) {
@@ -175,26 +170,28 @@ const ReplayViewer = () => {
           </div>
 
           <div className="replay-controls">
-            <button onClick={goToStart} className="replay-control-btn" disabled={currentTurn === 0}>
+            <button onClick={goToStart} className="replay-control-btn" disabled={currentStep === 0}>
               |&laquo;
             </button>
-            <button onClick={goBack} className="replay-control-btn" disabled={currentTurn === 0}>
+            <button onClick={goBack} className="replay-control-btn" disabled={currentStep === 0}>
               &laquo;
             </button>
             <span className="replay-turn-display">
-              Turn {currentTurn} / {totalTurns}
+              {step?.actionType === 'start'
+                ? 'Start'
+                : `Turn ${step?.turnNumber ?? 0}`}
             </span>
             <button
               onClick={goForward}
               className="replay-control-btn"
-              disabled={currentTurn === totalTurns}
+              disabled={currentStep === totalSteps}
             >
               &raquo;
             </button>
             <button
               onClick={goToEnd}
               className="replay-control-btn"
-              disabled={currentTurn === totalTurns}
+              disabled={currentStep === totalSteps}
             >
               &raquo;|
             </button>
@@ -203,9 +200,9 @@ const ReplayViewer = () => {
           <input
             type="range"
             min={0}
-            max={totalTurns}
-            value={currentTurn}
-            onChange={(e) => setCurrentTurn(Number(e.target.value))}
+            max={totalSteps}
+            value={currentStep}
+            onChange={(e) => setCurrentStep(Number(e.target.value))}
             className="replay-slider"
           />
         </div>
@@ -213,18 +210,28 @@ const ReplayViewer = () => {
         <div className="replay-move-list">
           <h3 className="replay-move-list-title">Moves</h3>
           <div className="replay-moves-scroll">
-            {game.moveHistory.map((move, idx) => (
-              <button
-                key={idx}
-                className={`replay-move-entry ${idx + 1 === currentTurn ? 'active' : ''}`}
-                onClick={() => setCurrentTurn(idx + 1)}
-              >
-                <span className="replay-move-number">{move.turnNumber}.</span>
-                <span className={`replay-move-player ${move.player}`}>
-                  {move.player === 'white' ? 'W' : 'B'}
-                </span>
-                <span className="replay-move-detail">{formatMove(move)}</span>
-              </button>
+            {turnGroups.map((group) => (
+              <div key={group.turnIndex} className="replay-turn-group">
+                <div className="replay-turn-header">
+                  <span className="replay-move-number">{group.turnNumber}.</span>
+                  <span className={`replay-move-player ${group.player}`}>
+                    {group.player === 'white' ? 'W' : 'B'}
+                  </span>
+                </div>
+                {group.steps.map(({ stepIndex, step: s }) => (
+                  <button
+                    key={stepIndex}
+                    ref={stepIndex === currentStep ? activeStepRef : undefined}
+                    className={`replay-step-entry ${stepIndex === currentStep ? 'active' : ''} replay-step-${s.actionType}`}
+                    onClick={() => setCurrentStep(stepIndex)}
+                  >
+                    <span className={`replay-step-icon ${s.actionType}`}>
+                      {s.actionType === 'move' ? '\u265E' : s.actionType === 'pass' ? '\u25CF' : ''}
+                    </span>
+                    <span className="replay-step-detail">{s.description}</span>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         </div>
