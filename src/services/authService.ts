@@ -44,10 +44,10 @@ export const getMe = async (
   token: string
 ): Promise<{ success: boolean; data?: User; error?: string }> => {
   try {
-    const { data } = await apiClient.get<User>('/api/users/me', {
+    const { data } = await apiClient.get<{ user: User }>('/api/users/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return { success: true, data };
+    return { success: true, data: data.user };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get user';
     return { success: false, error: message };
