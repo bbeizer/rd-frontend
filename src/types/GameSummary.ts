@@ -7,6 +7,7 @@ export interface MoveHistoryEntry {
 
 export interface GameSummary {
   _id: string;
+  status?: 'pending' | 'playing' | 'completed';
   whitePlayerName: string;
   blackPlayerName: string;
   winner: string;

@@ -32,7 +32,7 @@ function ProfilePage() {
     if (!user) return;
     const result = await getUserGames(user._id);
     if (result.success && result.data) {
-      setGames(result.data);
+      setGames(result.data.filter((game) => game.status === 'completed'));
     }
   };
 
