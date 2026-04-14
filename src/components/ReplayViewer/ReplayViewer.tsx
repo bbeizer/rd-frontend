@@ -4,17 +4,17 @@ import { getGameById } from '@/services/gameService';
 import { buildReplaySteps } from '@/utils/gameUtilities';
 import type { MoveHistoryEntry } from '@/types/GameSummary';
 import type { ReplayStep } from '@/utils/gameUtilities';
+import GridCell from '../grid/GridCell/GridCell';
+import GridContainer from '../grid/GridContainer/GridContainer';
+import Piece from '../piece/Piece';
+import './ReplayViewer.css';
+
 interface TurnGroup {
   turnIndex: number;
   turnNumber: number;
   player: string;
   steps: { stepIndex: number; step: ReplayStep }[];
 }
-
-import GridCell from '../grid/GridCell/GridCell';
-import GridContainer from '../grid/GridContainer/GridContainer';
-import Piece from '../piece/Piece';
-import './ReplayViewer.css';
 
 interface ReplayGame {
   _id: string;

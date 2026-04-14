@@ -134,6 +134,75 @@ describe('buildReplaySteps', () => {
     expect(steps[3].turnIndex).toBe(1);
   });
 
+  it('uses boardSnapshot as starting point for next turn', () => {
+    // Provide a snapshot on turn 1 that differs from what delta would produce.
+    // Turn 2 should start from the snapshot, not from delta.
+    const snapshotBoard: Record<
+      string,
+      { color: string; hasBall: boolean; position: string } | null
+    > = {};
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const cellKey = `${String.fromCharCode(97 + col)}${8 - row}`;
+        snapshotBoard[cellKey] = null;
+      }
+    }
+    // Snapshot places pieces in unusual positions
+    snapshotBoard['a1'] = { color: 'white', hasBall: true, position: 'a1' };
+    snapshotBoard['b1'] = { color: 'white', hasBall: false, position: 'b1' };
+    snapshotBoard['h8'] = { color: 'black', hasBall: true, position: 'h8' };
+    snapshotBoard['g8'] = { color: 'black', hasBall: false, position: 'g8' };
+
+    const steps = buildReplaySteps([
+      {
+        turnNumber: 1,
+        player: 'white',
+        pieceMove: { from: 'd1', to: 'c3' },
+        boardSnapshot: snapshotBoard,
+      },
+      {
+        turnNumber: 2,
+        player: 'black',
+        // Pass from h8 to g8 — only valid if snapshot was used
+        ballPasses: [{ from: 'h8', to: 'g8' }],
+      },
+    ]);
+
+    // Last step is the pass on turn 2 — should use snapshot positions
+    const lastStep = steps[steps.length - 1];
+    expect(lastStep.board['h8']?.hasBall).toBe(false);
+    expect(lastStep.board['g8']?.hasBall).toBe(true);
+    // White ball holder should be a1 (from snapshot, not c3 from delta)
+    expect(lastStep.board['a1']?.hasBall).toBe(true);
+  });
+
+  it('handles turns with only ballPasses and no pieceMove', () => {
+    // First turn moves a piece so ball holder is in a passable position
+    // Second turn is pass-only (no piece move)
+    const steps = buildReplaySteps([
+      {
+        turnNumber: 1,
+        player: 'white',
+        pieceMove: { from: 'd1', to: 'c3' },
+      },
+      {
+        turnNumber: 2,
+        player: 'white',
+        ballPasses: [{ from: 'c3', to: 'e1' }],
+      },
+    ]);
+
+    // Turn 1: start + move = 2 steps so far
+    // Turn 2: pass only = 1 step
+    // Total: start + move + pass = 3
+    expect(steps).toHaveLength(3);
+    expect(steps[2].actionType).toBe('pass');
+    expect(steps[2].description).toContain('c3');
+    expect(steps[2].description).toContain('e1');
+    expect(countBalls(steps[2].board, 'white')).toBe(1);
+    expect(ballHolder(steps[2].board, 'white')).toBe('e1');
+  });
+
   it('does not mutate boards between steps', () => {
     const steps = buildReplaySteps([
       {
