@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getUserGames } from '@/services/authService';
+import type { GameSummary } from '@/types/GameSummary';
 import './auth.css';
 
 function ProfilePage() {
@@ -9,7 +10,7 @@ function ProfilePage() {
   const { user, isAuthenticated, isLoading, logout, updateUser, deleteAccount } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
-  const [games, setGames] = useState<string[]>([]);
+  const [games, setGames] = useState<GameSummary[]>([]);
   const [error, setError] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -63,6 +64,29 @@ function ProfilePage() {
     } else {
       setError(result.error || 'Failed to delete account');
     }
+  };
+
+  const getOpponentName = (game: GameSummary) => {
+    if (game.gameType === 'singleplayer') {
+      const label = game.difficulty ? `AI (${game.difficulty})` : 'AI';
+      return label;
+    }
+    if (game.whitePlayerName === user?.username) {
+      return game.blackPlayerName;
+    }
+    return game.whitePlayerName;
+  };
+
+  const getResult = (game: GameSummary) => {
+    return game.winner === user?.username ? 'Won' : 'Lost';
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   if (isLoading) {
@@ -135,12 +159,27 @@ function ProfilePage() {
           <h2 className="profile-subtitle">Game History</h2>
           {games.length > 0 ? (
             <ul className="game-history-list">
-              {games.map((gameId) => (
-                <li key={gameId} className="game-history-item">
-                  <span>Game: {gameId.slice(-8)}</span>
-                  <button onClick={() => navigate(`/game/${gameId}`)} className="view-game-btn">
-                    View
-                  </button>
+              {games.map((game) => (
+                <li key={game._id} className="game-history-item">
+                  <div className="game-history-info">
+                    <span className="game-history-opponent">
+                      vs {getOpponentName(game)}
+                    </span>
+                    <span className={`game-history-result ${getResult(game) === 'Won' ? 'result-won' : 'result-lost'}`}>
+                      {getResult(game)}
+                    </span>
+                    <span className="game-history-meta">
+                      {game.moveHistory?.length ? `${game.moveHistory.length} turns \u00b7 ` : ''}{formatDate(game.createdAt)}
+                    </span>
+                  </div>
+                  <div className="game-history-actions">
+                    <button onClick={() => navigate(`/game/${game._id}`)} className="view-game-btn">
+                      View
+                    </button>
+                    <button onClick={() => navigate(`/game/${game._id}/replay`)} className="view-game-btn replay-btn">
+                      Replay
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

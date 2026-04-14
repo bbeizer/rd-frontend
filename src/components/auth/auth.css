@@ -104,7 +104,7 @@
 
 /* Profile Page Styles */
 .profile-container {
-  max-width: 30rem;
+  max-width: 35rem;
 }
 
 .profile-section {
@@ -205,6 +205,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .game-history-item {
@@ -215,6 +217,41 @@
   background-color: #f9f9f9;
   border-radius: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.game-history-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.game-history-opponent {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.game-history-result {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.result-won {
+  color: #4caf50;
+}
+
+.result-lost {
+  color: #d32f2f;
+}
+
+.game-history-meta {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.game-history-actions {
+  display: flex;
+  gap: 0.4rem;
 }
 
 .view-game-btn {
@@ -229,6 +266,14 @@
 
 .view-game-btn:hover {
   background-color: #a55233;
+}
+
+.replay-btn {
+  background-color: #5c6bc0;
+}
+
+.replay-btn:hover {
+  background-color: #4a5ab5;
 }
 
 .no-games {

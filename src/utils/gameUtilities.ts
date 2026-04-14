@@ -53,6 +53,37 @@ export const initializeGameBoard = (): Record<string, Piece | null> => {
   return board;
 };
 
+export const reconstructBoardAtTurn = (
+  moveHistory: Array<{
+    pieceMove?: { from: string; to: string };
+    ballPass?: { from: string; to: string };
+  }>,
+  targetTurn: number
+): Record<string, Piece | null> => {
+  const board = initializeGameBoard();
+
+  for (let i = 0; i < targetTurn && i < moveHistory.length; i++) {
+    const move = moveHistory[i];
+
+    if (move.pieceMove) {
+      const piece = board[move.pieceMove.from];
+      if (piece) {
+        board[move.pieceMove.to] = { ...piece, position: move.pieceMove.to };
+        board[move.pieceMove.from] = null;
+      }
+    }
+
+    if (move.ballPass) {
+      const fromPiece = board[move.ballPass.from];
+      const toPiece = board[move.ballPass.to];
+      if (fromPiece) board[move.ballPass.from] = { ...fromPiece, hasBall: false };
+      if (toPiece) board[move.ballPass.to] = { ...toPiece, hasBall: true };
+    }
+  }
+
+  return board;
+};
+
 export const getKeyCoordinates = (cellKey: string) => {
   const col = cellKey.charCodeAt(0) - 'a'.charCodeAt(0);
   const row = 8 - parseInt(cellKey.slice(1), 10);
