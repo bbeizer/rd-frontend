@@ -51,6 +51,13 @@ jest.mock('@/hooks/useGameSocket', () => ({
   useGameSocket: () => {},
 }));
 
+jest.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: null,
+    isAuthenticated: false,
+  }),
+}));
+
 jest.mock('../../../hooks/useGameActions', () => ({
   useGameActions: () => ({
     handleCellClick: jest.fn(),
