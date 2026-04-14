@@ -162,18 +162,22 @@ function ProfilePage() {
               {games.map((game) => (
                 <li key={game._id} className="game-history-item">
                   <div className="game-history-info">
-                    <span className="game-history-opponent">
-                      vs {getOpponentName(game)}
-                    </span>
-                    <span className={`game-history-result ${getResult(game) === 'Won' ? 'result-won' : 'result-lost'}`}>
+                    <span className="game-history-opponent">vs {getOpponentName(game)}</span>
+                    <span
+                      className={`game-history-result ${getResult(game) === 'Won' ? 'result-won' : 'result-lost'}`}
+                    >
                       {getResult(game)}
                     </span>
                     <span className="game-history-meta">
-                      {game.moveHistory?.length ? `${game.moveHistory.length} turns \u00b7 ` : ''}{formatDate(game.createdAt)}
+                      {game.moveHistory?.length ? `${game.moveHistory.length} turns \u00b7 ` : ''}
+                      {formatDate(game.createdAt)}
                     </span>
                   </div>
                   <div className="game-history-actions">
-                    <button onClick={() => navigate(`/game/${game._id}/replay`)} className="view-game-btn">
+                    <button
+                      onClick={() => navigate(`/game/${game._id}/replay`)}
+                      className="view-game-btn"
+                    >
                       View
                     </button>
                   </div>

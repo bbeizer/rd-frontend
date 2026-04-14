@@ -9,14 +9,8 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  plugins: [
-    'react',
-    'react-hooks',
-    '@typescript-eslint',
-    'jsx-a11y',
-    'unused-imports',
-    'prettier',
-  ],
+  ignorePatterns: ['dist/**'],
+  plugins: ['react', 'react-hooks', '@typescript-eslint', 'jsx-a11y', 'unused-imports', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',

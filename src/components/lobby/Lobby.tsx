@@ -170,7 +170,7 @@ function Lobby() {
               <button type="button" className="auth-nav-logout-btn" onClick={handleLogout}>
                 Logout
               </button>
-              </div>
+            </div>
           ) : (
             <>
               <Link to="/login" className="auth-nav-link">
@@ -225,13 +225,22 @@ function Lobby() {
         {showDifficultyModal && (
           <Modal>
             <h2>Select Difficulty</h2>
-            <button className="difficulty-button easy" onClick={() => handleSelectDifficulty('easy')}>
+            <button
+              className="difficulty-button easy"
+              onClick={() => handleSelectDifficulty('easy')}
+            >
               Easy
             </button>
-            <button className="difficulty-button medium" onClick={() => handleSelectDifficulty('medium')}>
+            <button
+              className="difficulty-button medium"
+              onClick={() => handleSelectDifficulty('medium')}
+            >
               Medium
             </button>
-            <button className="difficulty-button hard" onClick={() => handleSelectDifficulty('hard')}>
+            <button
+              className="difficulty-button hard"
+              onClick={() => handleSelectDifficulty('hard')}
+            >
               Hard
             </button>
           </Modal>

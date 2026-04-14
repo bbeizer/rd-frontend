@@ -53,7 +53,10 @@ const ReplayViewer = () => {
 
   const goToStart = useCallback(() => setCurrentTurn(0), []);
   const goBack = useCallback(() => setCurrentTurn((t) => Math.max(0, t - 1)), []);
-  const goForward = useCallback(() => setCurrentTurn((t) => Math.min(totalTurns, t + 1)), [totalTurns]);
+  const goForward = useCallback(
+    () => setCurrentTurn((t) => Math.min(totalTurns, t + 1)),
+    [totalTurns]
+  );
   const goToEnd = useCallback(() => setCurrentTurn(totalTurns), [totalTurns]);
 
   useEffect(() => {
@@ -103,7 +106,12 @@ const ReplayViewer = () => {
             onClick={() => {}}
           >
             {piece && (
-              <Piece color={piece.color} hasBall={piece.hasBall} position={piece.position} onClick={() => {}} />
+              <Piece
+                color={piece.color}
+                hasBall={piece.hasBall}
+                position={piece.position}
+                onClick={() => {}}
+              />
             )}
           </GridCell>
         );
@@ -157,9 +165,7 @@ const ReplayViewer = () => {
           <span className="replay-vs">vs</span>
           <span className="replay-player black-label">{game.blackPlayerName || 'Black'}</span>
         </div>
-        <div className="replay-result">
-          {game.winner} wins
-        </div>
+        <div className="replay-result">{game.winner} wins</div>
       </div>
 
       <div className="replay-content">
@@ -178,10 +184,18 @@ const ReplayViewer = () => {
             <span className="replay-turn-display">
               Turn {currentTurn} / {totalTurns}
             </span>
-            <button onClick={goForward} className="replay-control-btn" disabled={currentTurn === totalTurns}>
+            <button
+              onClick={goForward}
+              className="replay-control-btn"
+              disabled={currentTurn === totalTurns}
+            >
               &raquo;
             </button>
-            <button onClick={goToEnd} className="replay-control-btn" disabled={currentTurn === totalTurns}>
+            <button
+              onClick={goToEnd}
+              className="replay-control-btn"
+              disabled={currentTurn === totalTurns}
+            >
               &raquo;|
             </button>
           </div>
