@@ -4,7 +4,10 @@ import type { Piece } from '@/types/Piece';
 const countBalls = (board: Record<string, Piece | null>, color: 'white' | 'black'): number =>
   Object.values(board).filter((p) => p?.color === color && p.hasBall).length;
 
-const ballHolder = (board: Record<string, Piece | null>, color: 'white' | 'black'): string | null => {
+const ballHolder = (
+  board: Record<string, Piece | null>,
+  color: 'white' | 'black'
+): string | null => {
   for (const [, p] of Object.entries(board)) {
     if (p?.color === color && p.hasBall) return p.position;
   }
@@ -77,9 +80,7 @@ describe('buildReplaySteps', () => {
   });
 
   it('handles pass-turn (no actions)', () => {
-    const steps = buildReplaySteps([
-      { turnNumber: 1, player: 'white' },
-    ]);
+    const steps = buildReplaySteps([{ turnNumber: 1, player: 'white' }]);
 
     expect(steps).toHaveLength(2); // start + pass turn
     expect(steps[1].description).toBe('pass turn');
@@ -98,7 +99,10 @@ describe('buildReplaySteps', () => {
         turnNumber: 2,
         player: 'black',
         pieceMove: { from: 'e8', to: 'd6' },
-        ballPasses: [{ from: 'd6', to: 'f8' }, { from: 'f8', to: 'c8' }],
+        ballPasses: [
+          { from: 'd6', to: 'f8' },
+          { from: 'f8', to: 'c8' },
+        ],
       },
     ]);
 

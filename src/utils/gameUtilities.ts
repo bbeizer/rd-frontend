@@ -90,11 +90,7 @@ const cloneBoard = (board: Record<string, Piece | null>): Record<string, Piece |
  * Clears hasBall on the sender before setting it on the receiver,
  * preventing duplicate-ball states.
  */
-const applyBallPass = (
-  board: Record<string, Piece | null>,
-  from: string,
-  to: string
-): void => {
+const applyBallPass = (board: Record<string, Piece | null>, from: string, to: string): void => {
   const fromPiece = board[from];
   const toPiece = board[to];
   if (fromPiece) board[from] = { ...fromPiece, hasBall: false };
@@ -105,10 +101,7 @@ const applyBallPass = (
  * Dev-only invariant check: exactly one ball holder per color.
  * Logs a warning in development; no-op in production.
  */
-export const assertBallInvariant = (
-  board: Record<string, Piece | null>,
-  context: string
-): void => {
+export const assertBallInvariant = (board: Record<string, Piece | null>, context: string): void => {
   if (process.env.NODE_ENV === 'production') return;
 
   const ballCounts = { white: 0, black: 0 };
@@ -126,7 +119,10 @@ export const assertBallInvariant = (
 type MoveEntry = {
   pieceMove?: { from: string; to: string };
   ballPasses?: Array<{ from: string; to: string }>;
-  actionStates?: Array<{ action: string; boardSnapshot: Record<string, { color: string; hasBall: boolean; position: string } | null> }>;
+  actionStates?: Array<{
+    action: string;
+    boardSnapshot: Record<string, { color: string; hasBall: boolean; position: string } | null>;
+  }>;
   boardSnapshot?: Record<string, { color: string; hasBall: boolean; position: string } | null>;
 };
 

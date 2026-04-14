@@ -4,6 +4,13 @@ import { getGameById } from '@/services/gameService';
 import { buildReplaySteps } from '@/utils/gameUtilities';
 import type { MoveHistoryEntry } from '@/types/GameSummary';
 import type { ReplayStep } from '@/utils/gameUtilities';
+interface TurnGroup {
+  turnIndex: number;
+  turnNumber: number;
+  player: string;
+  steps: { stepIndex: number; step: ReplayStep }[];
+}
+
 import GridCell from '../grid/GridCell/GridCell';
 import GridContainer from '../grid/GridContainer/GridContainer';
 import Piece from '../piece/Piece';
@@ -77,7 +84,7 @@ const ReplayViewer = () => {
 
   // Group steps by turn for the move list sidebar
   const turnGroups = useMemo(() => {
-    const groups: { turnIndex: number; turnNumber: number; player: string; steps: { stepIndex: number; step: ReplayStep }[] }[] = [];
+    const groups: TurnGroup[] = [];
     for (let i = 1; i < steps.length; i++) {
       const s = steps[i];
       const last = groups[groups.length - 1];
@@ -177,9 +184,7 @@ const ReplayViewer = () => {
               &laquo;
             </button>
             <span className="replay-turn-display">
-              {step?.actionType === 'start'
-                ? 'Start'
-                : `Turn ${step?.turnNumber ?? 0}`}
+              {step?.actionType === 'start' ? 'Start' : `Turn ${step?.turnNumber ?? 0}`}
             </span>
             <button
               onClick={goForward}

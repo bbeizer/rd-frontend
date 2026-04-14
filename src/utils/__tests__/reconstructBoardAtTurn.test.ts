@@ -4,7 +4,10 @@ import type { Piece } from '@/types/Piece';
 const countBalls = (board: Record<string, Piece | null>, color: 'white' | 'black'): number =>
   Object.values(board).filter((p) => p?.color === color && p.hasBall).length;
 
-const ballHolder = (board: Record<string, Piece | null>, color: 'white' | 'black'): string | null => {
+const ballHolder = (
+  board: Record<string, Piece | null>,
+  color: 'white' | 'black'
+): string | null => {
   for (const [, p] of Object.entries(board)) {
     if (p?.color === color && p.hasBall) return p.position;
   }
@@ -99,7 +102,10 @@ describe('reconstructBoardAtTurn', () => {
 
   describe('boardSnapshot support', () => {
     it('uses boardSnapshot when available instead of delta reconstruction', () => {
-      const snapshotBoard: Record<string, { color: string; hasBall: boolean; position: string } | null> = {};
+      const snapshotBoard: Record<
+        string,
+        { color: string; hasBall: boolean; position: string } | null
+      > = {};
       for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
           const cellKey = `${String.fromCharCode(97 + col)}${8 - row}`;
@@ -124,7 +130,10 @@ describe('reconstructBoardAtTurn', () => {
     });
 
     it('uses latest snapshot and replays remaining turns via delta', () => {
-      const snapshotBoard: Record<string, { color: string; hasBall: boolean; position: string } | null> = {};
+      const snapshotBoard: Record<
+        string,
+        { color: string; hasBall: boolean; position: string } | null
+      > = {};
       for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
           const cellKey = `${String.fromCharCode(97 + col)}${8 - row}`;
