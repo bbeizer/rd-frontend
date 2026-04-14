@@ -173,11 +173,8 @@ function ProfilePage() {
                     </span>
                   </div>
                   <div className="game-history-actions">
-                    <button onClick={() => navigate(`/game/${game._id}`)} className="view-game-btn">
+                    <button onClick={() => navigate(`/game/${game._id}/replay`)} className="view-game-btn">
                       View
-                    </button>
-                    <button onClick={() => navigate(`/game/${game._id}/replay`)} className="view-game-btn replay-btn">
-                      Replay
                     </button>
                   </div>
                 </li>
@@ -189,6 +186,10 @@ function ProfilePage() {
         </div>
 
         <div className="profile-actions">
+          <button onClick={() => navigate('/')} className="auth-button back-lobby-btn">
+            Back to Lobby
+          </button>
+
           <button onClick={handleLogout} className="auth-button logout-btn">
             Logout
           </button>

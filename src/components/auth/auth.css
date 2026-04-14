@@ -104,7 +104,8 @@
 
 /* Profile Page Styles */
 .profile-container {
-  max-width: 35rem;
+  width: min(90vw, 44rem);
+  max-width: 44rem;
 }
 
 .profile-section {
@@ -115,6 +116,18 @@
 
 .profile-section:last-of-type {
   border-bottom: none;
+}
+
+.profile-section:first-of-type {
+  text-align: center;
+}
+
+.profile-section:first-of-type .profile-field {
+  align-items: center;
+}
+
+.profile-section:first-of-type .profile-edit {
+  justify-content: center;
 }
 
 .profile-field {
@@ -268,14 +281,6 @@
   background-color: #a55233;
 }
 
-.replay-btn {
-  background-color: #5c6bc0;
-}
-
-.replay-btn:hover {
-  background-color: #4a5ab5;
-}
-
 .no-games {
   color: #888;
   font-style: italic;
@@ -286,6 +291,10 @@
   flex-direction: column;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.back-lobby-btn {
+  background-color: #b5633d;
 }
 
 .logout-btn {
