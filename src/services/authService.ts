@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import type { User } from '@/types/User';
+import type { GameSummary } from '@/types/GameSummary';
 
 interface AuthResponse {
   token: string;
@@ -83,10 +84,10 @@ export const deleteMe = async (token: string): Promise<{ success: boolean; error
 
 export const getUserGames = async (
   userId: string
-): Promise<{ success: boolean; data?: string[]; error?: string }> => {
+): Promise<{ success: boolean; data?: GameSummary[]; error?: string }> => {
   try {
-    const { data } = await apiClient.get<string[]>(`/api/users/${userId}/games`);
-    return { success: true, data };
+    const { data } = await apiClient.get<{ games: GameSummary[] }>(`/api/users/${userId}/games`);
+    return { success: true, data: data.games };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get games';
     return { success: false, error: message };

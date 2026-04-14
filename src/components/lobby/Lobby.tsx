@@ -11,7 +11,7 @@ import './lobby.css';
 
 function Lobby() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showColorModal, setShowColorModal] = useState(false);
   const [showDifficultyModal, setShowDifficultyModal] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -150,16 +150,26 @@ function Lobby() {
     alert('Thank you for your feedback!');
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <div className="page-container">
       <div className="lobby">
         <div className="auth-nav">
           {isAuthenticated ? (
-            <div className="auth-nav-user">
-              <span className="auth-nav-username">Hi, {user?.username}</span>
-              <Link to="/profile" className="auth-nav-link">
-                Profile
-              </Link>
+            <div className="auth-nav-authenticated">
+              <div className="auth-nav-user">
+                <span className="auth-nav-username">Hi, {user?.username}</span>
+                <Link to="/profile" className="auth-nav-link">
+                  Profile
+                </Link>
+              </div>
+              <button type="button" className="auth-nav-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
             </div>
           ) : (
             <>
@@ -215,13 +225,22 @@ function Lobby() {
         {showDifficultyModal && (
           <Modal>
             <h2>Select Difficulty</h2>
-            <button className="difficulty-button easy" onClick={() => handleSelectDifficulty('easy')}>
+            <button
+              className="difficulty-button easy"
+              onClick={() => handleSelectDifficulty('easy')}
+            >
               Easy
             </button>
-            <button className="difficulty-button medium" onClick={() => handleSelectDifficulty('medium')}>
+            <button
+              className="difficulty-button medium"
+              onClick={() => handleSelectDifficulty('medium')}
+            >
               Medium
             </button>
-            <button className="difficulty-button hard" onClick={() => handleSelectDifficulty('hard')}>
+            <button
+              className="difficulty-button hard"
+              onClick={() => handleSelectDifficulty('hard')}
+            >
               Hard
             </button>
           </Modal>
