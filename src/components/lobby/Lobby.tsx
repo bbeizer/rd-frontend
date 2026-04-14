@@ -35,7 +35,10 @@ function Lobby() {
 
   const handleJoinMultiplayerGame = async () => {
     try {
-      const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
+      const userId =
+        isAuthenticated && user
+          ? user._id
+          : localStorage.getItem('guestUserID') || generateGuestUserID();
       const result = await apiPost<StartOrJoinMultiplayerResponse>(
         '/api/games/joinMultiplayerGame',
         {
@@ -68,7 +71,10 @@ function Lobby() {
     try {
       setShowColorModal(false);
 
-      const userId = localStorage.getItem('guestUserID') || generateGuestUserID();
+      const userId =
+        isAuthenticated && user
+          ? user._id
+          : localStorage.getItem('guestUserID') || generateGuestUserID();
       localStorage.setItem('userColor', color);
 
       const result = await startSinglePlayerGame(userId, playerName, color, difficulty);

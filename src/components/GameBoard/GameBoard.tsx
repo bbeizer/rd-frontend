@@ -16,14 +16,16 @@ import {
 } from '@/utils/convertServerGameToGameState';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { requestRematch, declineRematch } from '@/services/gameService';
+import { useAuth } from '@/hooks/useAuth';
 
 type RematchStatus = 'idle' | 'waiting' | 'opponent-requested' | 'declined';
 
 const GameBoard = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const userColor = localStorage.getItem('userColor');
-  const playerId = localStorage.getItem('guestUserID') || '';
+  const playerId = isAuthenticated && user ? user._id : localStorage.getItem('guestUserID') || '';
 
   // Rematch state
   const [rematchStatus, setRematchStatus] = useState<RematchStatus>('idle');
