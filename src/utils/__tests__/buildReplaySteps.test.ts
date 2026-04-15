@@ -203,6 +203,138 @@ describe('buildReplaySteps', () => {
     expect(ballHolder(steps[2].board, 'white')).toBe('e1');
   });
 
+  describe('actionStates with boardSnapshots', () => {
+    const makeEmptySnapshot = (): Record<
+      string,
+      { color: string; hasBall: boolean; position: string } | null
+    > => {
+      const snap: Record<string, { color: string; hasBall: boolean; position: string } | null> = {};
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          snap[`${String.fromCharCode(97 + col)}${8 - row}`] = null;
+        }
+      }
+      return snap;
+    };
+
+    it('uses actionStates boardSnapshots directly instead of delta reconstruction', () => {
+      const afterMove = makeEmptySnapshot();
+      afterMove['c3'] = { color: 'white', hasBall: true, position: 'c3' };
+      afterMove['e1'] = { color: 'white', hasBall: false, position: 'e1' };
+      afterMove['e8'] = { color: 'black', hasBall: true, position: 'e8' };
+
+      const afterPass = makeEmptySnapshot();
+      afterPass['c3'] = { color: 'white', hasBall: false, position: 'c3' };
+      afterPass['e1'] = { color: 'white', hasBall: true, position: 'e1' };
+      afterPass['e8'] = { color: 'black', hasBall: true, position: 'e8' };
+
+      const steps = buildReplaySteps([
+        {
+          turnNumber: 1,
+          player: 'white',
+          pieceMove: { from: 'd1', to: 'c3' },
+          ballPasses: [{ from: 'c3', to: 'e1' }],
+          actionStates: [
+            {
+              actionType: 'pieceMove',
+              pieceMove: { from: 'd1', to: 'c3' },
+              boardSnapshot: afterMove,
+            },
+            {
+              actionType: 'ballPass',
+              ballPass: { from: 'c3', to: 'e1' },
+              boardSnapshot: afterPass,
+            },
+          ],
+        },
+      ]);
+
+      // start + move + pass = 3 steps
+      expect(steps).toHaveLength(3);
+
+      // Move step: ball still on c3 (snapshot says so)
+      expect(steps[1].actionType).toBe('move');
+      expect(steps[1].board['c3']?.hasBall).toBe(true);
+      expect(steps[1].board['e1']?.hasBall).toBe(false);
+      expect(steps[1].highlights['d1']).toBe('blue');
+      expect(steps[1].highlights['c3']).toBe('red');
+
+      // Pass step: ball moved to e1, c3 no longer has ball
+      expect(steps[2].actionType).toBe('pass');
+      expect(steps[2].board['c3']?.hasBall).toBe(false);
+      expect(steps[2].board['e1']?.hasBall).toBe(true);
+      expect(steps[2].highlights['c3']).toBe('yellow');
+      expect(steps[2].highlights['e1']).toBe('yellow');
+
+      // Exactly one ball per color across all steps
+      for (const s of steps) {
+        expect(countBalls(s.board, 'white')).toBe(1);
+      }
+    });
+
+    it('never produces duplicate balls when using actionStates', () => {
+      // Multi-pass chain: move d1->c3, pass c3->e1, pass e1->f1
+      const afterMove = makeEmptySnapshot();
+      afterMove['c3'] = { color: 'white', hasBall: true, position: 'c3' };
+      afterMove['e1'] = { color: 'white', hasBall: false, position: 'e1' };
+      afterMove['f1'] = { color: 'white', hasBall: false, position: 'f1' };
+      afterMove['e8'] = { color: 'black', hasBall: true, position: 'e8' };
+
+      const afterPass1 = makeEmptySnapshot();
+      afterPass1['c3'] = { color: 'white', hasBall: false, position: 'c3' };
+      afterPass1['e1'] = { color: 'white', hasBall: true, position: 'e1' };
+      afterPass1['f1'] = { color: 'white', hasBall: false, position: 'f1' };
+      afterPass1['e8'] = { color: 'black', hasBall: true, position: 'e8' };
+
+      const afterPass2 = makeEmptySnapshot();
+      afterPass2['c3'] = { color: 'white', hasBall: false, position: 'c3' };
+      afterPass2['e1'] = { color: 'white', hasBall: false, position: 'e1' };
+      afterPass2['f1'] = { color: 'white', hasBall: true, position: 'f1' };
+      afterPass2['e8'] = { color: 'black', hasBall: true, position: 'e8' };
+
+      const steps = buildReplaySteps([
+        {
+          turnNumber: 1,
+          player: 'white',
+          pieceMove: { from: 'd1', to: 'c3' },
+          ballPasses: [
+            { from: 'c3', to: 'e1' },
+            { from: 'e1', to: 'f1' },
+          ],
+          actionStates: [
+            {
+              actionType: 'pieceMove',
+              pieceMove: { from: 'd1', to: 'c3' },
+              boardSnapshot: afterMove,
+            },
+            {
+              actionType: 'ballPass',
+              ballPass: { from: 'c3', to: 'e1' },
+              boardSnapshot: afterPass1,
+            },
+            {
+              actionType: 'ballPass',
+              ballPass: { from: 'e1', to: 'f1' },
+              boardSnapshot: afterPass2,
+            },
+          ],
+        },
+      ]);
+
+      // start + move + pass + pass = 4 steps
+      expect(steps).toHaveLength(4);
+
+      // Every step must have exactly 1 white ball holder
+      for (const s of steps) {
+        expect(countBalls(s.board, 'white')).toBe(1);
+      }
+
+      expect(ballHolder(steps[1].board, 'white')).toBe('c3');
+      expect(ballHolder(steps[2].board, 'white')).toBe('e1');
+      expect(ballHolder(steps[3].board, 'white')).toBe('f1');
+    });
+  });
+
   it('does not mutate boards between steps', () => {
     const steps = buildReplaySteps([
       {

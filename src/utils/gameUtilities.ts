@@ -116,14 +116,18 @@ export const assertBallInvariant = (board: Record<string, Piece | null>, context
   }
 };
 
+type SnapshotRecord = Record<string, { color: string; hasBall: boolean; position: string } | null>;
+
 type MoveEntry = {
   pieceMove?: { from: string; to: string };
   ballPasses?: Array<{ from: string; to: string }>;
   actionStates?: Array<{
-    action: string;
-    boardSnapshot: Record<string, { color: string; hasBall: boolean; position: string } | null>;
+    actionType: 'pieceMove' | 'ballPass';
+    pieceMove?: { from: string; to: string };
+    ballPass?: { from: string; to: string };
+    boardSnapshot: SnapshotRecord;
   }>;
-  boardSnapshot?: Record<string, { color: string; hasBall: boolean; position: string } | null>;
+  boardSnapshot?: SnapshotRecord;
 };
 
 export const reconstructBoardAtTurn = (
@@ -206,15 +210,60 @@ export const buildReplaySteps = (
 
   for (let i = 0; i < moveHistory.length; i++) {
     const move = moveHistory[i];
-    let actionIndex = 0;
 
-    // If the turn has a boardSnapshot AND no sub-actions to step through,
-    // just use the snapshot as a single step.
+    // Preferred path: use actionStates with boardSnapshots directly.
+    // Each actionState has the authoritative board — no delta logic needed.
+    if (move.actionStates && move.actionStates.length > 0) {
+      for (let j = 0; j < move.actionStates.length; j++) {
+        const action = move.actionStates[j];
+        board = snapshotToBoard(action.boardSnapshot);
+
+        let actionType: 'move' | 'pass';
+        let description: string;
+        let highlights: HighlightMap;
+
+        if (action.actionType === 'pieceMove' && action.pieceMove) {
+          actionType = 'move';
+          description = `${action.pieceMove.from} \u2192 ${action.pieceMove.to}`;
+          highlights = {
+            [action.pieceMove.from]: 'blue',
+            [action.pieceMove.to]: 'red',
+          };
+        } else if (action.actionType === 'ballPass' && action.ballPass) {
+          actionType = 'pass';
+          description = `pass ${action.ballPass.from} \u2192 ${action.ballPass.to}`;
+          highlights = {
+            [action.ballPass.from]: 'yellow',
+            [action.ballPass.to]: 'yellow',
+          };
+        } else {
+          actionType = 'move';
+          description = 'unknown action';
+          highlights = {};
+        }
+
+        steps.push({
+          turnIndex: i,
+          turnNumber: move.turnNumber,
+          player: move.player,
+          actionIndex: j,
+          actionType,
+          description,
+          board: cloneBoard(board),
+          highlights,
+        });
+      }
+
+      assertBallInvariant(board, `after turn ${i + 1}`);
+      continue;
+    }
+
+    // Fallback: delta reconstruction for games without actionStates
+    let actionIndex = 0;
     const passes = move.ballPasses ?? [];
     const hasSubActions = !!move.pieceMove || passes.length > 0;
 
     if (!hasSubActions) {
-      // Pass turn — board unchanged, single step
       steps.push({
         turnIndex: i,
         turnNumber: move.turnNumber,
@@ -228,7 +277,6 @@ export const buildReplaySteps = (
       continue;
     }
 
-    // Apply piece move as its own step
     if (move.pieceMove) {
       board = cloneBoard(board);
       const piece = board[move.pieceMove.from];
@@ -252,7 +300,6 @@ export const buildReplaySteps = (
       });
     }
 
-    // Apply each pass as its own step
     for (const pass of passes) {
       board = cloneBoard(board);
       applyBallPass(board, pass.from, pass.to);
@@ -272,8 +319,6 @@ export const buildReplaySteps = (
       });
     }
 
-    // If we have a boardSnapshot, use it as the authoritative final state
-    // to correct any drift from delta application
     if (move.boardSnapshot) {
       board = snapshotToBoard(move.boardSnapshot);
     }

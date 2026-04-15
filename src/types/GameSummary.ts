@@ -7,7 +7,9 @@ export interface BoardSnapshot {
 }
 
 export interface ActionState {
-  action: string;
+  actionType: 'pieceMove' | 'ballPass';
+  pieceMove?: { from: string; to: string };
+  ballPass?: { from: string; to: string };
   boardSnapshot: BoardSnapshot;
 }
 
