@@ -22,7 +22,7 @@ interface ReplayGame {
   blackPlayerName?: string;
   winner: string | null;
   gameType: 'singleplayer' | 'multiplayer';
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: 'easy' | 'medium' | 'hard' | 'impossible';
   moveHistory: MoveHistoryEntry[];
 }
 

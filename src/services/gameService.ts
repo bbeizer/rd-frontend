@@ -11,7 +11,7 @@ export const startSinglePlayerGame = async (
   userId: string,
   userName: string,
   userColor: string,
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
+  difficulty: 'easy' | 'medium' | 'hard' | 'impossible' = 'medium'
 ) => {
   return apiPost<StartSinglePlayerResponse>('/api/games/startSinglePlayerGame', {
     playerId: userId,

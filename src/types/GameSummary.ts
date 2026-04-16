@@ -31,7 +31,7 @@ export interface GameSummary {
   blackPlayerName: string;
   winner: string;
   gameType: 'singleplayer' | 'multiplayer';
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: 'easy' | 'medium' | 'hard' | 'impossible';
   aiColor: 'white' | 'black' | null;
   moveHistory: MoveHistoryEntry[];
   turnNumber?: number;
