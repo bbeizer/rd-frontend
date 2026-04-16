@@ -27,7 +27,7 @@ export type ServerGame = {
   blackPlayerId?: string;
   whitePlayerName?: string;
   blackPlayerName?: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: 'easy' | 'medium' | 'hard' | 'impossible';
   aiColor: 'white' | 'black' | null;
   turnNumber: number;
   currentPlayerTurn: 'white' | 'black';

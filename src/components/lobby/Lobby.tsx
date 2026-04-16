@@ -14,7 +14,9 @@ function Lobby() {
   const { user, isAuthenticated, logout } = useAuth();
   const [showColorModal, setShowColorModal] = useState(false);
   const [showDifficultyModal, setShowDifficultyModal] = useState(false);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'impossible'>(
+    'medium'
+  );
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackName, setFeedbackName] = useState('');
@@ -96,7 +98,7 @@ function Lobby() {
     setShowDifficultyModal(true);
   };
 
-  const handleSelectDifficulty = (selected: 'easy' | 'medium' | 'hard') => {
+  const handleSelectDifficulty = (selected: 'easy' | 'medium' | 'hard' | 'impossible') => {
     setDifficulty(selected);
     setShowDifficultyModal(false);
     setShowColorModal(true);
@@ -242,6 +244,12 @@ function Lobby() {
               onClick={() => handleSelectDifficulty('hard')}
             >
               Hard
+            </button>
+            <button
+              className="difficulty-button impossible"
+              onClick={() => handleSelectDifficulty('impossible')}
+            >
+              Impossible
             </button>
           </Modal>
         )}
