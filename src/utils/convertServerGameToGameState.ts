@@ -71,5 +71,7 @@ export function convertServerGameToGameState(
     whiteWantsRematch: serverGame.whiteWantsRematch,
     blackWantsRematch: serverGame.blackWantsRematch,
     rematchGameId: serverGame.rematchGameId,
+    aiColor: serverGame.aiColor ?? undefined,
+    moveHistory: serverGame.moveHistory ?? [],
   };
 }

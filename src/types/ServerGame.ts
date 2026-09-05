@@ -1,3 +1,5 @@
+import { MoveHistoryEntry } from './GameSummary';
+
 export type ServerGame = {
   _id: string;
   status: 'playing' | 'not started' | 'completed';
@@ -31,11 +33,7 @@ export type ServerGame = {
   aiColor: 'white' | 'black' | null;
   turnNumber: number;
   currentPlayerTurn: 'white' | 'black';
-  moveHistory: Array<{
-    turnNumber: number;
-    black: string;
-    white: string;
-  }>;
+  moveHistory: MoveHistoryEntry[];
   whiteWantsRematch?: boolean;
   blackWantsRematch?: boolean;
   rematchGameId?: string;

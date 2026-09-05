@@ -126,6 +126,170 @@
   box-shadow: none;
 }
 
+/* Replay mode */
+.board-container.replay-mode {
+  border-color: #f0a500;
+  box-shadow: 0 0 0 3px rgba(240, 165, 0, 0.35);
+}
+
+.replay-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  min-height: 40px;
+}
+
+.replay-nav-btn {
+  padding: 6px 12px;
+  background: #fff;
+  border: 1.5px solid #e3e6f3;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #444;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(60, 60, 90, 0.08);
+}
+
+.replay-nav-btn:hover:not(:disabled) {
+  background: #f4f6ff;
+  transform: translateY(-1px);
+}
+
+.replay-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.replay-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.replay-status.live {
+  color: #2e7d32;
+  background: rgba(76, 175, 80, 0.12);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+.replay-status.replaying {
+  flex-direction: column;
+  gap: 2px;
+  color: #8a5b00;
+  background: rgba(240, 165, 0, 0.15);
+}
+
+.replay-status-label {
+  font-weight: 700;
+}
+
+.replay-status-detail {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.replay-live-btn {
+  padding: 6px 12px;
+  background: #f0a500;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.replay-live-btn:hover {
+  background: #d99400;
+  transform: translateY(-1px);
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Opponent thinking / waiting indicator */
+.player-info.thinking > div:first-child {
+  animation: thinkingPulse 1.6s ease-in-out infinite;
+}
+
+.opponent-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  padding: 8px 14px;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(60, 60, 90, 0.1);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #666;
+  align-self: center;
+}
+
+.thinking-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #888;
+  animation: thinkingDot 1.2s ease-in-out infinite;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinkingPulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 32px rgba(60, 60, 90, 0.08);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(76, 110, 245, 0.35);
+  }
+}
+
+@keyframes thinkingDot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
 /* Action error toast */
 .action-error-toast {
   position: fixed;
