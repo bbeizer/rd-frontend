@@ -1,4 +1,5 @@
 import { MessageProps } from '@/components/Message/Message';
+import { MoveHistoryEntry } from './GameSummary';
 import { Piece } from './Piece';
 
 export type GameState = {
@@ -24,4 +25,5 @@ export type GameState = {
   whiteWantsRematch?: boolean;
   blackWantsRematch?: boolean;
   rematchGameId?: string;
+  moveHistory?: MoveHistoryEntry[];
 };

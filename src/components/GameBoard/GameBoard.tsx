@@ -17,6 +17,7 @@ import {
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { requestRematch, declineRematch } from '@/services/gameService';
 import { useAuth } from '@/hooks/useAuth';
+import { useReplay } from '@/hooks/useReplay';
 
 type RematchStatus = 'idle' | 'waiting' | 'opponent-requested' | 'declined';
 
@@ -131,13 +132,53 @@ const GameBoard = () => {
     setRematchStatus('idle');
   };
 
-  const { handleCellClick, handlePassTurn, handleSendMessage, actionError, clearError } =
-    useGameActions({
-      gameState,
-      setGameState,
-      userColor: gameState.playerColor,
-      playerId,
+  const {
+    handleCellClick,
+    handlePassTurn,
+    handleSendMessage,
+    actionError,
+    clearError,
+    isProcessingAction,
+  } = useGameActions({
+    gameState,
+    setGameState,
+    userColor: gameState.playerColor,
+    playerId,
+  });
+
+  const { isReplaying, currentStep, canStepBack, canStepForward, stepBack, stepForward, goLive } =
+    useReplay({
+      moveHistory: gameState.moveHistory ?? [],
+      enabled: !isLoading && !error,
     });
+
+  const totalTurns = useMemo(() => {
+    const history = gameState.moveHistory ?? [];
+    return history.length > 0 ? history[history.length - 1].turnNumber : 0;
+  }, [gameState.moveHistory]);
+
+  // AI "thinking" inference: in singleplayer the AI's reply arrives either in
+  // the awaited action response or via a later gameUpdated, so the pending
+  // window is "action in flight OR it's the AI's turn". Delay the indicator
+  // slightly so instant actions (piece selection, easy AI) don't flash it.
+  const aiTurnPending =
+    gameState.gameType === 'singleplayer' &&
+    gameState.status === 'playing' &&
+    !gameState.winner &&
+    (isProcessingAction || !isUserTurn);
+
+  const [showThinking, setShowThinking] = useState(false);
+  useEffect(() => {
+    if (!aiTurnPending) {
+      setShowThinking(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowThinking(true), 400);
+    return () => clearTimeout(timer);
+  }, [aiTurnPending]);
+
+  const waitingForOpponent =
+    gameState.gameType === 'multiplayer' && gameState.status === 'playing' && !isUserTurn;
 
   // Loading state
   if (isLoading) {
@@ -159,12 +200,16 @@ const GameBoard = () => {
   const opponentPlayerName = !isUserWhite ? gameState.whitePlayerName : gameState.blackPlayerName;
   const rotationStyle = gameState.playerColor === 'black' ? '180deg' : '0deg';
 
+  // While replaying, render the historical snapshot and block move input.
+  const displayedBoard =
+    isReplaying && currentStep ? currentStep.board : gameState.currentBoardStatus;
+
   const renderBoard = () => {
-    if (!gameState.currentBoardStatus) {
+    if (!displayedBoard) {
       return <p>Loading game board...</p>;
     }
 
-    return Object.entries(gameState.currentBoardStatus)
+    return Object.entries(displayedBoard)
       .sort(([keyA], [keyB]) => {
         const rowA = parseInt(keyA[1], 10);
         const rowB = parseInt(keyB[1], 10);
@@ -173,9 +218,25 @@ const GameBoard = () => {
         return rowB - rowA || colA - colB;
       })
       .map(([cellKey, cellData]) => {
-        const isPossibleMove = gameState.possibleMoves.includes(cellKey);
-        const isPossiblePass = gameState.possiblePasses.includes(cellKey);
-        const isActivePiece = gameState.activePiece?.position === cellKey;
+        let highlight: 'red' | 'yellow' | 'blue' | null;
+        if (isReplaying) {
+          highlight = currentStep?.highlights[cellKey] ?? null;
+        } else {
+          const isPossibleMove = gameState.possibleMoves.includes(cellKey);
+          const isPossiblePass = gameState.possiblePasses.includes(cellKey);
+          const isActivePiece = gameState.activePiece?.position === cellKey;
+          highlight = isPossibleMove
+            ? 'red'
+            : isPossiblePass
+              ? 'yellow'
+              : isActivePiece
+                ? 'blue'
+                : null;
+        }
+
+        const onCellClick = () => {
+          if (!isReplaying) handleCellClick(cellKey);
+        };
 
         return (
           <GridCell
@@ -184,10 +245,8 @@ const GameBoard = () => {
             data-testid={cellKey}
             row={parseInt(cellKey[1], 10) - 1}
             col={cellKey.charCodeAt(0) - 'a'.charCodeAt(0)}
-            highlight={
-              isPossibleMove ? 'red' : isPossiblePass ? 'yellow' : isActivePiece ? 'blue' : null
-            }
-            onClick={() => handleCellClick(cellKey)}
+            highlight={highlight}
+            onClick={onCellClick}
           >
             {cellData && (
               <Piece
@@ -196,7 +255,7 @@ const GameBoard = () => {
                 position={cellKey}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                   e.stopPropagation();
-                  handleCellClick(cellKey);
+                  onCellClick();
                 }}
               />
             )}
@@ -219,19 +278,32 @@ const GameBoard = () => {
 
       <div className="board-wrapper">
         <div className="board-column">
-          <div className="player-info top-player">
+          <div className={`player-info top-player ${showThinking ? 'thinking' : ''}`}>
             <PlayerInfoBar playerName={opponentPlayerName ?? 'Opponent'} />
+            {showThinking && (
+              <div className="opponent-status-chip" data-testid="thinking-indicator">
+                <span className="thinking-dot" />
+                <span className="thinking-dot" />
+                <span className="thinking-dot" />
+                thinking…
+              </div>
+            )}
+            {waitingForOpponent && isReplaying && (
+              <div className="opponent-status-chip" data-testid="waiting-indicator">
+                waiting for opponent…
+              </div>
+            )}
           </div>
 
           <div
-            className="board-container"
+            className={`board-container ${isReplaying ? 'replay-mode' : ''}`}
             data-testid="board-container"
             style={{ transform: `rotate(${rotationStyle})` }}
           >
             <GridContainer>{renderBoard()}</GridContainer>
 
             {/* Modals */}
-            {gameState.status === 'playing' && !isUserTurn && (
+            {gameState.status === 'playing' && !isUserTurn && !isReplaying && (
               <Modal>
                 <div style={{ transform: `rotate(${rotationStyle})` }}>
                   <p>It&apos;s not your turn. Please wait for the other player.</p>
@@ -293,11 +365,54 @@ const GameBoard = () => {
             )}
           </div>
 
+          <div className="replay-bar" data-testid="replay-bar">
+            <button
+              onClick={stepBack}
+              disabled={!canStepBack}
+              className="replay-nav-btn"
+              aria-label="Step back"
+            >
+              &#9664;
+            </button>
+            {isReplaying && currentStep ? (
+              <div className="replay-status replaying" data-testid="replay-status">
+                <span className="replay-status-label">
+                  {currentStep.actionType === 'start'
+                    ? 'Reviewing start'
+                    : `Reviewing turn ${currentStep.turnNumber} of ${totalTurns}`}
+                </span>
+                <span className="replay-status-detail">{currentStep.description}</span>
+              </div>
+            ) : (
+              <div className="replay-status live" data-testid="replay-status">
+                <span className="live-dot" />
+                Live
+              </div>
+            )}
+            <button
+              onClick={stepForward}
+              disabled={!canStepForward}
+              className="replay-nav-btn"
+              aria-label="Step forward"
+            >
+              &#9654;
+            </button>
+            {isReplaying && (
+              <button onClick={goLive} className="replay-live-btn">
+                Return to live (Esc)
+              </button>
+            )}
+          </div>
+
           <div className="player-info bottom-player">
             <PlayerInfoBar playerName={currentPlayerName ?? 'You'} />
           </div>
 
-          <button onClick={handlePassTurn} disabled={!isUserTurn} className="pass-turn-btn">
+          <button
+            onClick={handlePassTurn}
+            disabled={!isUserTurn || isReplaying}
+            className="pass-turn-btn"
+          >
             Pass Turn
           </button>
         </div>

@@ -45,7 +45,7 @@ describe('useGameState', () => {
     aiColor: 'black' as const,
     turnNumber: 1,
     currentPlayerTurn: 'white' as const,
-    moveHistory: [] as Array<{ turnNumber: number; black: string; white: string }>,
+    moveHistory: [],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
